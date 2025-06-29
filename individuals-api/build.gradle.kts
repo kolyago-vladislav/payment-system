@@ -1,3 +1,10 @@
+val keycloakAdminClientVersion: String by project
+val springdocOpenapiStarterWebmvcUiVersion: String by project
+val mapstructVersion: String by project
+val javaxAnnotationApiVersion: String by project
+val javaxValidationApiVersion: String by project
+val javaxServletApiVersion: String by project
+
 plugins {
 	java
 	id("org.springframework.boot") version "3.5.0"
@@ -26,20 +33,28 @@ repositories {
 }
 
 dependencies {
+    implementation ("org.springframework.boot:spring-boot-starter-actuator")
+    implementation ("org.springframework.boot:spring-boot-starter-security")
+    implementation ("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation ("org.keycloak:keycloak-admin-client:$keycloakAdminClientVersion")
+
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocOpenapiStarterWebmvcUiVersion")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-	compileOnly("org.projectlombok:lombok")
-	annotationProcessor("org.projectlombok:lombok")
+
+    compileOnly("org.projectlombok:lombok")
+    compileOnly("org.mapstruct:mapstruct:$mapstructVersion")
+    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    annotationProcessor("org.projectlombok:lombok")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 
-	implementation("javax.validation:validation-api:2.0.0.Final")
-	implementation("javax.annotation:javax.annotation-api:1.3.2")
-	compileOnly("javax.servlet:servlet-api:2.5")
+	implementation("javax.validation:validation-api:$javaxValidationApiVersion")
+	implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
+	compileOnly("javax.servlet:servlet-api:$javaxServletApiVersion")
 }
 
 tasks.withType<Test> {
@@ -55,7 +70,7 @@ openApiGenerate {
     configOptions.set(
         mapOf(
             "interfaceOnly" to "true",
-            "library" to "spring-boot",
+            "library" to "spring-cloud",
             "skipDefaultInterface" to "true",
             "useBeanValidation" to "true",
             "openApiNullable" to "false"

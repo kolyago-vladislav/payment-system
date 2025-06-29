@@ -1,0 +1,22 @@
+package com.example.mapper;
+
+import org.keycloak.representations.AccessTokenResponse;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import com.example.dto.TokenResponse;
+
+import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING, injectionStrategy = CONSTRUCTOR)
+public abstract class TokenResponseMapper {
+
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(target = "accessToken", source = "token")
+    @Mapping(target = "refreshToken", source = "refreshToken")
+    @Mapping(target = "expiresIn", source = "expiresIn")
+    @Mapping(target = "tokenType", source = "tokenType")
+    public abstract TokenResponse to(AccessTokenResponse request);
+}

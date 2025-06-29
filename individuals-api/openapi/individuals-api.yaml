@@ -165,6 +165,7 @@ components:
           type: string
         expires_in:
           type: integer
+          format: int64
         token_type:
           type: string
           example: Bearer

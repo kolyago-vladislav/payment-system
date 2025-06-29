@@ -1,5 +1,34 @@
 spring:
   application:
     name: individual-api
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: ${application.keycloak.clientId}
+            client-secret: ${application.keycloak.clientSecret}
+            client-name: individual
+            authorization-grant-type: authorization_code
+            scope: openid, profile, email
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/individual
 
+application:
+  keycloak:
+    serverUrl: http://localhost:9090
+    realm: individual
+    clientId: individual
+    clientSecret: FaxzBgk7pkyattBrV8MlVCVg80jjZKo5
+    adminUsername: admin
+    adminPassword: admin
+    adminClientId: admin-cli
 
+server:
+  port: 8091
+
+logging:
+  level:
+    org.springframework.security: DEBUG

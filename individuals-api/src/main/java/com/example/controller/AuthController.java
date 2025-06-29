@@ -1,33 +1,45 @@
 package com.example.controller;
 
-import com.example.api.AuthApi;
-import com.example.dto.*;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/v1/auth")
-public class AuthController implements AuthApi {
+import com.example.api.AuthApi;
+import com.example.dto.TokenRefreshRequest;
+import com.example.dto.TokenResponse;
+import com.example.dto.UserInfoResponse;
+import com.example.dto.UserLoginRequest;
+import com.example.dto.UserRegistrationRequest;
+import com.example.service.UserService;
 
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/v1")
+public class AuthController implements AuthApi {
+    private final UserService keycloakUserService;
 
     @Override
     public ResponseEntity<UserInfoResponse> getMe() {
-        return null;
+        return ResponseEntity.ok(new UserInfoResponse()
+                .email("getMe-uladzislau.kaliaha"));
     }
 
     @Override
     public ResponseEntity<TokenResponse> login(UserLoginRequest userLoginRequest) {
-        return null;
+        return ResponseEntity.ok(new TokenResponse()
+                .accessToken("login-uladzislau.kaliaha"));
     }
 
     @Override
     public ResponseEntity<TokenResponse> refreshToken(TokenRefreshRequest tokenRefreshRequest) {
-        return null;
+        return ResponseEntity.ok(new TokenResponse()
+                .accessToken("refreshToken-uladzislau.kaliaha"));
     }
 
     @Override
     public ResponseEntity<TokenResponse> registration(UserRegistrationRequest userRegistrationRequest) {
-        return null;
+        return ResponseEntity.ok(keycloakUserService.register(userRegistrationRequest));
     }
 }
