@@ -1,14 +1,19 @@
 package com.example.service;
 
+import java.time.ZoneOffset;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.example.dto.TokenResponse;
+import com.example.dto.UserInfoResponse;
 import com.example.dto.UserRegistrationRequest;
 import com.example.exception.IndividualException;
 import com.example.mapper.CredentialRepresentationMapper;
@@ -25,6 +30,26 @@ public class UserService {
     private final UserRepresentationMapper userRepresentationMapper;
     private final CredentialRepresentationMapper credentialRepresentationMapper;
     private final TokenService tokenService;
+
+    public UserInfoResponse getCurrentUserInfo() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication.getPrincipal() instanceof Jwt jwt) {
+            var userInfoResponse = new UserInfoResponse();
+            userInfoResponse.setId(jwt.getSubject());
+            userInfoResponse.setEmail(jwt.getClaimAsString("email"));
+            userInfoResponse.setRoles(jwt.getClaimAsStringList("roles"));
+
+            if (jwt.getIssuedAt() != null) {
+                userInfoResponse.setCreatedAt(jwt.getIssuedAt().atOffset(ZoneOffset.UTC));
+            }
+
+            return userInfoResponse;
+        }
+
+        log.error("Can not get current user info: Invalid principal");
+        throw new IndividualException("Can not get current user info: Invalid principal");
+    }
 
     public TokenResponse register(UserRegistrationRequest request) {
         var user = userRepresentationMapper.to(request);

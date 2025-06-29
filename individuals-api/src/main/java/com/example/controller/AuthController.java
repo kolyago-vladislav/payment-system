@@ -18,12 +18,11 @@ import com.example.service.UserService;
 @RequiredArgsConstructor
 @RequestMapping("/v1")
 public class AuthController implements AuthApi {
-    private final UserService keycloakUserService;
+    private final UserService userService;
 
     @Override
     public ResponseEntity<UserInfoResponse> getMe() {
-        return ResponseEntity.ok(new UserInfoResponse()
-                .email("getMe-uladzislau.kaliaha"));
+        return ResponseEntity.ok(userService.getCurrentUserInfo());
     }
 
     @Override
@@ -40,6 +39,6 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<TokenResponse> registration(UserRegistrationRequest userRegistrationRequest) {
-        return ResponseEntity.ok(keycloakUserService.register(userRegistrationRequest));
+        return ResponseEntity.ok(userService.register(userRegistrationRequest));
     }
 }
