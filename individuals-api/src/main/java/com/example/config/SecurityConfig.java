@@ -17,8 +17,9 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/v1/auth/registration").permitAll()
+                .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/v1/auth/refresh-token").permitAll()
                 .requestMatchers("/actuator/**").hasAuthority("ROLE_individual.admin")
-                .requestMatchers("/v1/auth/me").hasAnyAuthority("ROLE_individual.user", "ROLE_individual.admin")
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2

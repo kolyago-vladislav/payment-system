@@ -1,3 +1,14 @@
+application:
+  keycloak:
+    serverUrl: http://localhost:9090
+    tokenUrl: ${application.keycloak.serverUrl}/realms/${application.keycloak.realm}/protocol/openid-connect/token
+    realm: individual
+    clientId: individual
+    clientSecret: FaxzBgk7pkyattBrV8MlVCVg80jjZKo5
+    adminUsername: admin
+    adminPassword: admin
+    adminClientId: admin-cli
+
 spring:
   application:
     name: individual-api
@@ -14,17 +25,7 @@ spring:
             scope: openid, profile, email
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:9090/realms/individual
-
-application:
-  keycloak:
-    serverUrl: http://localhost:9090
-    realm: individual
-    clientId: individual
-    clientSecret: FaxzBgk7pkyattBrV8MlVCVg80jjZKo5
-    adminUsername: admin
-    adminPassword: admin
-    adminClientId: admin-cli
+          issuer-uri: ${application.keycloak.serverUrl}/realms/${application.keycloak.realm}
 
 server:
   port: 8091

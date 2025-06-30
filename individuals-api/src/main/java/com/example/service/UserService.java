@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.dto.TokenResponse;
 import com.example.dto.UserInfoResponse;
+import com.example.dto.UserLoginRequest;
 import com.example.dto.UserRegistrationRequest;
 import com.example.exception.IndividualException;
 import com.example.mapper.CredentialRepresentationMapper;
@@ -30,6 +31,10 @@ public class UserService {
     private final UserRepresentationMapper userRepresentationMapper;
     private final CredentialRepresentationMapper credentialRepresentationMapper;
     private final TokenService tokenService;
+
+    public TokenResponse login(UserLoginRequest userLoginRequest) {
+        return tokenService.generateAccessToken(userLoginRequest.getEmail(), userLoginRequest.getPassword());
+    }
 
     public UserInfoResponse getCurrentUserInfo() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();

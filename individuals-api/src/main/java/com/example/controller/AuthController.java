@@ -12,13 +12,16 @@ import com.example.dto.TokenResponse;
 import com.example.dto.UserInfoResponse;
 import com.example.dto.UserLoginRequest;
 import com.example.dto.UserRegistrationRequest;
+import com.example.service.TokenService;
 import com.example.service.UserService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1")
 public class AuthController implements AuthApi {
+
     private final UserService userService;
+    private final TokenService tokenService;
 
     @Override
     public ResponseEntity<UserInfoResponse> getMe() {
@@ -27,14 +30,12 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<TokenResponse> login(UserLoginRequest userLoginRequest) {
-        return ResponseEntity.ok(new TokenResponse()
-                .accessToken("login-uladzislau.kaliaha"));
+        return ResponseEntity.ok(userService.login(userLoginRequest));
     }
 
     @Override
     public ResponseEntity<TokenResponse> refreshToken(TokenRefreshRequest tokenRefreshRequest) {
-        return ResponseEntity.ok(new TokenResponse()
-                .accessToken("refreshToken-uladzislau.kaliaha"));
+        return ResponseEntity.ok(tokenService.refreshToken(tokenRefreshRequest.getRefreshToken()));
     }
 
     @Override
