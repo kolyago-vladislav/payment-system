@@ -4,6 +4,7 @@ val mapstructVersion: String by project
 val javaxAnnotationApiVersion: String by project
 val javaxValidationApiVersion: String by project
 val javaxServletApiVersion: String by project
+val logbackClassicVersion: String by project
 
 plugins {
 	java
@@ -51,6 +52,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+    implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
 
 	implementation("javax.validation:validation-api:$javaxValidationApiVersion")
 	implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")

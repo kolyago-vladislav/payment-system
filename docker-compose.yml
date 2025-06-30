@@ -7,6 +7,7 @@ services:
     ports:
       - "9090:8080"
     environment:
+      JAVA_OPTS: -Dkeycloak.migration.usersExportStrategy=REALM_FILE
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: postgres
