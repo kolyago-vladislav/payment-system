@@ -1,6 +1,6 @@
 application:
   keycloak:
-    serverUrl: http://localhost:9090
+    serverUrl: ${KEYCLOAK_URL:http://localhost:9090}
     tokenUrl: ${application.keycloak.serverUrl}/realms/${application.keycloak.realm}/protocol/openid-connect/token
     realm: individual
     clientId: individual
@@ -32,3 +32,12 @@ server:
 
 logging:
   config: "classpath:logback.xml"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  endpoint:
+    prometheus:
+      enabled: true

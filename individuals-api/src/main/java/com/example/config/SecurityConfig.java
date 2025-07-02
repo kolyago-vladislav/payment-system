@@ -16,6 +16,7 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/prometheus").permitAll()
                 .requestMatchers(HttpMethod.POST, "/v1/auth/registration").permitAll()
                 .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/v1/auth/refresh-token").permitAll()
