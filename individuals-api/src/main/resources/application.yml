@@ -1,6 +1,6 @@
 application:
   keycloak:
-    serverUrl: ${KEYCLOAK_URL:http://localhost:9090}
+    serverUrl: ${KEYCLOAK_URL:http://localhost:8080}
     tokenUrl: ${application.keycloak.serverUrl}/realms/${application.keycloak.realm}/protocol/openid-connect/token
     realm: individual
     clientId: individual
@@ -40,4 +40,8 @@ management:
         include: prometheus
   endpoint:
     prometheus:
-      enabled: true
+      access: read_only
+  prometheus:
+    metrics:
+      export:
+        enabled: true
