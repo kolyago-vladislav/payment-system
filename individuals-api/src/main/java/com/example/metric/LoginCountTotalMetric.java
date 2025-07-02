@@ -5,6 +5,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 import org.springframework.stereotype.Component;
 
+/*
+    The same metrics has already implemented in http_server_requests_seconds
+ */
 @Component
 public class LoginCountTotalMetric {
 
