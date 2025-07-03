@@ -59,7 +59,7 @@ services:
   keycloak-healthcheck:
     image: curlimages/curl:7.85.0
     depends_on:
-      - keycloak
+      - keycloak-postgres
     command: ["sh", "-c", "
       until curl -f http://keycloak:9000/health; do
         echo 'Waiting for Keycloak...';
@@ -79,21 +79,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-#
-#  loki:
-#    image: grafana/loki:2.9.2
-#    container_name: loki
-#    ports:
-#      - "3100:3100"
-#    command: -config.file=/etc/loki/local-config.yaml
-#    volumes:
-#      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
-#    healthcheck:
-#      test: ["CMD", "wget", "--spider", "http://localhost:3100/ready"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-#
+
   grafana:
     image: grafana/grafana:10.3.1
     container_name: grafana
@@ -102,8 +88,8 @@ services:
     depends_on:
       prometheus:
         condition: service_healthy
-#      loki:
-#        condition: service_healthy
+      loki:
+        condition: service_healthy
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: true
       GF_SECURITY_ADMIN_USER: admin
@@ -116,3 +102,45 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yaml
+    user: "root"
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    user: root
+    ports:
+      - "9080:9080"
+    depends_on:
+      - loki
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log:/var/log:ro
+    environment:
+      GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:9080
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+
+volumes:
+  loki_data:
+  loki_chunks:
+  loki_index:
+  loki_rules:

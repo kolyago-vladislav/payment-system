@@ -49,6 +49,8 @@ public class UserService {
                 userInfoResponse.setCreatedAt(jwt.getIssuedAt().atOffset(ZoneOffset.UTC));
             }
 
+            log.error("User[email={}] was successfully get info", jwt.getClaimAsString("email"));
+
             return userInfoResponse;
         }
 

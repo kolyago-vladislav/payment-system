@@ -73,6 +73,7 @@ public class TokenService {
         var entity = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 
         var response = restTemplate.exchange(keycloakProperties.tokenUrl(), HttpMethod.POST, entity, AccessTokenResponse.class);
+        log.info("Token was successfully refreshed");
         return tokenResponseMapper.to(response.getBody());
     }
 }

@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "HTTP endpoints metrics with breakdown by URI and method",
+  "description": "HTTP endpoints metrics",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
@@ -55,8 +55,8 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "decimals": 3
+          "unit": "requests",
+          "decimals": 0
         },
         "overrides": []
       },
@@ -64,7 +64,7 @@
       "id": 3,
       "targets": [
         {
-          "expr": "sum by (error, outcome) (http_server_requests_seconds_count{outcome != \"SUCCESS\"} or http_server_requests_seconds_count{error != \"none\"})",
+          "expr": "sum by (uri, method, error, outcome) (http_server_requests_seconds_count{outcome != \"SUCCESS\"} or http_server_requests_seconds_count{error != \"none\"})",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
