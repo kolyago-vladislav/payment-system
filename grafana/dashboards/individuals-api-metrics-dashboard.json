@@ -22,7 +22,7 @@
       "id": 1,
       "targets": [
         {
-          "expr": "sum by (uri, method) (http_server_requests_seconds_count{error=\"none\"})",
+          "expr": "sum by (uri, method) (http_server_requests_seconds_count{error=\"none\", uri=~\"^/v1.*\"})",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
@@ -43,7 +43,7 @@
       "id": 2,
       "targets": [
         {
-          "expr": "sum by (uri, method) (http_server_requests_seconds_sum{error=\"none\"}) / sum by (uri, method) (http_server_requests_seconds_count{error=\"none\"})",
+          "expr": "sum by (uri, method) (http_server_requests_seconds_sum{error=\"none\", uri=~\"^/v1.*\"}) / sum by (uri, method) (http_server_requests_seconds_count{error=\"none\", uri=~\"^/v1.*\"})",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
@@ -64,7 +64,7 @@
       "id": 3,
       "targets": [
         {
-          "expr": "sum by (uri, method, error, outcome) (http_server_requests_seconds_count{outcome != \"SUCCESS\"} or http_server_requests_seconds_count{error != \"none\"})",
+          "expr": "sum by (uri, method, error, outcome) (http_server_requests_seconds_count{outcome != \"SUCCESS\", uri=~\"^/v1.*\"} or http_server_requests_seconds_count{error != \"none\", uri=~\"^/v1.*\"})",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
