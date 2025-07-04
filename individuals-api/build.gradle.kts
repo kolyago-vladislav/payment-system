@@ -54,11 +54,18 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+    testCompileOnly ("org.projectlombok:lombok")
+    testAnnotationProcessor ("org.projectlombok:lombok")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testImplementation("org.testcontainers:testcontainers:1.19.3")
+    testImplementation("org.testcontainers:postgresql:1.19.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.3")
+
     implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
 
 	implementation("javax.validation:validation-api:$javaxValidationApiVersion")
 	implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
-	compileOnly("javax.servlet:servlet-api:$javaxServletApiVersion")
+
 }
 
 tasks.withType<Test> {
