@@ -9,7 +9,7 @@ import com.example.spec.integration.LifecycleSpecification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class IndividualApiTests extends LifecycleSpecification {
+class AuthControllerTest extends LifecycleSpecification {
 
 	@Test
 	void shouldCreateNewUserAndReturnAccessToken() {
