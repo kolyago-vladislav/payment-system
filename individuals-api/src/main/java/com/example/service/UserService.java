@@ -19,8 +19,7 @@ import com.example.dto.UserInfoResponse;
 import com.example.dto.UserLoginRequest;
 import com.example.dto.UserRegistrationRequest;
 import com.example.exception.IndividualException;
-import com.example.mapper.PasswordResetMapper;
-import com.example.mapper.UserRepresentationMapper;
+import com.example.mapper.KeycloakMapper;
 
 @Slf4j
 @Service
@@ -28,8 +27,7 @@ import com.example.mapper.UserRepresentationMapper;
 public class UserService {
 
     private final KeycloakProperties keycloakProperties;
-    private final UserRepresentationMapper userRepresentationMapper;
-    private final PasswordResetMapper passwordResetMapper;
+    private final KeycloakMapper keycloakMapper;
     private final TokenService tokenService;
     private final KeycloakClient keycloakClient;
 
@@ -60,7 +58,7 @@ public class UserService {
     }
 
     public Mono<TokenResponse> register(UserRegistrationRequest request) {
-        var userRepresentation = userRepresentationMapper.to(request);
+        var userRepresentation = keycloakMapper.toUserRepresentation(request);
 
         var adminLoginRequest = new UserLoginRequest(
             keycloakProperties.adminEmail(),
@@ -71,7 +69,7 @@ public class UserService {
             .flatMap(adminTokenResponse ->
                 keycloakClient.registerUser(request, adminTokenResponse, userRepresentation)
                     .flatMap(userId ->
-                        keycloakClient.resetUserPassword(userId, passwordResetMapper.to(request), adminTokenResponse.getAccessToken())
+                        keycloakClient.resetUserPassword(userId, keycloakMapper.toCredentialRepresentation(request), adminTokenResponse.getAccessToken())
                             .then(Mono.defer(() -> tokenService.login(new UserLoginRequest(request.getEmail(), request.getPassword()))))));
     }
 }

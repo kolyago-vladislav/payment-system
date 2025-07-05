@@ -18,8 +18,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.example.config.property.KeycloakProperties;
 import com.example.dto.KeycloakAccessTokenResponse;
-import com.example.dto.KeycloakCredentialDto;
-import com.example.dto.KeycloakUserRegistrationDto;
+import com.example.dto.KeycloakCredentialRepresentation;
+import com.example.dto.KeycloakUserRepresentation;
 import com.example.dto.TokenRefreshRequest;
 import com.example.dto.TokenResponse;
 import com.example.dto.UserLoginRequest;
@@ -87,7 +87,7 @@ public class KeycloakClient {
     public Mono<String> registerUser(
         UserRegistrationRequest request,
         TokenResponse adminTokenResponse,
-        KeycloakUserRegistrationDto userRepresentation
+        KeycloakUserRepresentation userRepresentation
     ) {
         return webClient.post()
             .uri(userRegistrationUrl)
@@ -116,7 +116,7 @@ public class KeycloakClient {
 
     public Mono<Void> resetUserPassword(
         String userId,
-        KeycloakCredentialDto dto,
+        KeycloakCredentialRepresentation dto,
         String adminAccessToken
     ) {
         return webClient.put()

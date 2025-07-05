@@ -3,7 +3,7 @@ package com.example.dto;
 import lombok.Data;
 
 @Data
-public class KeycloakCredentialDto {
+public class KeycloakCredentialRepresentation {
     private String type;
     private String value;
     private Boolean temporary;

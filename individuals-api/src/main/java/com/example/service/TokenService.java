@@ -24,12 +24,12 @@ public class TokenService {
     public Mono<TokenResponse> login(UserLoginRequest userLoginRequest) {
         return keycloakClient.login(userLoginRequest)
             .doOnNext(t -> log.info("Token was successfully generated for email={}", userLoginRequest.getEmail()))
-            .map(tokenResponseMapper::to);
+            .map(tokenResponseMapper::toTokenResponse);
     }
 
     public Mono<TokenResponse> refreshToken(TokenRefreshRequest tokenRefreshRequest) {
         return keycloakClient.refreshToken(tokenRefreshRequest)
             .doOnNext(r -> log.info("Token was successfully refreshed"))
-            .map(tokenResponseMapper::to);
+            .map(tokenResponseMapper::toTokenResponse);
     }
 }
