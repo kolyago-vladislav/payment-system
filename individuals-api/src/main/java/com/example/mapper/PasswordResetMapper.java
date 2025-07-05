@@ -11,7 +11,7 @@ import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
 @Mapper(componentModel = SPRING, injectionStrategy = CONSTRUCTOR)
-public abstract class CredentialRepresentationMapper {
+public abstract class PasswordResetMapper {
 
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "value", source = "password")
