@@ -1,79 +1,70 @@
 package com.example.service;
 
+import reactor.core.publisher.Mono;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.keycloak.OAuth2Constants;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.representations.AccessTokenResponse;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.example.config.property.KeycloakProperties;
+import com.example.dto.TokenRefreshRequest;
 import com.example.dto.TokenResponse;
+import com.example.dto.UserLoginRequest;
 import com.example.mapper.TokenResponseMapper;
 
 import static org.keycloak.OAuth2Constants.CLIENT_ID;
 import static org.keycloak.OAuth2Constants.CLIENT_SECRET;
 import static org.keycloak.OAuth2Constants.GRANT_TYPE;
+import static org.keycloak.OAuth2Constants.PASSWORD;
 import static org.keycloak.OAuth2Constants.REFRESH_TOKEN;
+import static org.keycloak.OAuth2Constants.USERNAME;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenService {
 
+    private final WebClient webClient;
     private final KeycloakProperties keycloakProperties;
-    private final RestTemplate restTemplate;
     private final TokenResponseMapper tokenResponseMapper;
 
-    public TokenResponse generateAccessToken(String email, String password) {
-        try (var keycloak = buildKeycloakClient(email, password)) {
-            var accessToken = keycloak.tokenManager().getAccessToken();
+    public Mono<TokenResponse> login(UserLoginRequest userLoginRequest) {
+        var formData = new LinkedMultiValueMap<String, String>();
+        formData.add(GRANT_TYPE, PASSWORD);
+        formData.add(USERNAME, userLoginRequest.getEmail());
+        formData.add(PASSWORD, userLoginRequest.getPassword());
+        formData.add(CLIENT_ID, keycloakProperties.clientId());
+        formData.add(CLIENT_SECRET, keycloakProperties.clientSecret());
 
-            log.info("Token was successfully generated for email={}", email);
-
-            return tokenResponseMapper.to(accessToken);
-        }
+        return webClient.post()
+            .uri(keycloakProperties.tokenUrl()) // обычно "/realms/{realm}/protocol/openid-connect/token"
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .bodyValue(formData)
+            .retrieve()
+            .bodyToMono(AccessTokenResponse.class)
+            .map(tokenResponseMapper::to)
+            .doOnNext(token -> log.info("Token was successfully generated for email={}", userLoginRequest.getEmail()));
     }
 
-    private Keycloak buildKeycloakClient(
-        String email,
-        String password
-    ) {
-        return KeycloakBuilder.builder()
-            .serverUrl(keycloakProperties.serverUrl())
-            .realm(keycloakProperties.realm())
-            .username(email)
-            .password(password)
-            .clientId(keycloakProperties.clientId())
-            .clientSecret(keycloakProperties.clientSecret())
-            .grantType(OAuth2Constants.PASSWORD)
-            .build();
-    }
+    public Mono<TokenResponse> refreshToken(TokenRefreshRequest tokenRefreshRequest) {
+        var formData = new LinkedMultiValueMap<String, String>();
+        formData.add(GRANT_TYPE, REFRESH_TOKEN);
+        formData.add(REFRESH_TOKEN, tokenRefreshRequest.getRefreshToken());
+        formData.add(CLIENT_ID, keycloakProperties.clientId());
+        formData.add(CLIENT_SECRET, keycloakProperties.clientSecret());
 
-    public TokenResponse refreshToken(String refreshToken) {
-        var headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        var map = new LinkedMultiValueMap<String, String>();
-        map.add(GRANT_TYPE, REFRESH_TOKEN);
-        map.add(REFRESH_TOKEN, refreshToken);
-        map.add(CLIENT_ID, keycloakProperties.clientId());
-        map.add(CLIENT_SECRET, keycloakProperties.clientSecret());
-
-        var entity = new HttpEntity<MultiValueMap<String, String>>(map, headers);
-
-        var response = restTemplate.exchange(keycloakProperties.tokenUrl(), HttpMethod.POST, entity, AccessTokenResponse.class);
-        log.info("Token was successfully refreshed");
-        return tokenResponseMapper.to(response.getBody());
+        return webClient.post()
+            .uri(keycloakProperties.tokenUrl())
+            .bodyValue(formData)
+            .retrieve()
+            .bodyToMono(AccessTokenResponse.class)
+            .doOnNext(response -> log.info("Token was successfully refreshed"))
+            .map(tokenResponseMapper::to);
     }
 }

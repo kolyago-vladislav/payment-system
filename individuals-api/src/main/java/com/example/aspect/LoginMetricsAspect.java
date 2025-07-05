@@ -16,7 +16,7 @@ public class LoginMetricsAspect {
 
     private final LoginCountTotalMetric loginCountTotalMetric;
 
-    @AfterReturning("execution(public * com.example.service.UserService.login(..))")
+    @AfterReturning("execution(public * com.example.service.TokenService.login(..))")
     public void afterLogin() {
         loginCountTotalMetric.incrementCounter();
     }
