@@ -1,10 +1,10 @@
 package com.example.mapper;
 
-import org.keycloak.representations.idm.UserRepresentation;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import com.example.dto.KeycloakUserRegistrationDto;
 import com.example.dto.UserRegistrationRequest;
 
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
@@ -18,5 +18,5 @@ public abstract class UserRepresentationMapper {
     @Mapping(target = "email", source = "email")
     @Mapping(target = "enabled", constant = "true")
     @Mapping(target = "emailVerified", constant = "true")
-    public abstract UserRepresentation to(UserRegistrationRequest request);
+    public abstract KeycloakUserRegistrationDto to(UserRegistrationRequest request);
 }

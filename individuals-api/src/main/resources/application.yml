@@ -6,7 +6,7 @@ application:
     realm: individual
     clientId: individual
     clientSecret: FaxzBgk7pkyattBrV8MlVCVg80jjZKo5
-    adminUsername: admin@gmail.com
+    adminEmail: admin@gmail.com
     adminPassword: admin
     adminClientId: admin-cli
 

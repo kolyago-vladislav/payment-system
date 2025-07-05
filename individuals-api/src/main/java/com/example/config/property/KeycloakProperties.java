@@ -10,7 +10,7 @@ public record KeycloakProperties(
     String clientSecret,
     String clientId,
     String realm,
-    String adminUsername,
+    String adminEmail,
     String adminPassword,
     String adminClientId
 ) {

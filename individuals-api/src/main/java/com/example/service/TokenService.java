@@ -5,25 +5,25 @@ import reactor.core.publisher.Mono;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.keycloak.representations.AccessTokenResponse;
-
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.example.client.KeycloakClient;
 import com.example.config.property.KeycloakProperties;
+import com.example.dto.KeycloakAccessTokenResponse;
 import com.example.dto.TokenRefreshRequest;
 import com.example.dto.TokenResponse;
 import com.example.dto.UserLoginRequest;
 import com.example.mapper.TokenResponseMapper;
 
-import static org.keycloak.OAuth2Constants.CLIENT_ID;
-import static org.keycloak.OAuth2Constants.CLIENT_SECRET;
-import static org.keycloak.OAuth2Constants.GRANT_TYPE;
-import static org.keycloak.OAuth2Constants.PASSWORD;
-import static org.keycloak.OAuth2Constants.REFRESH_TOKEN;
-import static org.keycloak.OAuth2Constants.USERNAME;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.CLIENT_ID;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.CLIENT_SECRET;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.GRANT_TYPE;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.PASSWORD;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.REFRESH_TOKEN;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.USERNAME;
 
 @Slf4j
 @Service
@@ -33,6 +33,7 @@ public class TokenService {
     private final WebClient webClient;
     private final KeycloakProperties keycloakProperties;
     private final TokenResponseMapper tokenResponseMapper;
+    private final KeycloakClient keycloakClient;
 
     public Mono<TokenResponse> login(UserLoginRequest userLoginRequest) {
         var formData = new LinkedMultiValueMap<String, String>();
@@ -47,7 +48,7 @@ public class TokenService {
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .bodyValue(formData)
             .retrieve()
-            .bodyToMono(AccessTokenResponse.class)
+            .bodyToMono(KeycloakAccessTokenResponse.class)
             .map(tokenResponseMapper::to)
             .doOnNext(token -> log.info("Token was successfully generated for email={}", userLoginRequest.getEmail()));
     }
@@ -63,7 +64,7 @@ public class TokenService {
             .uri(keycloakProperties.tokenUrl())
             .bodyValue(formData)
             .retrieve()
-            .bodyToMono(AccessTokenResponse.class)
+            .bodyToMono(KeycloakAccessTokenResponse.class)
             .doOnNext(response -> log.info("Token was successfully refreshed"))
             .map(tokenResponseMapper::to);
     }
