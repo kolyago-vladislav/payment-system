@@ -40,16 +40,16 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation ("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation ("org.keycloak:keycloak-admin-client:$keycloakAdminClientVersion")
-
-	implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocOpenapiStarterWebmvcUiVersion")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
 
     compileOnly("org.projectlombok:lombok")
     compileOnly("org.mapstruct:mapstruct:$mapstructVersion")
-    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
     annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -81,10 +81,11 @@ openApiGenerate {
     configOptions.set(
         mapOf(
             "interfaceOnly" to "true",
-            "library" to "spring-cloud",
+            "library" to "spring-boot",
             "skipDefaultInterface" to "true",
             "useBeanValidation" to "true",
-            "openApiNullable" to "false"
+            "openApiNullable" to "false",
+            "reactive" to "true"
         )
     )
 }

@@ -1,44 +1,44 @@
 package com.example.service;
 
+import reactor.core.publisher.Mono;
 import java.time.ZoneOffset;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.representations.idm.UserRepresentation;
-
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import com.example.client.KeycloakClient;
+import com.example.config.property.KeycloakProperties;
 import com.example.dto.TokenResponse;
 import com.example.dto.UserInfoResponse;
 import com.example.dto.UserLoginRequest;
 import com.example.dto.UserRegistrationRequest;
 import com.example.exception.IndividualException;
-import com.example.mapper.CredentialRepresentationMapper;
-import com.example.mapper.UserRepresentationMapper;
+import com.example.mapper.KeycloakMapper;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    public static final String REGEX_GET_SUBSTRING_AFTER_LAST_SLASH = ".*/([^/]+)$";
-
-    private final RealmResource realmResource;
-    private final UserRepresentationMapper userRepresentationMapper;
-    private final CredentialRepresentationMapper credentialRepresentationMapper;
+    private final KeycloakProperties keycloakProperties;
+    private final KeycloakMapper keycloakMapper;
     private final TokenService tokenService;
+    private final KeycloakClient keycloakClient;
 
-    public TokenResponse login(UserLoginRequest userLoginRequest) {
-        return tokenService.generateAccessToken(userLoginRequest.getEmail(), userLoginRequest.getPassword());
+    public Mono<UserInfoResponse> getCurrentUserInfo() {
+        return ReactiveSecurityContextHolder.getContext()
+            .map(SecurityContext::getAuthentication)
+            .flatMap(UserService::getUserInfoResponseMono)
+            .switchIfEmpty(Mono.error(new IndividualException("No authentication present")));
     }
 
-    public UserInfoResponse getCurrentUserInfo() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-
+    private static Mono<UserInfoResponse> getUserInfoResponseMono(Authentication authentication) {
         if (authentication.getPrincipal() instanceof Jwt jwt) {
             var userInfoResponse = new UserInfoResponse();
             userInfoResponse.setId(jwt.getSubject());
@@ -48,52 +48,28 @@ public class UserService {
             if (jwt.getIssuedAt() != null) {
                 userInfoResponse.setCreatedAt(jwt.getIssuedAt().atOffset(ZoneOffset.UTC));
             }
+            log.info("User[email={}] was successfully get info", jwt.getClaimAsString("email"));
 
-            log.error("User[email={}] was successfully get info", jwt.getClaimAsString("email"));
-
-            return userInfoResponse;
+            return Mono.just(userInfoResponse);
         }
 
         log.error("Can not get current user info: Invalid principal");
-        throw new IndividualException("Can not get current user info: Invalid principal");
+        return Mono.error(new IndividualException("Can not get current user info: Invalid principal"));
     }
 
-    public TokenResponse register(UserRegistrationRequest request) {
-        var user = userRepresentationMapper.to(request);
+    public Mono<TokenResponse> register(UserRegistrationRequest request) {
+        var userRepresentation = keycloakMapper.toUserRepresentation(request);
 
-        try (var response = realmResource.users().create(user)) {
-            if (response.getStatus() != 201) {
-                log.error("User[email={}] is not created. Something went wrong", user.getEmail());
-                throw new IndividualException("User[email=%s] is not created. Something went wrong", user.getEmail());
-            }
+        var adminLoginRequest = new UserLoginRequest(
+            keycloakProperties.adminEmail(),
+            keycloakProperties.adminPassword()
+        );
 
-            var userId = extractIdFromPath(response.getLocation().getPath());
-
-            setUserPassword(user, userId, request);
-
-            log.info("User[email={}] was successfully created with id={}", user.getEmail(), userId);
-
-            return tokenService.generateAccessToken(request.getEmail(), request.getPassword());
-        }
-    }
-
-    private void setUserPassword(
-        UserRepresentation user,
-        String userId,
-        UserRegistrationRequest request
-    ) {
-        try {
-            var credentialRepresentation = credentialRepresentationMapper.to(request);
-            var userResource = realmResource.users().get(userId);
-            userResource.resetPassword(credentialRepresentation);
-        } catch (Exception e) {
-            realmResource.users().get(userId).remove();
-            log.error("User[email={}] was created but password wasn't set correctly", user.getEmail());
-            throw new IndividualException("User[email=%s] was created but password wasn't set correctly", user.getEmail());
-        }
-    }
-
-    private String extractIdFromPath(String path) {
-        return path.replaceAll(REGEX_GET_SUBSTRING_AFTER_LAST_SLASH, "$1");
+        return tokenService.login(adminLoginRequest)
+            .flatMap(adminTokenResponse ->
+                keycloakClient.registerUser(request, adminTokenResponse, userRepresentation)
+                    .flatMap(userId ->
+                        keycloakClient.resetUserPassword(userId, keycloakMapper.toCredentialRepresentation(request), adminTokenResponse.getAccessToken())
+                            .then(Mono.defer(() -> tokenService.login(new UserLoginRequest(request.getEmail(), request.getPassword()))))));
     }
 }
