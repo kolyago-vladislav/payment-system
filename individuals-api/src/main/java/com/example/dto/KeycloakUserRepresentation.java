@@ -1,12 +1,11 @@
 package com.example.dto;
 
-import lombok.Data;
+public record KeycloakUserRepresentation(
+    String id,
+    String username,
+    Boolean enabled,
+    Boolean emailVerified,
+    String email
+) {
 
-@Data
-public class KeycloakUserRepresentation {
-    private String id;
-    private String username;
-    private Boolean enabled;
-    private Boolean emailVerified;
-    private String email;
 }
