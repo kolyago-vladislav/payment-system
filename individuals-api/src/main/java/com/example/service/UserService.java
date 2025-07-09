@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.example.client.KeycloakClient;
-import com.example.config.property.KeycloakProperties;
 import com.example.dto.TokenResponse;
 import com.example.dto.UserInfoResponse;
 import com.example.dto.UserLoginRequest;
@@ -26,7 +25,7 @@ import com.example.mapper.KeycloakMapper;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final KeycloakProperties keycloakProperties;
+
     private final KeycloakMapper keycloakMapper;
     private final TokenService tokenService;
     private final KeycloakClient keycloakClient;
@@ -60,12 +59,7 @@ public class UserService {
     public Mono<TokenResponse> register(UserRegistrationRequest request) {
         var userRepresentation = keycloakMapper.toUserRepresentation(request);
 
-        var adminLoginRequest = new UserLoginRequest(
-            keycloakProperties.adminEmail(),
-            keycloakProperties.adminPassword()
-        );
-
-        return tokenService.login(adminLoginRequest)
+        return tokenService.obtainAdminServiceToken()
             .flatMap(adminTokenResponse ->
                 keycloakClient.registerUser(request, adminTokenResponse, userRepresentation)
                     .flatMap(userId ->

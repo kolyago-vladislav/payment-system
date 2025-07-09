@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import com.example.client.KeycloakClient;
+import com.example.config.property.KeycloakProperties;
 import com.example.dto.TokenRefreshRequest;
 import com.example.dto.TokenResponse;
 import com.example.dto.UserLoginRequest;
@@ -18,6 +19,7 @@ import com.example.mapper.TokenResponseMapper;
 @RequiredArgsConstructor
 public class TokenService {
 
+    private final KeycloakProperties keycloakProperties;
     private final TokenResponseMapper tokenResponseMapper;
     private final KeycloakClient keycloakClient;
 
@@ -32,5 +34,16 @@ public class TokenService {
         return keycloakClient.refreshToken(tokenRefreshRequest)
             .doOnNext(r -> log.info("Token was successfully refreshed"))
             .map(tokenResponseMapper::toTokenResponse);
+    }
+
+    public Mono<TokenResponse> obtainAdminServiceToken() {
+        var adminLoginRequest = new UserLoginRequest(
+            keycloakProperties.adminEmail(),
+            keycloakProperties.adminPassword()
+        );
+
+        log.info("Admin login request was created");
+
+        return login(adminLoginRequest);
     }
 }
