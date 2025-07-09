@@ -14,26 +14,30 @@ class AuthControllerTest extends LifecycleSpecification {
 	@Test
 	void shouldCreateNewUserAndReturnAccessToken() {
 		//when
-		var response = apiService.register(buildUserRegistrationRequest());
-
+		var request = buildUserRegistrationRequest();
+		var response = apiService.register(request);
+		var meResponse = apiService.getMe(response.getAccessToken());
 		//then
 		assertNotNull(response, "Response must not be null");
 		assertNotNull(response.getAccessToken(), "Access token must not be null");
 		assertEquals("Bearer", response.getTokenType(), "Token type must be Bearer");
+		assertEquals(meResponse.getEmail(), request.getEmail());
 	}
 
 	@Test
 	void shouldLoginAndReturnAccessToken() {
 		//given
-		var registrationResponse = apiService.register(buildUserRegistrationRequest());
+		var request = buildUserRegistrationRequest();
+		apiService.register(request);
 
 		//when
-		var loginResponse = apiService.login(buildUserLoginRequest());
-
+		var response = apiService.login(buildUserLoginRequest());
+		var meResponse = apiService.getMe(response.getAccessToken());
 		//then
-		assertNotNull(loginResponse, "Response must not be null");
-		assertNotNull(loginResponse.getAccessToken(), "Access token must not be null");
-		assertEquals("Bearer", loginResponse.getTokenType(), "Token type must be Bearer");
+		assertNotNull(response, "Response must not be null");
+		assertNotNull(response.getAccessToken(), "Access token must not be null");
+		assertEquals("Bearer", response.getTokenType(), "Token type must be Bearer");
+		assertEquals(meResponse.getEmail(), request.getEmail());
 	}
 
 	@Test
