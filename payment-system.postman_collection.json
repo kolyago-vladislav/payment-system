@@ -1,0 +1,319 @@
+{
+	"info": {
+		"_postman_id": "6e788ed1-8a97-48ca-94f5-a9276573dfcd",
+		"name": "payment-system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21484570"
+	},
+	"item": [
+		{
+			"name": "individuals-api",
+			"item": [
+				{
+					"name": "me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8091/v1/auth/me",
+							"host": [
+								"localhost"
+							],
+							"port": "8091",
+							"path": [
+								"v1",
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.text()) {\r",
+									"    try {\r",
+									"        const responseJson = pm.response.json();\r",
+									"        if (responseJson.access_token) {\r",
+									"            pm.globals.set(\"access_token\", responseJson.access_token);\r",
+									"            console.log(pm.globals.get(\"access_token\"));\r",
+									"        }\r",
+									"        if (responseJson.refresh_token) {\r",
+									"            pm.globals.set(\"refresh_token\", responseJson.refresh_token);\r",
+									"            console.log(pm.globals.get(\"refresh_token\"));\r",
+									"        }\r",
+									"    } catch (e) {\r",
+									"        console.log(\"Response is not valid JSON\");\r",
+									"    }\r",
+									"} else {\r",
+									"    console.log(\"Response body is empty\");\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"newUser@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"confirmPassword\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8091/v1/auth/registration",
+							"host": [
+								"localhost"
+							],
+							"port": "8091",
+							"path": [
+								"v1",
+								"auth",
+								"registration"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.text()) {\r",
+									"    try {\r",
+									"        const responseJson = pm.response.json();\r",
+									"        if (responseJson.access_token) {\r",
+									"            pm.globals.set(\"access_token\", responseJson.access_token);\r",
+									"            console.log(pm.globals.get(\"access_token\"));\r",
+									"        }\r",
+									"        if (responseJson.refresh_token) {\r",
+									"            pm.globals.set(\"refresh_token\", responseJson.refresh_token);\r",
+									"            console.log(pm.globals.get(\"refresh_token\"));\r",
+									"        }\r",
+									"    } catch (e) {\r",
+									"        console.log(\"Response is not valid JSON\");\r",
+									"    }\r",
+									"} else {\r",
+									"    console.log(\"Response body is empty\");\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8091/v1/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8091",
+							"path": [
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.text()) {\r",
+									"    try {\r",
+									"        const responseJson = pm.response.json();\r",
+									"        if (responseJson.access_token) {\r",
+									"            pm.globals.set(\"access_token\", responseJson.access_token);\r",
+									"            console.log(pm.globals.get(\"access_token\"));\r",
+									"        }\r",
+									"        if (responseJson.refresh_token) {\r",
+									"            pm.globals.set(\"refresh_token\", responseJson.refresh_token);\r",
+									"            console.log(pm.globals.get(\"refresh_token\"));\r",
+									"        }\r",
+									"    } catch (e) {\r",
+									"        console.log(\"Response is not valid JSON\");\r",
+									"    }\r",
+									"} else {\r",
+									"    console.log(\"Response body is empty\");\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"newUser@gmail.com\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8091/v1/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8091",
+							"path": [
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refreshToken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.text()) {\r",
+									"    try {\r",
+									"        const responseJson = pm.response.json();\r",
+									"        if (responseJson.access_token) {\r",
+									"            pm.globals.set(\"access_token\", responseJson.access_token);\r",
+									"        }\r",
+									"        if (responseJson.refresh_token) {\r",
+									"            pm.globals.set(\"refresh_token\", responseJson.refresh_token);\r",
+									"        }\r",
+									"    } catch (e) {\r",
+									"        console.log(\"Response is not valid JSON\");\r",
+									"    }\r",
+									"} else {\r",
+									"    console.log(\"Response body is empty\");\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refresh_token\": \"{{refresh_token}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8091/v1/auth/refresh-token",
+							"host": [
+								"localhost"
+							],
+							"port": "8091",
+							"path": [
+								"v1",
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "keycloak-health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:9000/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9000",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "metrics",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8091/actuator/prometheus",
+							"host": [
+								"localhost"
+							],
+							"port": "8091",
+							"path": [
+								"actuator",
+								"prometheus"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
