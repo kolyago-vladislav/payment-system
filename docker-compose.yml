@@ -85,13 +85,6 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
-    depends_on:
-      prometheus:
-        condition: service_healthy
-      loki:
-        condition: service_healthy
-      alloy:
-        condition: service_started
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: true
       GF_SECURITY_ADMIN_USER: admin
@@ -99,6 +92,7 @@ services:
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - nexus-data:/nexus-data
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000/api/health"]
       interval: 10s
@@ -142,7 +136,33 @@ services:
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
 
+  nexus:
+    image: sonatype/nexus3
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus-data:/nexus-data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/service/rest/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  nexus-change-password:
+    image: appropriate/curl
+    environment:
+      - NEXUS_ADMIN_PASSWORD_FILE=/nexus-data/admin.password
+      - NEXUS_NEW_PASSWORD=admin
+    depends_on:
+      nexus:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/scripts/change-password.sh"]
+    volumes:
+      - nexus-data:/nexus-data
+      - ./nexus-init:/scripts:ro
+
 volumes:
+  nexus-data:
   loki_data:
   loki_chunks:
   loki_index:
