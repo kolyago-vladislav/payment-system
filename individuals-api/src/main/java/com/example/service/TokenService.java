@@ -24,6 +24,7 @@ public class TokenService {
     public Mono<TokenResponse> login(UserLoginRequest userLoginRequest) {
         return keycloakClient.login(userLoginRequest)
             .doOnNext(t -> log.info("Token was successfully generated for email={}", userLoginRequest.getEmail()))
+            .doOnError(e -> log.warn("Failed to generate token for email={}", userLoginRequest.getEmail(), e))
             .map(tokenResponseMapper::toTokenResponse);
     }
 

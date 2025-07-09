@@ -6,7 +6,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,20 +20,33 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .authorizeExchange(exchanges -> exchanges
-                .pathMatchers("/actuator/prometheus").permitAll()
-                .pathMatchers(HttpMethod.POST, "/v1/auth/registration").permitAll()
-                .pathMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
-                .pathMatchers(HttpMethod.POST, "/v1/auth/refresh-token").permitAll()
-                .pathMatchers("/actuator/**").hasAuthority("ROLE_individual.admin")
-                .anyExchange().authenticated()
-            )
+            .authorizeExchange(exchanges -> {
+                applyPublicRoutes(exchanges);
+                applyProtectedRoutes(exchanges);
+                exchanges.anyExchange().authenticated();
+            })
             .oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter1())))
+                oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakAuthenticationConverter()))
+            )
             .build();
     }
 
-    private Converter<Jwt, ? extends Mono<? extends AbstractAuthenticationToken>> jwtAuthenticationConverter1() {
+    private void applyPublicRoutes(ServerHttpSecurity.AuthorizeExchangeSpec exchanges) {
+        exchanges
+            .pathMatchers(
+                "/actuator/prometheus",
+                "/v1/auth/registration",
+                "/v1/auth/login",
+                "/v1/auth/refresh-token"
+            ).permitAll();
+    }
+
+    private void applyProtectedRoutes(ServerHttpSecurity.AuthorizeExchangeSpec exchanges) {
+        exchanges
+            .pathMatchers("/actuator/**").hasRole("individual.admin");
+    }
+
+    private Converter<Jwt, ? extends Mono<? extends AbstractAuthenticationToken>> keycloakAuthenticationConverter() {
         ReactiveJwtAuthenticationConverter converter = new ReactiveJwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwtAuthenticationConverter());
         return converter;
