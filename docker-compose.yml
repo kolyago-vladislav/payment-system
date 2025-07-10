@@ -181,7 +181,7 @@ services:
     entrypoint: ["/bin/sh", "/scripts/change-password.sh"]
     volumes:
       - nexus-data:/nexus-data
-      - ./nexus-init:/scripts:ro
+      - ./nexus:/scripts:ro
 
 volumes:
   nexus-data:
