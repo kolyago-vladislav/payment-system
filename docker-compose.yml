@@ -85,6 +85,13 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      alloy:
+        condition: service_started
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: true
       GF_SECURITY_ADMIN_USER: admin
