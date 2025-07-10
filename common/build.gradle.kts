@@ -5,6 +5,7 @@ import java.util.Date
 val springdocOpenapiStarterWebmvcUiVersion: String by project
 val javaxAnnotationApiVersion: String by project
 val javaxValidationApiVersion: String by project
+val comGoogleCodeFindbugsVersion: String by project
 
 plugins {
     id("java-library")
@@ -27,7 +28,7 @@ dependencies {
 	implementation("javax.validation:validation-api:$javaxValidationApiVersion")
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
 
-    compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+    compileOnly("com.google.code.findbugs:jsr305:$comGoogleCodeFindbugsVersion")
 }
 
 val openApiDir = file("$rootDir/openapi")
