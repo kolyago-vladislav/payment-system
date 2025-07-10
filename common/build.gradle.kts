@@ -1,5 +1,6 @@
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 import java.io.File
+import java.io.FileFilter
 
 val springdocOpenapiStarterWebmvcUiVersion: String by project
 val javaxAnnotationApiVersion: String by project
@@ -57,13 +58,10 @@ fun getAbsolutePath(nameWithoutExtension: String): Provider<String> {
 
 foundSpecifications.forEach { specFile ->
     val taskName = buildTaskName(specFile.nameWithoutExtension)
-    logger.lifecycle("taskName to be registered " + taskName)
-
     val outDir = getAbsolutePath(specFile.nameWithoutExtension)
-    logger.lifecycle("Register task $taskName from $outDir")
+    logger.lifecycle("Register task $taskName from ${outDir.get()}")
 
     val packageName = defineJavaPackageName(specFile.nameWithoutExtension)
-    logger.lifecycle("packageName " + packageName)
 
     tasks.register(taskName, GenerateTask::class) {
         generatorName.set("spring")
@@ -88,8 +86,7 @@ foundSpecifications.forEach { specFile ->
     }
 }
 
-val withoutExtensionNames = foundSpecifications
-    ?.map { it.nameWithoutExtension } ?: emptyList()
+val withoutExtensionNames = foundSpecifications.map { it.nameWithoutExtension }
 
 sourceSets.named("main") {
     withoutExtensionNames.forEach { name ->
