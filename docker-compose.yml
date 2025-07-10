@@ -136,6 +136,21 @@ services:
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
 
+  common:
+    build:
+      context: ./common
+      dockerfile: Dockerfile
+    container_name: common
+    environment:
+      NEXUS_URL: "http://nexus:8081/repository/maven-releases/"
+#      NEXUS_USERNAME: admin
+#      NEXUS_PASSWORD: admin
+#      ARTEFACT_VERSION: "1.0.0"
+    depends_on:
+      nexus-change-password:
+        condition: service_completed_successfully
+    command: gradle clean build publish --no-daemon
+
   nexus:
     image: sonatype/nexus3:3.76.0
     ports:
@@ -144,9 +159,9 @@ services:
       - nexus-data:/nexus-data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/service/rest/v1/status"]
-      interval: 30s
+      interval: 5s
       timeout: 10s
-      retries: 5
+      retries: 30
 
   nexus-change-password:
     image: appropriate/curl

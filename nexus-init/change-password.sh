@@ -28,5 +28,5 @@ echo "Disabling anonymous access in Nexus..."
 curl -s -o /dev/null -w "%{http_code}" -u "admin:${NEW_PASS}" \
   -H "Content-Type: application/json" \
   -X PUT http://nexus:8081/service/rest/v1/security/anonymous \
-  -d '{"enabled": false}'
+  -d '{"enabled": true}'
 

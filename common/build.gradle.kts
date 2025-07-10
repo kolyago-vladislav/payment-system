@@ -1,6 +1,6 @@
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
-import java.io.File
-import java.io.FileFilter
+import java.text.SimpleDateFormat
+import java.util.Date
 
 val springdocOpenapiStarterWebmvcUiVersion: String by project
 val javaxAnnotationApiVersion: String by project
@@ -94,12 +94,16 @@ sourceSets.named("main") {
     }
 }
 
+val baseVersion = "1.0.0"
+val timestamp = SimpleDateFormat("dd_MM_yyyy.HH_mm_ss").format(Date())
+val artifactVersion = System.getenv("ARTEFACT_VERSION") ?: "$baseVersion-$timestamp"
+
 tasks.register("generateAllOpenApi") {
     foundSpecifications.forEach { specFile ->
         dependsOn(buildTaskName(specFile.nameWithoutExtension))
     }
     doLast {
-        logger.lifecycle("generateAllOpenApi: all specifications has been generated")
+        logger.lifecycle("generateAllOpenApi: all specifications has been generated with VERSION=${artifactVersion}")
     }
 }
 
@@ -107,23 +111,27 @@ tasks.named("compileJava") {
     dependsOn("generateAllOpenApi")
 }
 
+val nexusUrl = System.getenv("NEXUS_URL") ?: "http://localhost:8081/repository/maven-snapshots/"
+val nexusUsername = System.getenv("NEXUS_USERNAME") ?: "admin"
+val nexusPassword = System.getenv("NEXUS_PASSWORD") ?: "admin"
+
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
             groupId = "com.example"
             artifactId = "common"
-            version = "1.0.0"
+            version = artifactVersion
         }
     }
     repositories {
         maven {
             name = "nexus"
-            url = uri("http://localhost:8081/repository/maven-releases/")
+            url = uri(nexusUrl)
             isAllowInsecureProtocol = true
             credentials {
-                username = "admin"
-                password = "admin"
+                username = nexusUsername
+                password = nexusPassword
             }
         }
     }
