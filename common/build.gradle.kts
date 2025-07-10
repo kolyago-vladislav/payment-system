@@ -1,3 +1,6 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+import java.io.File
+
 val springdocOpenapiStarterWebmvcUiVersion: String by project
 val javaxAnnotationApiVersion: String by project
 val javaxValidationApiVersion: String by project
@@ -24,26 +27,40 @@ dependencies {
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
 }
 
-tasks.named("compileJava") {
-    dependsOn("openApiGenerate")
+tasks.register("generateAllOpenApi") {
+    openApiDir
+        .listFiles { file -> file.extension in listOf("yaml", "yml") }
+        ?.forEach { specFile ->
+            val nameWithoutExt = specFile.nameWithoutExtension.replace(Regex("[^A-Za-z0-9]"), "").capitalize()
+            dependsOn("generate${nameWithoutExt}Api")
+        }
 }
 
-openApiGenerate {
-    generatorName.set("spring")
-    inputSpec.set("$rootDir/openapi/persons-api.yaml")
-    outputDir.set("$buildDir/generated-sources/openapi")
-    apiPackage.set("com.example.api")
-    modelPackage.set("com.example.dto")
-    configOptions.set(
-        mapOf(
-            "interfaceOnly" to "true",
-            "library" to "spring-cloud",
-            "skipDefaultInterface" to "true",
-            "useBeanValidation" to "true",
-            "openApiNullable" to "false"
-        )
-    )
-}
+val openApiDir = file("$rootDir/openapi")
+
+openApiDir
+    .listFiles { file -> file.extension in listOf("yaml", "yml") }
+    ?.forEach { specFile ->
+        val nameWithoutExt = specFile.nameWithoutExtension.replace(Regex("[^A-Za-z0-9]"), "").capitalize()
+        val taskName = "generate${nameWithoutExt}Api"
+
+        tasks.register(taskName, GenerateTask::class) {
+            generatorName.set("spring")
+            inputSpec.set(specFile.absolutePath)
+            outputDir.set("$buildDir/generated-sources/openapi/${specFile.nameWithoutExtension}")
+            apiPackage.set("com.example.${specFile.nameWithoutExtension}.api")
+            modelPackage.set("com.example.${specFile.nameWithoutExtension}.dto")
+            configOptions.set(
+                mapOf(
+                    "interfaceOnly" to "true",
+                    "library" to "spring-cloud",
+                    "skipDefaultInterface" to "true",
+                    "useBeanValidation" to "true",
+                    "openApiNullable" to "false"
+                )
+            )
+        }
+    }
 
 publishing {
     publications {
