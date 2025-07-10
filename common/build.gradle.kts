@@ -1,6 +1,4 @@
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
-import java.text.SimpleDateFormat
-import java.util.Date
 
 val springdocOpenapiStarterWebmvcUiVersion: String by project
 val javaxAnnotationApiVersion: String by project
@@ -95,16 +93,12 @@ sourceSets.named("main") {
     }
 }
 
-val baseVersion = "1.0.0"
-val timestamp = SimpleDateFormat("dd_MM_yyyy.HH_mm_ss").format(Date())
-val artifactVersion = System.getenv("ARTEFACT_VERSION") ?: "$baseVersion-$timestamp"
-
 tasks.register("generateAllOpenApi") {
     foundSpecifications.forEach { specFile ->
         dependsOn(buildTaskName(specFile.nameWithoutExtension))
     }
     doLast {
-        logger.lifecycle("generateAllOpenApi: all specifications has been generated with VERSION=${artifactVersion}")
+        logger.lifecycle("generateAllOpenApi: all specifications has been generated")
     }
 }
 
@@ -122,7 +116,7 @@ publishing {
             from(components["java"])
             groupId = "com.example"
             artifactId = "common"
-            version = artifactVersion
+            version = System.getenv("ARTEFACT_VERSION") ?: "1.0.0-SNAPSHOT"
         }
     }
     repositories {

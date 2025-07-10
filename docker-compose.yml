@@ -149,10 +149,10 @@ services:
       dockerfile: Dockerfile
     container_name: common
     environment:
-      NEXUS_URL: "http://nexus:8081/repository/maven-releases/"
-#      NEXUS_USERNAME: admin
-#      NEXUS_PASSWORD: admin
-#      ARTEFACT_VERSION: "1.0.0"
+      NEXUS_URL: "http://nexus:8081/repository/maven-snapshots/"
+      NEXUS_USERNAME: admin
+      NEXUS_PASSWORD: admin
+      ARTEFACT_VERSION: "1.0.0-SNAPSHOT"
     depends_on:
       nexus-change-password:
         condition: service_completed_successfully
