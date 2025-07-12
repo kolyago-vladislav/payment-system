@@ -29,24 +29,23 @@ dependencies {
     compileOnly("com.google.code.findbugs:jsr305:$comGoogleCodeFindbugsVersion")
 }
 
+
+/*
+──────────────────────────────────────────────────────
+============== Api generation ==============
+──────────────────────────────────────────────────────
+*/
+
 val openApiDir = file("$rootDir/openapi")
 
 val foundSpecifications = openApiDir.listFiles { f -> f.extension in listOf("yaml", "yml") } ?: emptyArray()
 logger.lifecycle("Found ${foundSpecifications.size} specifications: " + foundSpecifications.joinToString { it.name })
 
-fun buildTaskName(name: String): String {
-    val prepareName = name
-        .split(Regex("[^A-Za-z0-9]"))
-        .filter { it.isNotBlank() }
-        .joinToString("") { it.replaceFirstChar(Char::uppercase) }
+foundSpecifications.forEach { specFile ->
+    val outDir = getAbsolutePath(specFile.nameWithoutExtension)
+    val packageName = defineJavaPackageName(specFile.nameWithoutExtension)
 
-    return "generate${prepareName}"
-}
-
-fun defineJavaPackageName(name: String): String {
-     val beforeDash = name.substringBefore('-')
-     val match = Regex("^[a-z]+").find(beforeDash)
-     return match?.value ?: beforeDash.lowercase()
+    registerGenerationApiTask(specFile, outDir, packageName)
 }
 
 fun getAbsolutePath(nameWithoutExtension: String): Provider<String> {
@@ -55,12 +54,19 @@ fun getAbsolutePath(nameWithoutExtension: String): Provider<String> {
             .map { it.asFile.absolutePath }
 }
 
-foundSpecifications.forEach { specFile ->
-    val taskName = buildTaskName(specFile.nameWithoutExtension)
-    val outDir = getAbsolutePath(specFile.nameWithoutExtension)
-    logger.lifecycle("Register task $taskName from ${outDir.get()}")
+fun defineJavaPackageName(name: String): String {
+     val beforeDash = name.substringBefore('-')
+     val match = Regex("^[a-z]+").find(beforeDash)
+     return match?.value ?: beforeDash.lowercase()
+}
 
-    val packageName = defineJavaPackageName(specFile.nameWithoutExtension)
+fun registerGenerationApiTask(
+    specFile: File,
+    outDir: Provider<String>,
+    packageName: String
+) {
+    val taskName = buildTaskName(specFile.nameWithoutExtension)
+    logger.lifecycle("Register task $taskName from ${outDir.get()}")
 
     tasks.register(taskName, GenerateTask::class) {
         generatorName.set("spring")
@@ -85,6 +91,16 @@ foundSpecifications.forEach { specFile ->
     }
 }
 
+fun buildTaskName(name: String): String {
+    val prepareName = name
+        .split(Regex("[^A-Za-z0-9]"))
+        .filter { it.isNotBlank() }
+        .joinToString("") { it.replaceFirstChar(Char::uppercase) }
+
+    return "generate${prepareName}"
+}
+
+
 val withoutExtensionNames = foundSpecifications.map { it.nameWithoutExtension }
 
 sourceSets.named("main") {
@@ -105,6 +121,12 @@ tasks.register("generateAllOpenApi") {
 tasks.named("compileJava") {
     dependsOn("generateAllOpenApi")
 }
+
+/*
+──────────────────────────────────────────────────────
+============== Nexus Publishing ==============
+──────────────────────────────────────────────────────
+*/
 
 val nexusUrl = System.getenv("NEXUS_URL") ?: "http://localhost:8081/repository/maven-snapshots/"
 val nexusUsername = System.getenv("NEXUS_USERNAME") ?: "admin"
