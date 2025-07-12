@@ -1,4 +1,4 @@
-package com.example.entity;
+package com.example.entity.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -13,13 +13,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.RelationTargetAuditMode;
 
 @Getter
 @Setter
 @MappedSuperclass
-public class HibernateEntity {
+public class BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)

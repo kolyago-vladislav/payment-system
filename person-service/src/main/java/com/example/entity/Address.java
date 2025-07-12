@@ -15,13 +15,15 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
+import com.example.entity.base.BaseEntity;
+
 @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "addresses", schema = "person")
-public class Address extends HibernateEntity {
+public class Address extends BaseEntity {
 
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

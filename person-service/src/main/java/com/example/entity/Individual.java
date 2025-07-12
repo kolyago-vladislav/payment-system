@@ -14,6 +14,8 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
+import com.example.entity.base.BaseEntity;
+
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
@@ -24,7 +26,7 @@ import static jakarta.persistence.CascadeType.REMOVE;
 @Setter
 @Entity
 @Table(name = "individuals", schema = "person")
-public class Individual extends HibernateEntity {
+public class Individual extends BaseEntity {
 
     @Size(max = 32)
     @Column(name = "passport_number", nullable = false, length = 32)

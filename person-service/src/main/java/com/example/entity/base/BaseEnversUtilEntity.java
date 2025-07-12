@@ -1,4 +1,4 @@
-package com.example.entity;
+package com.example.entity.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,7 +14,7 @@ import org.hibernate.envers.RevisionTimestamp;
 @Entity
 @RevisionEntity
 @Table(name="revinfo", schema = "person_history")
-public class RevInfoEntity {
+public class BaseEnversUtilEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @RevisionNumber
