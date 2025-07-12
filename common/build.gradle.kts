@@ -1,9 +1,12 @@
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
-val springdocOpenapiStarterWebmvcUiVersion: String by project
-val javaxAnnotationApiVersion: String by project
-val javaxValidationApiVersion: String by project
-val comGoogleCodeFindbugsVersion: String by project
+val versions = mapOf(
+    "springdocOpenapiStarterWebmvcUi" to "2.5.0",
+    "javaxAnnotationApi" to "1.3.2",
+    "javaxValidationApi" to "2.0.0.Final",
+    "comGoogleCodeFindbugs" to "3.0.2",
+    "springCloudStarterOpenfeign" to "4.1.1",
+)
 
 plugins {
     id("java-library")
@@ -22,11 +25,13 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocOpenapiStarterWebmvcUiVersion")
-	implementation("javax.validation:validation-api:$javaxValidationApiVersion")
-    implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${versions["springdocOpenapiStarterWebmvcUi"]}")
+	implementation("javax.validation:validation-api:${versions["javaxValidationApi"]}")
+    implementation("javax.annotation:javax.annotation-api:${versions["javaxAnnotationApi"]}")
 
-    compileOnly("com.google.code.findbugs:jsr305:$comGoogleCodeFindbugsVersion")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:${versions["springCloudStarterOpenfeign"]}")
+
+    compileOnly("com.google.code.findbugs:jsr305:${versions["comGoogleCodeFindbugs"]}")
 }
 
 
@@ -45,7 +50,32 @@ foundSpecifications.forEach { specFile ->
     val outDir = getAbsolutePath(specFile.nameWithoutExtension)
     val packageName = defineJavaPackageName(specFile.nameWithoutExtension)
 
-    registerGenerationApiTask(specFile, outDir, packageName)
+    val taskName = buildTaskName(specFile.nameWithoutExtension)
+    logger.lifecycle("Register task $taskName from ${outDir.get()}")
+    val basePackage = "com.example.${packageName}"
+
+    tasks.register(taskName, GenerateTask::class) {
+        generatorName.set("spring")
+        inputSpec.set(specFile.absolutePath)
+        outputDir.set(outDir)
+
+        configOptions.set(
+            mapOf(
+                "library"              to "spring-cloud",
+                "skipDefaultInterface" to "true",
+                "useBeanValidation"    to "true",
+                "openApiNullable"      to "false",
+                "useFeignClientUrl"    to "true",
+                "apiPackage"           to "${basePackage}.api",
+                "modelPackage"         to "${basePackage}.dto",
+                "configPackage"        to "${basePackage}.config"
+            )
+        )
+
+        doFirst {
+            logger.lifecycle("$taskName: starting generation from ${specFile.name}")
+        }
+    }
 }
 
 fun getAbsolutePath(nameWithoutExtension: String): Provider<String> {
@@ -60,36 +90,6 @@ fun defineJavaPackageName(name: String): String {
      return match?.value ?: beforeDash.lowercase()
 }
 
-fun registerGenerationApiTask(
-    specFile: File,
-    outDir: Provider<String>,
-    packageName: String
-) {
-    val taskName = buildTaskName(specFile.nameWithoutExtension)
-    logger.lifecycle("Register task $taskName from ${outDir.get()}")
-
-    tasks.register(taskName, GenerateTask::class) {
-        generatorName.set("spring")
-        inputSpec.set(specFile.absolutePath)
-        outputDir.set(outDir)
-        apiPackage.set("com.example.${packageName}.api")
-        modelPackage.set("com.example.${packageName}.dto")
-
-        configOptions.set(
-            mapOf(
-                "interfaceOnly"        to "true",
-                "library"              to "spring-cloud",
-                "skipDefaultInterface" to "true",
-                "useBeanValidation"    to "true",
-                "openApiNullable"      to "false"
-            )
-        )
-
-        doFirst {
-            logger.lifecycle("$taskName: starting generation from ${specFile.name}")
-        }
-    }
-}
 
 fun buildTaskName(name: String): String {
     val prepareName = name
