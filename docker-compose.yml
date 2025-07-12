@@ -1,4 +1,28 @@
 services:
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payment_system
+    ports:
+      - "5432:5432"
+
+  flyway-persons:
+    image: flyway/flyway
+    container_name: flyway-persons
+    depends_on:
+      - postgres
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/payment_system
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: postgres
+    command: migrate
+    volumes:
+      - ./person-service/flyway:/flyway/sql
+
+
   individuals-api:
     build: ./individuals-api
     container_name: individuals-api

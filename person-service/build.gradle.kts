@@ -33,7 +33,6 @@ configurations {
 }
 
 repositories {
-    mavenLocal()
 	mavenCentral()
 	maven {
         url = uri(System.getenv("NEXUS_URL") ?: "http://localhost:8081/repository/maven-snapshots/")
@@ -45,15 +44,23 @@ repositories {
     }
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.0.0")
+    }
+}
+
 dependencies {
     implementation ("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocOpenapiStarterWebmvcUiVersion")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-
     implementation("com.example:common:1.0.0-SNAPSHOT")
+
+    implementation("org.postgresql:postgresql")
 
     compileOnly("org.projectlombok:lombok")
     compileOnly("org.mapstruct:mapstruct:$mapstructVersion")
@@ -63,6 +70,8 @@ dependencies {
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
 
     testCompileOnly ("org.projectlombok:lombok")
     testAnnotationProcessor ("org.projectlombok:lombok")

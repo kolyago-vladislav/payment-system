@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+
+<configuration scan="true">
+
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %highlight(%-5level) %boldWhite(-> [ %thread ]) %cyan(%logger{36}) %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!--    <logger name="org.springframework.transaction" level="TRACE"/>-->
+<!--        <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>-->
+<!--        <logger name="org.springframework.orm.jpa" level="TRACE"/>-->
+    <!--    <logger name="org.springframework.kafka.listener" level="TRACE"/>-->
+    <!--    <logger name="org.springframework.security" level="TRACE"/>-->
+    <!--    <logger name="com.zaxxer.hikari" level="TRACE"/>-->
+
+    <root level="INFO">
+        <appender-ref ref="console"/>
+    </root>
+
+</configuration>

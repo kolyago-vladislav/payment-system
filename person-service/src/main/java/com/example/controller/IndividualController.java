@@ -1,0 +1,62 @@
+package com.example.controller;
+
+import java.util.UUID;
+
+import javax.validation.Valid;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.person.api.PersonsApi;
+import com.example.person.dto.IndividualDto;
+import com.example.person.dto.IndividualWriteDto;
+import com.example.person.dto.IndividualWriteResponseDto;
+import com.example.service.IndividualService;
+
+@RestController("v1")
+@RequiredArgsConstructor
+public class IndividualController implements PersonsApi {
+
+    private final IndividualService individualService;
+
+    @Override
+    public ResponseEntity<IndividualWriteResponseDto> registration(
+        @Valid
+        IndividualWriteDto individualWriteDto
+    ) {
+        return ResponseEntity.ok(individualService.register(individualWriteDto));
+    }
+
+    @Override
+    public ResponseEntity<IndividualDto> findById(UUID id) {
+        return ResponseEntity.ok(individualService.findById(id));
+    }
+
+
+    @Override
+    public ResponseEntity<IndividualDto> findByEmail(String email) {
+        return ResponseEntity.ok(individualService.findByEmail(email));
+    }
+
+    @Override
+    public ResponseEntity<IndividualWriteResponseDto> update(
+        UUID uuid,
+        @Valid IndividualWriteDto individualWriteDto
+    ) {
+        return ResponseEntity.ok(individualService.update(uuid, individualWriteDto));
+    }
+
+    @Override
+    public ResponseEntity<Void> delete(UUID id) {
+        individualService.softDelete(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> hardDelete(UUID id) {
+        individualService.hardDelete(id);
+        return ResponseEntity.ok().build();
+    }
+}

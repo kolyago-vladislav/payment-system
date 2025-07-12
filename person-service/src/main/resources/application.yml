@@ -1,2 +1,25 @@
 server:
   port: 8092
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payment_system
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        show_sql: ${SHOW_SQL:false}
+        format_sql: ${FORMAT_SQL:true}
+        highlight_sql: ${HIGHLIGHT_SQL:true}
+        session.events.log.LOG_QUERIES_SLOWER_THAN_MS: ${SLOW_SQL_QUERY_INDICATOR_MS:1500}
+        hbm2ddl:
+          auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  config: "classpath:logback-local.xml"
+
