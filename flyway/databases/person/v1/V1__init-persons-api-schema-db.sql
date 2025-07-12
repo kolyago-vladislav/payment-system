@@ -1,6 +1,4 @@
-CREATE SCHEMA if NOT EXISTS person;
-CREATE
-EXTENSION IF NOT EXISTS "uuid-ossp";
+
 
 CREATE TABLE person.countries
 (

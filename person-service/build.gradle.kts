@@ -67,6 +67,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
 
+    implementation("org.hibernate.orm:hibernate-envers:6.4.4.Final")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")

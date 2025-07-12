@@ -11,10 +11,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
+
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 @NoArgsConstructor
 @Getter
 @Setter
