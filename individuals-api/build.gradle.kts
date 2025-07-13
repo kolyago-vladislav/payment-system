@@ -80,6 +80,7 @@ dependencies {
 	implementation("javax.validation:validation-api:${versions["javaxValidationApiVersion"]}")
 	implementation("javax.annotation:javax.annotation-api:${versions["javaxAnnotationApiVersion"]}")
 
+    implementation("io.github.openfeign:feign-micrometer:13.6")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
     implementation("io.micrometer:micrometer-observation")
     implementation("io.micrometer:micrometer-tracing")
