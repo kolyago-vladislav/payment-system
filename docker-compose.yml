@@ -6,10 +6,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5434" ]
     ports:
-      - "5432:5432"
+      - "5434:5434"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5434" ]
       interval: 2s
       timeout: 5s
       retries: 25
@@ -21,7 +22,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      FLYWAY_URL: jdbc:postgresql://postgres:5432/person
+      FLYWAY_URL: jdbc:postgresql://postgres:5434/person
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: postgres
     command: migrate

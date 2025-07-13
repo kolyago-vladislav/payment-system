@@ -1,8 +1,12 @@
 package com.example.mapper;
 
+import java.util.Map;
+
 import org.mapstruct.BeanMapping;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import com.example.dto.KeycloakCredentialRepresentation;
 import com.example.dto.KeycloakUserRepresentation;
@@ -25,5 +29,19 @@ public abstract class KeycloakMapper {
     @Mapping(target = "email", source = "email")
     @Mapping(target = "enabled", constant = "true")
     @Mapping(target = "emailVerified", constant = "true")
-    public abstract KeycloakUserRepresentation toUserRepresentation(IndividualWriteDto request);
+    @Mapping(target = "attributes", source = ".", qualifiedByName = "toAttributes")
+    public abstract KeycloakUserRepresentation toUserRepresentation(
+        IndividualWriteDto request,
+        @Context
+        String personId
+    );
+
+    @Named("toAttributes")
+    public Map<String, String> toAttributes(
+        IndividualWriteDto request,
+        @Context
+        String personId
+    ) {
+        return Map.of("personId", personId);
+    }
 }

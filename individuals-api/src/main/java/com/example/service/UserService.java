@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.example.client.KeycloakClient;
+import com.example.dto.KeycloakUserRepresentation;
 import com.example.exception.IndividualException;
 import com.example.individual.dto.IndividualWriteDto;
 import com.example.individual.dto.TokenResponse;
@@ -20,13 +21,12 @@ import com.example.individual.dto.UserInfoResponse;
 import com.example.individual.dto.UserLoginRequest;
 import com.example.mapper.KeycloakMapper;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-
+    private final PersonService personService;
     private final KeycloakMapper keycloakMapper;
     private final TokenService tokenService;
     private final KeycloakClient keycloakClient;
@@ -58,13 +58,21 @@ public class UserService {
     }
 
     public Mono<TokenResponse> register(IndividualWriteDto request) {
-        var userRepresentation = keycloakMapper.toUserRepresentation(request);
+        return personService.register(request)
+            .flatMap(writeResponseDto ->
+                tokenService.obtainAdminServiceToken()
+                    .flatMap(adminTokenResponse ->
+                        keycloakClient.registerUser(request, adminTokenResponse, createRepresentation(request, writeResponseDto.getId()))
+                            .flatMap(userId ->
+                                keycloakClient.resetUserPassword(
+                                        userId, keycloakMapper.toCredentialRepresentation(request), adminTokenResponse.getAccessToken())
+                                    .then(Mono.defer(() -> tokenService.login(new UserLoginRequest(request.getEmail(), request.getPassword())))))));
+    }
 
-        return tokenService.obtainAdminServiceToken()
-            .flatMap(adminTokenResponse ->
-                keycloakClient.registerUser(request, adminTokenResponse, userRepresentation)
-                    .flatMap(userId ->
-                        keycloakClient.resetUserPassword(userId, keycloakMapper.toCredentialRepresentation(request), adminTokenResponse.getAccessToken())
-                            .then(Mono.defer(() -> tokenService.login(new UserLoginRequest(request.getEmail(), request.getPassword()))))));
+    private KeycloakUserRepresentation createRepresentation(
+        IndividualWriteDto request,
+        String id
+    ) {
+        return keycloakMapper.toUserRepresentation(request, id);
     }
 }

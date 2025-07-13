@@ -54,6 +54,8 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${versions["springdocOpenapiStarterWebmvcUiVersion"]}")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
+    implementation("io.github.openfeign:feign-micrometer:13.6")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     compileOnly("org.projectlombok:lombok")
     compileOnly("org.mapstruct:mapstruct:${versions["mapstructVersion"]}")
@@ -91,14 +93,7 @@ tasks.withType<Test> {
 
 val openApiDir = file("$rootDir/openapi")
 
-val foundSpecifications = findApiYamlFiles(openApiDir)
-
-fun findApiYamlFiles(directory: File): Array<File> {
-    return directory.listFiles { file ->
-        file.isFile && file.name.matches(Regex(".*-api\\.ya?ml$", RegexOption.IGNORE_CASE))
-    } ?: emptyArray()
-}
-
+val foundSpecifications = openApiDir.listFiles { f -> f.extension in listOf("yaml", "yml") } ?: emptyArray()
 logger.lifecycle("Found ${foundSpecifications.size} specifications: " + foundSpecifications.joinToString { it.name })
 
 foundSpecifications.forEach { specFile ->
@@ -141,9 +136,12 @@ fun getAbsolutePath(nameWithoutExtension: String): Provider<String> {
 }
 
 fun defineJavaPackageName(name: String): String {
-     val beforeDash = name.substringBefore('-')
-     val match = Regex("^[a-z]+").find(beforeDash)
-     return match?.value ?: beforeDash.lowercase()
+    val withoutApi = name.removeSuffix("-api")
+
+    return withoutApi
+        .split('-')
+        .filter { it.isNotBlank() }
+        .joinToString(".") { it.lowercase() }
 }
 
 

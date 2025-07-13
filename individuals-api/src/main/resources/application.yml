@@ -1,3 +1,6 @@
+server:
+  port: 8091
+
 application:
   keycloak:
     serverUrl: ${KEYCLOAK_URL:http://localhost:8080}
@@ -28,8 +31,9 @@ spring:
         jwt:
           issuer-uri: ${application.keycloak.serverUrl}/realms/${application.keycloak.realm}
 
-server:
-  port: 8091
+persons:
+  name: localhost
+  url: ${KEYCLOAK_URL:http://localhost:8092}
 
 logging:
   config: "classpath:logback.xml"
