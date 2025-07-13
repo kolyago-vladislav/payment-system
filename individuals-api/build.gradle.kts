@@ -40,6 +40,7 @@ repositories {
 dependencyManagement {
     imports {
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.0.0")
+        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.15.0")
     }
 }
 
@@ -78,6 +79,13 @@ dependencies {
 
 	implementation("javax.validation:validation-api:${versions["javaxValidationApiVersion"]}")
 	implementation("javax.annotation:javax.annotation-api:${versions["javaxAnnotationApiVersion"]}")
+
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+    implementation("io.micrometer:micrometer-observation")
+    implementation("io.micrometer:micrometer-tracing")
+    implementation("io.micrometer:micrometer-tracing-bridge-otel")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    implementation ("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
 
 }
 
