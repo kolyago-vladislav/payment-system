@@ -89,23 +89,6 @@ paths:
         '200':
           description: Successfully deleted
 
-  /persons/{id}/hard:
-    delete:
-      summary: soft delete person by id
-      operationId: "hardDelete"
-      tags:
-        - Person
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Successfully deleted
-
 components:
   schemas:
     IndividualWriteResponseDto:
@@ -114,9 +97,6 @@ components:
       properties:
         id:
           type: string
-
-
-
     IndividualDto:
       type: object
       required: [

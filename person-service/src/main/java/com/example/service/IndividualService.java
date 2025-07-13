@@ -58,6 +58,7 @@ public class IndividualService {
 
     @Transactional
     public void softDelete(UUID id) {
+        log.info("Individual[id={}] was successfully soft deleted", id);
         repository.softDelete(id);
     }
 
@@ -66,7 +67,7 @@ public class IndividualService {
         var individual = repository.findById(id)
             .orElseThrow(() -> new PersonException("Individual not found by uuid=[%s]", id));
 
-        log.info("Individual[id={}] was successfully deleted", id);
+        log.info("Individual[id={}] was successfully hard deleted", id);
 
         repository.delete(individual);
     }

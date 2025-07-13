@@ -9,15 +9,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.person.api.PersonsApi;
+import com.example.person.api.PersonApi;
 import com.example.person.dto.IndividualDto;
 import com.example.person.dto.IndividualWriteDto;
 import com.example.person.dto.IndividualWriteResponseDto;
 import com.example.service.IndividualService;
 
-@RestController("v1")
+@RestController
 @RequiredArgsConstructor
-public class IndividualController implements PersonsApi {
+public class IndividualController implements PersonApi {
 
     private final IndividualService individualService;
 

@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 
 import com.example.individual.api.AuthApi;
+import com.example.individual.dto.IndividualWriteDto;
 import com.example.individual.dto.TokenRefreshRequest;
 import com.example.individual.dto.TokenResponse;
 import com.example.individual.dto.UserInfoResponse;
 import com.example.individual.dto.UserLoginRequest;
-import com.example.individual.dto.IndividualWriteDto;
 import com.example.service.TokenService;
 import com.example.service.UserService;
 

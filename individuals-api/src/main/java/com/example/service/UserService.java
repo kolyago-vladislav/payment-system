@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.example.client.KeycloakClient;
+import com.example.dto.KeycloakCredentialRepresentation;
 import com.example.dto.KeycloakUserRepresentation;
 import com.example.exception.IndividualException;
 import com.example.individual.dto.IndividualWriteDto;
@@ -62,11 +63,21 @@ public class UserService {
             .flatMap(writeResponseDto ->
                 tokenService.obtainAdminServiceToken()
                     .flatMap(adminTokenResponse ->
-                        keycloakClient.registerUser(request, adminTokenResponse, createRepresentation(request, writeResponseDto.getId()))
+                        keycloakClient
+                            .registerUser(request, adminTokenResponse, createRepresentation(request, writeResponseDto.getId()))
                             .flatMap(userId ->
-                                keycloakClient.resetUserPassword(
-                                        userId, keycloakMapper.toCredentialRepresentation(request), adminTokenResponse.getAccessToken())
-                                    .then(Mono.defer(() -> tokenService.login(new UserLoginRequest(request.getEmail(), request.getPassword())))))));
+                                keycloakClient
+                                    .resetUserPassword(userId, toCredentialRepresentation(request), adminTokenResponse.getAccessToken())
+                                    .then(Mono.defer(() -> tokenService.login(new UserLoginRequest(request.getEmail(), request.getPassword()))))))
+                    .onErrorResume(throwable ->
+                        personService
+                            .hardDelete(writeResponseDto.getId())
+                            .then(Mono.error(throwable)))
+            );
+    }
+
+    private KeycloakCredentialRepresentation toCredentialRepresentation(IndividualWriteDto request) {
+        return keycloakMapper.toCredentialRepresentation(request);
     }
 
     private KeycloakUserRepresentation createRepresentation(

@@ -102,12 +102,12 @@ foundSpecifications.forEach { specFile ->
 
     val taskName = buildTaskName(specFile.nameWithoutExtension)
     logger.lifecycle("Register task $taskName from ${outDir.get()}")
-    val basePackage = "com.example.${packageName}"
+    val basePackage = "com.example.individual"
 
     tasks.register(taskName, GenerateTask::class) {
         generatorName.set("spring")
         inputSpec.set(specFile.absolutePath)
-        outputDir.set(outDir)
+        outputDir.set(layout.buildDirectory.dir("generated-sources/openapi/payment-system").map { it.asFile.absolutePath })
 
         configOptions.set(
             mapOf(
@@ -158,10 +158,8 @@ fun buildTaskName(name: String): String {
 val withoutExtensionNames = foundSpecifications.map { it.nameWithoutExtension }
 
 sourceSets.named("main") {
-    withoutExtensionNames.forEach { name ->
-        logger.lifecycle("generated-sources/openapi/$name/src/main/java")
-        java.srcDir(layout.buildDirectory.dir("generated-sources/openapi/$name/src/main/java"))
-    }
+    logger.lifecycle("generated-sources/openapi/payment-system/src/main/java")
+    java.srcDir(layout.buildDirectory.dir("generated-sources/openapi/payment-system/src/main/java"))
 }
 
 tasks.register("generateAllOpenApi") {

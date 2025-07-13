@@ -7,7 +7,7 @@ servers:
   - url: http://localhost:8081/v1
 
 paths:
-  /persons:
+  /person/v1/persons:
     post:
       summary: Регистрация пользователя
       operationId: "registration"
@@ -27,7 +27,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/IndividualWriteResponseDto'
 
-  /persons/email/{email}:
+  /person/v1/persons/email/{email}:
     get:
       summary: Get person by email
       operationId: "findByEmail"
@@ -48,7 +48,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/IndividualDto'
 
-  /persons/{id}:
+  /person/v1/persons/{id}:
     get:
       summary: Get person by id
       operationId: "findById"
@@ -109,7 +109,7 @@ paths:
         '200':
           description: Successfully deleted
 
-  /persons/{id}/hard:
+  /person/v1/persons/{id}/hard:
     delete:
       summary: soft delete person by id
       operationId: "hardDelete"
