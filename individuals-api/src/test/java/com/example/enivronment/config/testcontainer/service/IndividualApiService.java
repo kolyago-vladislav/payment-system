@@ -6,10 +6,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.individual.dto.IndividualWriteDto;
 import com.example.individual.dto.TokenResponse;
 import com.example.individual.dto.UserInfoResponse;
 import com.example.individual.dto.UserLoginRequest;
-import com.example.individual.dto.UserRegistrationRequest;
 
 import static org.springframework.http.HttpMethod.GET;
 
@@ -24,7 +24,7 @@ public class IndividualApiService {
         this.url = "http://localhost:" + port;
     }
 
-    public TokenResponse register(UserRegistrationRequest request) {
+    public TokenResponse register(IndividualWriteDto request) {
         return restTemplate.postForObject(url + "/v1/auth/registration", request, TokenResponse.class);
     }
 

@@ -14,7 +14,7 @@ import com.example.individual.dto.TokenRefreshRequest;
 import com.example.individual.dto.TokenResponse;
 import com.example.individual.dto.UserInfoResponse;
 import com.example.individual.dto.UserLoginRequest;
-import com.example.individual.dto.UserRegistrationRequest;
+import com.example.individual.dto.IndividualWriteDto;
 import com.example.service.TokenService;
 import com.example.service.UserService;
 
@@ -53,7 +53,7 @@ public class AuthController implements AuthApi {
 
     @Override
     public Mono<ResponseEntity<TokenResponse>> registration(
-        Mono<UserRegistrationRequest> userRegistrationRequest,
+        Mono<IndividualWriteDto> userRegistrationRequest,
         ServerWebExchange exchange
     ) {
         return userRegistrationRequest

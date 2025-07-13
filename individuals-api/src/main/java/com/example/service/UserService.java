@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 
 import com.example.client.KeycloakClient;
 import com.example.exception.IndividualException;
+import com.example.individual.dto.IndividualWriteDto;
 import com.example.individual.dto.TokenResponse;
 import com.example.individual.dto.UserInfoResponse;
 import com.example.individual.dto.UserLoginRequest;
-import com.example.individual.dto.UserRegistrationRequest;
 import com.example.mapper.KeycloakMapper;
 
 
@@ -57,7 +57,7 @@ public class UserService {
         return Mono.error(new IndividualException("Can not get current user info: Invalid principal"));
     }
 
-    public Mono<TokenResponse> register(UserRegistrationRequest request) {
+    public Mono<TokenResponse> register(IndividualWriteDto request) {
         var userRepresentation = keycloakMapper.toUserRepresentation(request);
 
         return tokenService.obtainAdminServiceToken()

@@ -91,7 +91,14 @@ tasks.withType<Test> {
 
 val openApiDir = file("$rootDir/openapi")
 
-val foundSpecifications = openApiDir.listFiles { f -> f.extension in listOf("yaml", "yml") } ?: emptyArray()
+val foundSpecifications = findApiYamlFiles(openApiDir)
+
+fun findApiYamlFiles(directory: File): Array<File> {
+    return directory.listFiles { file ->
+        file.isFile && file.name.matches(Regex(".*-api\\.ya?ml$", RegexOption.IGNORE_CASE))
+    } ?: emptyArray()
+}
+
 logger.lifecycle("Found ${foundSpecifications.size} specifications: " + foundSpecifications.joinToString { it.name })
 
 foundSpecifications.forEach { specFile ->

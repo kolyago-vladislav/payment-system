@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 
 import com.example.dto.KeycloakCredentialRepresentation;
 import com.example.dto.KeycloakUserRepresentation;
-import com.example.individual.dto.UserRegistrationRequest;
+import com.example.individual.dto.IndividualWriteDto;
 
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
@@ -18,12 +18,12 @@ public abstract class KeycloakMapper {
     @Mapping(target = "value", source = "password")
     @Mapping(target = "type", constant = "password")
     @Mapping(target = "temporary", constant = "false")
-    public abstract KeycloakCredentialRepresentation toCredentialRepresentation(UserRegistrationRequest request);
+    public abstract KeycloakCredentialRepresentation toCredentialRepresentation(IndividualWriteDto request);
 
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "username", source = "email")
     @Mapping(target = "email", source = "email")
     @Mapping(target = "enabled", constant = "true")
     @Mapping(target = "emailVerified", constant = "true")
-    public abstract KeycloakUserRepresentation toUserRepresentation(UserRegistrationRequest request);
+    public abstract KeycloakUserRepresentation toUserRepresentation(IndividualWriteDto request);
 }

@@ -18,7 +18,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRegistrationRequest'
+              $ref: './common-components.yaml#/components/schemas/IndividualWriteDto'
       responses:
         '201':
           description: Успешная регистрация
@@ -127,18 +127,6 @@ components:
       bearerFormat: JWT
 
   schemas:
-    UserRegistrationRequest:
-      type: object
-      required: [email, password, confirm_password]
-      properties:
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-        confirm_password:
-          type: string
-
     UserLoginRequest:
       type: object
       required: [email, password]
