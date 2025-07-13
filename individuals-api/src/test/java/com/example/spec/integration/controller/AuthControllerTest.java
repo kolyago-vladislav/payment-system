@@ -2,8 +2,8 @@ package com.example.spec.integration.controller;
 
 import org.junit.jupiter.api.Test;
 
-import com.example.dto.UserLoginRequest;
-import com.example.dto.UserRegistrationRequest;
+import com.example.individual.dto.UserLoginRequest;
+import com.example.individual.dto.UserRegistrationRequest;
 import com.example.spec.integration.LifecycleSpecification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +53,7 @@ class AuthControllerTest extends LifecycleSpecification {
 
 	private UserRegistrationRequest buildUserRegistrationRequest() {
 		var request = new UserRegistrationRequest();
-		request.setEmail("newUser@gmail.com");
+		request.setEmail("newuser@gmail.com");
 		request.setPassword("password");
 		request.setConfirmPassword("password");
 		return request;
@@ -61,7 +61,7 @@ class AuthControllerTest extends LifecycleSpecification {
 
 	private UserLoginRequest buildUserLoginRequest() {
 		var request = new UserLoginRequest();
-		request.setEmail("newUser@gmail.com");
+		request.setEmail("newuser@gmail.com");
 		request.setPassword("password");
 		return request;
 	}

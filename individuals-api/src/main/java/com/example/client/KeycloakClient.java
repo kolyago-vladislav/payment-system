@@ -20,11 +20,11 @@ import com.example.config.property.KeycloakProperties;
 import com.example.dto.KeycloakAccessTokenResponse;
 import com.example.dto.KeycloakCredentialRepresentation;
 import com.example.dto.KeycloakUserRepresentation;
-import com.example.dto.TokenRefreshRequest;
-import com.example.dto.TokenResponse;
-import com.example.dto.UserLoginRequest;
-import com.example.dto.UserRegistrationRequest;
 import com.example.exception.IndividualException;
+import com.example.individual.dto.TokenRefreshRequest;
+import com.example.individual.dto.TokenResponse;
+import com.example.individual.dto.UserLoginRequest;
+import com.example.individual.dto.UserRegistrationRequest;
 import com.example.util.UserIdExtractor;
 
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.CLIENT_ID;

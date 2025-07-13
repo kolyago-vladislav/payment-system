@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.client.KeycloakClient;
 import com.example.config.property.KeycloakProperties;
-import com.example.dto.TokenRefreshRequest;
-import com.example.dto.TokenResponse;
-import com.example.dto.UserLoginRequest;
+import com.example.individual.dto.TokenRefreshRequest;
+import com.example.individual.dto.TokenResponse;
+import com.example.individual.dto.UserLoginRequest;
 import com.example.mapper.TokenResponseMapper;
 
 @Slf4j

@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 
-import com.example.api.AuthApi;
-import com.example.dto.TokenRefreshRequest;
-import com.example.dto.TokenResponse;
-import com.example.dto.UserInfoResponse;
-import com.example.dto.UserLoginRequest;
-import com.example.dto.UserRegistrationRequest;
+import com.example.individual.api.AuthApi;
+import com.example.individual.dto.TokenRefreshRequest;
+import com.example.individual.dto.TokenResponse;
+import com.example.individual.dto.UserInfoResponse;
+import com.example.individual.dto.UserLoginRequest;
+import com.example.individual.dto.UserRegistrationRequest;
 import com.example.service.TokenService;
 import com.example.service.UserService;
 

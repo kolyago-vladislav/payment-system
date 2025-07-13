@@ -6,10 +6,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.example.dto.TokenResponse;
-import com.example.dto.UserInfoResponse;
-import com.example.dto.UserLoginRequest;
-import com.example.dto.UserRegistrationRequest;
+import com.example.individual.dto.TokenResponse;
+import com.example.individual.dto.UserInfoResponse;
+import com.example.individual.dto.UserLoginRequest;
+import com.example.individual.dto.UserRegistrationRequest;
 
 import static org.springframework.http.HttpMethod.GET;
 
