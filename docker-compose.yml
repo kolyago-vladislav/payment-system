@@ -29,25 +29,102 @@ services:
     volumes:
       - ./flyway:/flyway/sql
 
+  individuals-api-builder:
+    image: gradle:8.14.0-jdk24
+    container_name: individuals-api-builder
+    volumes:
+      - ./individuals-api:/app
+      - artifacts:/artifacts
+    working_dir: /app
+    command: sh -c "gradle clean build -x test && cp build/libs/*.jar /artifacts/"
+    environment:
+      NEXUS_URL: http://nexus:8081/repository/maven-snapshots/
+    depends_on:
+      common:
+        condition: service_completed_successfully
+    restart: "no"
 
   individuals-api:
-    build: ./individuals-api
+    image: eclipse-temurin:24-jdk-alpine
     container_name: individuals-api
-    ports:
-      - "8091:8091"
     environment:
       KEYCLOAK_URL: http://keycloak:8080
       SPRING_PROFILES_ACTIVE: docker
+      PERSONS_API_HOST: persons-api
+      PERSONS_API_URL: http://persons-api:8092
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    ports:
+      - "8091:8091"
+    volumes:
+      - artifacts:/app
+    working_dir: /app
+    entrypoint: [ "java", "-jar", "individuals-api-0.0.1-SNAPSHOT.jar" ]
     depends_on:
-      grafana:
-        condition: service_healthy
+      individuals-api-builder:
+        condition: service_completed_successfully
       keycloak-healthcheck:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8091/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8091/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  persons-api-builder:
+    image: gradle:8.14.0-jdk24
+    container_name: persons-api-builder
+    volumes:
+      - ./person-service:/app
+      - artifacts:/artifacts
+    working_dir: /app
+    command: sh -c "gradle clean build -x test && cp build/libs/*.jar /artifacts/"
+    environment:
+      NEXUS_URL: http://nexus:8081/repository/maven-snapshots/
+    depends_on:
+      common:
+        condition: service_completed_successfully
+    restart: "no"
+
+
+  persons-api:
+    image: eclipse-temurin:24-jdk-alpine
+    container_name: persons-api
+    ports:
+      - "8092:8092"
+    volumes:
+      - artifacts:/app
+    working_dir: /app
+    entrypoint: [ "java", "-jar", "person-service-0.0.1-SNAPSHOT.jar" ]
+    environment:
+      POSTGRES_HOST: postgres
+      SPRING_PROFILES_ACTIVE: docker
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    depends_on:
+      postgres:
+        condition: service_healthy
+      persons-api-builder:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8091/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  common:
+    build:
+      context: ./common
+      dockerfile: Dockerfile
+    container_name: common
+    environment:
+      NEXUS_URL: "http://nexus:8081/repository/maven-snapshots/"
+      NEXUS_USERNAME: admin
+      NEXUS_PASSWORD: admin
+      ARTEFACT_VERSION: "1.0.0-SNAPSHOT"
+    depends_on:
+      nexus-change-password:
+        condition: service_completed_successfully
+    command: gradle clean build publish --no-daemon
+    restart: "no"
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
@@ -120,6 +197,8 @@ services:
         condition: service_healthy
       loki:
         condition: service_healthy
+      tempo:
+        condition: service_started
       alloy:
         condition: service_started
     environment:
@@ -172,22 +251,6 @@ services:
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
 
-
-  common:
-    build:
-      context: ./common
-      dockerfile: Dockerfile
-    container_name: common
-    environment:
-      NEXUS_URL: "http://nexus:8081/repository/maven-snapshots/"
-      NEXUS_USERNAME: admin
-      NEXUS_PASSWORD: admin
-      ARTEFACT_VERSION: "1.0.0-SNAPSHOT"
-    depends_on:
-      nexus-change-password:
-        condition: service_completed_successfully
-    command: gradle clean build publish --no-daemon
-
   nexus:
     image: sonatype/nexus3:3.76.0
     ports:
@@ -224,6 +287,7 @@ services:
       - "3200:3200"
 
 volumes:
+  artifacts:
   tempo_data:
   nexus-data:
   loki_data:

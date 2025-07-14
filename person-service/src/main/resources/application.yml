@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5434/person
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5434/person
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -48,12 +48,14 @@ management:
       probability: 1.0
 
 otel:
+  exporter:
+    otlp:
+      endpoint:
+        ${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}
+      protocol: http/protobuf
   logs:
     exporter: none
-  tracing:
-    otlp:
-      endpoint: http://localhost:4318
-      protocol: http/protobuf
+
 logging:
   config: "classpath:logback-local.xml"
 

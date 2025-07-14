@@ -32,8 +32,8 @@ spring:
           issuer-uri: ${application.keycloak.serverUrl}/realms/${application.keycloak.realm}
 
 person:
-  name: localhost
-  url: ${KEYCLOAK_URL:http://localhost:8092}
+  name: ${PERSONS_API_HOST:localhost}
+  url: ${PERSONS_API_URL:http://localhost:8092}
 
 logging:
   config: "classpath:logback.xml"
@@ -56,9 +56,10 @@ management:
       probability: 1.0
 
 otel:
+  exporter:
+    otlp:
+      endpoint:
+        ${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}
+      protocol: http/protobuf
   logs:
     exporter: none
-  tracing:
-    otlp:
-      endpoint: http://localhost:4318
-      protocol: http/protobuf
