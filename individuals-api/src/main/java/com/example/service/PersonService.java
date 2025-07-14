@@ -24,12 +24,14 @@ public class PersonService {
     private final PersonApiClient personApiClient;
     private final PersonMapper personMapper;
 
+    @WithSpan(value = "personService.findById")
     public Mono<IndividualDto> findById(UUID id) {
         return Mono.fromCallable(() -> personApiClient.findById(id))
             .map(dto -> personMapper.from(dto.getBody()))
             .subscribeOn(Schedulers.boundedElastic());
     }
 
+    @WithSpan(value = "personService.findByEmail")
     public Mono<IndividualDto> findByEmail(String email) {
         return Mono.fromCallable(() -> personApiClient.findByEmail(email))
             .map(dto -> personMapper.from(dto.getBody()))
@@ -45,6 +47,7 @@ public class PersonService {
             .doOnNext(t -> log.info("Person registered id={}", t.getId()));
     }
 
+    @WithSpan(value = "personService.update")
     public Mono<IndividualWriteResponseDto> update(
         UUID id,
         Mono<IndividualWriteDto> request
@@ -57,11 +60,13 @@ public class PersonService {
                         Mono.justOrEmpty(personMapper.from(responseEntity.getBody()))));
     }
 
+    @WithSpan(value = "personService.hardDelete")
     public Mono<Void> hardDelete(String id) {
         return Mono.fromRunnable(() -> personApiClient.hardDelete(UUID.fromString(id)))
             .subscribeOn(Schedulers.boundedElastic()).then();
     }
 
+    @WithSpan(value = "personService.delete")
     public Mono<Void> delete(UUID id) {
         return Mono.fromRunnable(() -> personApiClient.delete(id))
             .subscribeOn(Schedulers.boundedElastic()).then();

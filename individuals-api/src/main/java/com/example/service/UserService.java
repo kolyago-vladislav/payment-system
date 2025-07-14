@@ -33,6 +33,7 @@ public class UserService {
     private final TokenService tokenService;
     private final KeycloakClient keycloakClient;
 
+    @WithSpan(value = "userService.getCurrentUserInfo")
     public Mono<UserInfoResponse> getCurrentUserInfo() {
         return ReactiveSecurityContextHolder.getContext()
             .map(SecurityContext::getAuthentication)

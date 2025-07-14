@@ -32,6 +32,7 @@ public class TokenService {
             .map(tokenResponseMapper::toTokenResponse);
     }
 
+    @WithSpan(value = "tokenService.refreshToken")
     public Mono<TokenResponse> refreshToken(TokenRefreshRequest tokenRefreshRequest) {
         return keycloakClient.refreshToken(tokenRefreshRequest)
             .doOnNext(r -> log.info("Token was successfully refreshed"))

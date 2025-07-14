@@ -55,6 +55,7 @@ public class KeycloakClient {
         userPasswordResetUrl = userByIdUrl + "/reset-password";
     }
 
+    @WithSpan(value = "keycloakClient.login")
     public Mono<KeycloakAccessTokenResponse> login(UserLoginRequest userLoginRequest) {
         var formData = new LinkedMultiValueMap<String, String>();
         formData.add(GRANT_TYPE, PASSWORD);
@@ -71,6 +72,7 @@ public class KeycloakClient {
             .bodyToMono(KeycloakAccessTokenResponse.class);
     }
 
+    @WithSpan(value = "keycloakClient.refreshToken")
     public Mono<KeycloakAccessTokenResponse> refreshToken(TokenRefreshRequest tokenRefreshRequest) {
         var formData = new LinkedMultiValueMap<String, String>();
         formData.add(GRANT_TYPE, REFRESH_TOKEN);
