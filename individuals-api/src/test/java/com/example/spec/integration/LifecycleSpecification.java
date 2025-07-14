@@ -4,17 +4,18 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.junit.jupiter.api.AfterEach;
-import org.keycloak.OAuth2Constants;
-import org.keycloak.admin.client.KeycloakBuilder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.example.IndividualApiApplication;
-import com.example.config.property.KeycloakProperties;
 import com.example.enivronment.config.testcontainer.TestcontainersApplicationContextInitializer;
-import com.example.enivronment.config.testcontainer.service.IndividualApiService;
+import com.example.enivronment.config.testcontainer.data.DtoCreator;
+import com.example.enivronment.config.testcontainer.service.IndividualApiTestService;
+import com.example.enivronment.config.testcontainer.service.KeycloakApiTestService;
+import com.example.enivronment.config.testcontainer.service.PersonApiTestService;
+import com.example.mapper.PersonMapper;
 
 @Slf4j
 @SpringBootTest(
@@ -25,28 +26,17 @@ import com.example.enivronment.config.testcontainer.service.IndividualApiService
 @Setter(onMethod_ = {@Autowired})
 public abstract class LifecycleSpecification {
 
-    protected IndividualApiService apiService;
-    protected KeycloakProperties keycloakProperties;
+    public static final String PERSON_ID = "3ddcecd5-5004-4a8a-9447-ed110912b7ee";
+    public static final String PERSON_EMAIL = "newuser@gmail.com";
+
+    protected DtoCreator dtoCreator;
+    protected PersonMapper personMapper;
+    protected IndividualApiTestService individualControllerService;
+    protected PersonApiTestService personControllerService;
+    protected KeycloakApiTestService keycloakApiTestService;
 
     @AfterEach
     public void clear() {
-        try(var keycloak = KeycloakBuilder.builder()
-            .serverUrl(keycloakProperties.serverUrl())
-            .realm(keycloakProperties.realm())
-            .username(keycloakProperties.adminEmail())
-            .password(keycloakProperties.adminPassword())
-            .clientId(keycloakProperties.adminClientId())
-            .grantType(OAuth2Constants.PASSWORD)
-            .build()
-        ) {
-            var users = keycloak.realm(keycloakProperties.realm()).users().list();
-
-            for (var user : users) {
-                if (!keycloakProperties.adminEmail().equals(user.getEmail())) {
-                    keycloak.realm(keycloakProperties.realm()).users().delete(user.getId());
-                }
-            }
-        }
-
+        keycloakApiTestService.clear();
     }
 }

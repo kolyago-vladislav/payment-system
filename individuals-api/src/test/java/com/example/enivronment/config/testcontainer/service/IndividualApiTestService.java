@@ -14,12 +14,15 @@ import com.example.individual.dto.UserLoginRequest;
 import static org.springframework.http.HttpMethod.GET;
 
 @Component
-public class IndividualApiService {
+public class IndividualApiTestService {
 
     private final RestTemplate restTemplate;
     private final String url;
 
-    public IndividualApiService(RestTemplate restTemplate, @Value("${server.port}") int  port) {
+    public IndividualApiTestService(RestTemplate restTemplate,
+                                    @Value("${server.port}")
+                                    int port
+    ) {
         this.restTemplate = restTemplate;
         this.url = "http://localhost:" + port;
     }

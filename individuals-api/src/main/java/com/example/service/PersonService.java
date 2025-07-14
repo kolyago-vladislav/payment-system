@@ -8,6 +8,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.individual.dto.IndividualDto;
@@ -41,7 +42,8 @@ public class PersonService {
     @WithSpan("personService.register")
     public Mono<IndividualWriteResponseDto> register(IndividualWriteDto request) {
         return Mono
-            .fromCallable(() -> personApiClient.registration(personMapper.from(request)).getBody())
+            .fromCallable(() -> personApiClient.registration(personMapper.from(request)))
+            .mapNotNull(HttpEntity::getBody)
             .map(personMapper::from)
             .subscribeOn(Schedulers.boundedElastic())
             .doOnNext(t -> log.info("Person registered id={}", t.getId()));

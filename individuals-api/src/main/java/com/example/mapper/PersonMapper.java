@@ -17,6 +17,7 @@ public interface PersonMapper {
     @Mapping(target = "confirmPassword", ignore = true)
     com.example.person.dto.IndividualWriteDto from(IndividualWriteDto dto);
 
+    com.example.person.dto.IndividualDto from(IndividualDto dto);
     IndividualDto from(com.example.person.dto.IndividualDto dto);
 
     IndividualWriteResponseDto from(com.example.person.dto.IndividualWriteResponseDto dto);
