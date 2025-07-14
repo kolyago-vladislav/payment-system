@@ -40,7 +40,7 @@ class PersonControllerTest extends LifecycleSpecification {
         var response = personControllerService.findById(PERSON_ID);
 
         //then
-        assertEquals(dtoCreator.buildIndividualDto(), response);
+        assertEquals(dtoCreator.buildIndividualDtoWithoutPassword(), response);
     }
 
     @Test
@@ -53,7 +53,7 @@ class PersonControllerTest extends LifecycleSpecification {
         var response = personControllerService.findByEmail(PERSON_EMAIL);
 
         //then
-        assertEquals(dtoCreator.buildIndividualDto(), response);
+        assertEquals(dtoCreator.buildIndividualDtoWithoutPassword(), response);
     }
 
     @Test
