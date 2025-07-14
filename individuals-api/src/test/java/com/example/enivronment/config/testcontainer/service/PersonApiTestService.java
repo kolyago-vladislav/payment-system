@@ -68,7 +68,7 @@ public class PersonApiTestService {
         var entity = new HttpEntity<>(individualWriteDto, headers);
 
         return restTemplate.exchange(
-            url,
+            url + "/v1/persons/" + personId,
             HttpMethod.PUT,
             entity,
             IndividualWriteResponseDto.class

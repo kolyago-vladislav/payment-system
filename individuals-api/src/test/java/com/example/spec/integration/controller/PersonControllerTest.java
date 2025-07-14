@@ -60,6 +60,19 @@ class PersonControllerTest extends LifecycleSpecification {
     void shouldUpdateEntity() {
         //when
         Mockito
+            .when(personApiClient.update(UUID.fromString(PERSON_ID), personMapper.from(dtoCreator.buildForUpdate())))
+            .thenReturn(ResponseEntity.ofNullable(new IndividualWriteResponseDto(PERSON_ID)));
+
+        var response = personControllerService.update(PERSON_ID, personMapper.from(dtoCreator.buildForUpdate()));
+
+        //then
+        assertEquals(PERSON_ID, response);
+    }
+
+    @Test
+    void shouldDeleteEntity() {
+        //when
+        Mockito
             .when(personApiClient.delete(UUID.fromString(PERSON_ID)))
             .thenReturn(ResponseEntity.ok().build());
 
