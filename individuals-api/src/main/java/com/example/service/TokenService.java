@@ -1,5 +1,6 @@
 package com.example.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import reactor.core.publisher.Mono;
 
 import lombok.RequiredArgsConstructor;
@@ -23,10 +24,11 @@ public class TokenService {
     private final TokenResponseMapper tokenResponseMapper;
     private final KeycloakClient keycloakClient;
 
+    @WithSpan("tokenService.login")
     public Mono<TokenResponse> login(UserLoginRequest userLoginRequest) {
         return keycloakClient.login(userLoginRequest)
             .doOnNext(t -> log.info("Token was successfully generated for email={}", userLoginRequest.getEmail()))
-            .doOnError(e -> log.warn("Failed to generate token for email={}", userLoginRequest.getEmail(), e))
+            .doOnError(e -> log.error("Failed to generate token for email={}", userLoginRequest.getEmail(), e))
             .map(tokenResponseMapper::toTokenResponse);
     }
 
@@ -41,9 +43,6 @@ public class TokenService {
             keycloakProperties.adminEmail(),
             keycloakProperties.adminPassword()
         );
-
-        log.info("Admin login request was created");
-
         return login(adminLoginRequest);
     }
 }

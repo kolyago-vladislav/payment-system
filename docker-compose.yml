@@ -156,10 +156,9 @@ services:
     container_name: alloy
     user: root
     ports:
-      - "9080:9080"
-    depends_on:
-      loki:
-        condition: service_healthy
+      - "9080:9080"  # HTTP-интерфейс Alloy (по умолчанию)
+      - "4317:4317"   # OTLP gRPC (важно!)
+      - "4318:4318"   # OTLP HTTP (если нужен)
     volumes:
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -172,6 +171,7 @@ services:
       - --server.http.listen-addr=0.0.0.0:9080
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
+
 
   common:
     build:
@@ -213,7 +213,18 @@ services:
       - nexus-data:/nexus-data
       - ./nexus:/scripts:ro
 
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+
 volumes:
+  tempo_data:
   nexus-data:
   loki_data:
   loki_chunks:

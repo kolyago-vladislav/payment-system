@@ -1,5 +1,6 @@
 package com.example.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import reactor.core.publisher.Mono;
 import java.time.ZoneOffset;
 
@@ -58,6 +59,7 @@ public class UserService {
         return Mono.error(new IndividualException("Can not get current user info: Invalid principal"));
     }
 
+    @WithSpan("userService.register")
     public Mono<TokenResponse> register(IndividualWriteDto request) {
         return personService.register(request)
             .flatMap(writeResponseDto ->

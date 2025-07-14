@@ -1,5 +1,6 @@
 package com.example.client;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -84,6 +85,7 @@ public class KeycloakClient {
             .bodyToMono(KeycloakAccessTokenResponse.class);
     }
 
+    @WithSpan(value = "keycloakClient.registerUser")
     public Mono<String> registerUser(
         IndividualWriteDto dto,
         TokenResponse adminTokenResponse,
@@ -94,7 +96,8 @@ public class KeycloakClient {
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + adminTokenResponse.getAccessToken())
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(userRepresentation)
-            .exchangeToMono(this::extractIdFromPath);
+            .exchangeToMono(this::extractIdFromPath)
+            .doOnNext(id -> log.info("User with id={} registered", id));
     }
 
     private Mono<String> extractIdFromPath(ClientResponse response) {
@@ -114,6 +117,7 @@ public class KeycloakClient {
         }
     }
 
+    @WithSpan("keycloakClient.resetUserPassword")
     public Mono<Void> resetUserPassword(
         String userId,
         KeycloakCredentialRepresentation dto,
@@ -126,10 +130,12 @@ public class KeycloakClient {
             .bodyValue(dto)
             .retrieve()
             .toBodilessEntity()
+            .doOnNext(s -> log.info("Reset password request started for userId={}", userId))
             .onErrorResume(e -> executeOnError(userId, adminAccessToken, e))
             .then();
     }
 
+    @WithSpan("keycloakClient.resetUserPassword.executeOnError")
     private Mono<ResponseEntity<Void>> executeOnError(
         String userId,
         String adminAccessToken,

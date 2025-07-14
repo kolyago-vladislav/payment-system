@@ -1,10 +1,12 @@
 package com.example.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,7 @@ import com.example.individual.dto.IndividualWriteResponseDto;
 import com.example.mapper.PersonMapper;
 import com.example.person.api.PersonApiClient;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PersonService {
@@ -33,11 +36,13 @@ public class PersonService {
             .subscribeOn(Schedulers.boundedElastic());
     }
 
+    @WithSpan("personService.register")
     public Mono<IndividualWriteResponseDto> register(IndividualWriteDto request) {
         return Mono
             .fromCallable(() -> personApiClient.registration(personMapper.from(request)).getBody())
             .map(personMapper::from)
-            .subscribeOn(Schedulers.boundedElastic());
+            .subscribeOn(Schedulers.boundedElastic())
+            .doOnNext(t -> log.info("Person registered id={}", t.getId()));
     }
 
     public Mono<IndividualWriteResponseDto> update(
