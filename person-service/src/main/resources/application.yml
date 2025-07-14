@@ -46,10 +46,14 @@ management:
     enabled: true
     sampling:
       probability: 1.0
+
+otel:
+  logs:
+    exporter: none
+  tracing:
     otlp:
       endpoint: http://localhost:4318
       protocol: http/protobuf
-
 logging:
   config: "classpath:logback-local.xml"
 
