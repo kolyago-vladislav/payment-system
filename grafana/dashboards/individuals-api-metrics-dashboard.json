@@ -22,12 +22,12 @@
       "id": 1,
       "targets": [
         {
-          "expr": "sum by (uri, method) (http_server_requests_seconds_count{error=\"none\", uri=~\"^/v1.*\"})",
+          "expr": "sum by (uri, method, job) (http_server_requests_seconds_count{error=\"none\", job=\"individuals-api\", uri!~\"/actuator.*\", uri!~\"UNKNOWN.*\"})",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
       ],
-      "title": "Requests Count per Endpoint",
+      "title": "Individuals api [Requests Count per Endpoint]",
       "type": "timeseries"
     },
     {
@@ -43,12 +43,12 @@
       "id": 2,
       "targets": [
         {
-          "expr": "sum by (uri, method) (http_server_requests_seconds_sum{error=\"none\", uri=~\"^/v1.*\"}) / sum by (uri, method) (http_server_requests_seconds_count{error=\"none\", uri=~\"^/v1.*\"})",
+          "expr": "sum by (uri, method) (http_server_requests_seconds_sum{error=\"none\", job=\"individuals-api\", uri!~\"/actuator.*\", uri!~\"UNKNOWN.*\"}) / sum by (uri, method) (http_server_requests_seconds_count{error=\"none\", job=\"individuals-api\", uri!~\"/actuator.*\", uri!~\"UNKNOWN.*\"})",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
       ],
-      "title": "Average Request Duration per Endpoint",
+      "title": "Individuals service [Average Request Duration per Endpoint]",
       "type": "timeseries"
     },
     {
@@ -64,12 +64,90 @@
       "id": 3,
       "targets": [
         {
-          "expr": "sum by (uri, method, error, outcome) (http_server_requests_seconds_count{outcome != \"SUCCESS\", uri=~\"^/v1.*\"})",
+          "expr": "sum by (uri, method, error, outcome) (http_server_requests_seconds_count{outcome != \"SUCCESS\", job=\"individuals-api\", uri!~\"/actuator.*\"})",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
       ],
-      "title": "Application Errors",
+      "title": "Individuals service [Application Errors]",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "requests",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 4,
+      "targets": [
+        {
+          "expr": "sum by (uri, method, job) (http_server_requests_seconds_count{error=\"none\", job=\"persons-api\", uri!~\"/actuator.*\", uri!~\"UNKNOWN.*\"})",
+          "legendFormat": "{{method}} {{uri}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Persons service [Requests Count per Endpoint]",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "sum by (uri, method) (http_server_requests_seconds_sum{error=\"none\", job=\"persons-api\", uri!~\"/actuator.*\", uri!~\"UNKNOWN.*\"}) / sum by (uri, method) (http_server_requests_seconds_count{error=\"none\", job=\"persons-api\", uri!~\"/actuator.*\", uri!~\"UNKNOWN.*\"})",
+          "legendFormat": "{{method}} {{uri}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Persons service [Average Request Duration per Endpoint]",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "requests",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 6,
+      "targets": [
+        {
+          "expr": "sum by (uri, method, error, outcome) (http_server_requests_seconds_count{outcome != \"SUCCESS\", job=\"persons-api\", uri!~\"/actuator.*\"})",
+          "legendFormat": "{{method}} {{uri}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Persons service [Application Errors]",
       "type": "timeseries"
     }
   ],

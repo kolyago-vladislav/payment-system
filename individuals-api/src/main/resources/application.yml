@@ -63,3 +63,6 @@ otel:
       protocol: http/protobuf
   logs:
     exporter: none
+  metrics:
+    exporter: none
+

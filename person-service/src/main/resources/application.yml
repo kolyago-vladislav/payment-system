@@ -55,6 +55,8 @@ otel:
       protocol: http/protobuf
   logs:
     exporter: none
+  metrics:
+    exporter: none
 
 logging:
   config: "classpath:logback-local.xml"
