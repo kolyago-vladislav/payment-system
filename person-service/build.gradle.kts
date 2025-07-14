@@ -12,11 +12,6 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor(0, "seconds")
-}
-
-
 group = "com.example"
 version = "0.0.1-SNAPSHOT"
 
@@ -81,6 +76,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:1.19.3")
     testImplementation("org.testcontainers:postgresql:1.19.3")
     testImplementation("org.testcontainers:junit-jupiter:1.19.3")
+
 
     implementation("javax.validation:validation-api:$javaxValidationApiVersion")
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
