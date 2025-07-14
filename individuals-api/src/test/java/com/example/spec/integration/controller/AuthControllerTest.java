@@ -4,9 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.example.person.api.PersonApiClient;
 import com.example.person.dto.IndividualWriteResponseDto;
 import com.example.spec.integration.LifecycleSpecification;
 
@@ -15,9 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 class AuthControllerTest extends LifecycleSpecification {
-
-	@MockitoBean
-	private PersonApiClient personApiClient;
 
 	@Test
 	void shouldCreateNewUserAndReturnAccessToken() {
@@ -45,11 +40,17 @@ class AuthControllerTest extends LifecycleSpecification {
 	void shouldLoginAndReturnAccessToken() {
 		//given
 		var request = dtoCreator.buildIndividualWriteDto();
+
+		Mockito
+			.when(personApiClient.registration(personMapper.from(request)))
+			.thenReturn(ResponseEntity.ofNullable(new IndividualWriteResponseDto(PERSON_ID)));
+
 		individualControllerService.register(request);
 
 		//when
 		var response = individualControllerService.login(dtoCreator.buildUserLoginRequest());
 		var meResponse = individualControllerService.getMe(response.getAccessToken());
+
 		//then
 		assertNotNull(response, "Response must not be null");
 		assertNotNull(response.getAccessToken(), "Access token must not be null");
@@ -60,7 +61,12 @@ class AuthControllerTest extends LifecycleSpecification {
 	@Test
 	void shouldReturnUserInfo() {
 		//given
-		var registrationResponse = individualControllerService.register(dtoCreator.buildIndividualWriteDto());
+		var individualWriteDto = dtoCreator.buildIndividualWriteDto();
+		Mockito
+			.when(personApiClient.registration(personMapper.from(individualWriteDto)))
+			.thenReturn(ResponseEntity.ofNullable(new IndividualWriteResponseDto(PERSON_ID)));
+
+		var registrationResponse = individualControllerService.register(individualWriteDto);
 
 		//when
 		var meResponse = individualControllerService.getMe(registrationResponse.getAccessToken());

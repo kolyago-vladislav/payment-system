@@ -12,6 +12,13 @@ import static com.example.spec.integration.LifecycleSpecification.PERSON_EMAIL;
 @Component
 public class DtoCreator {
 
+    public IndividualDto buildIndividualDtoWithoutPassword() {
+        var dto = buildIndividualDto();
+        dto.setPassword(null);
+        dto.setConfirmPassword(null);
+        return dto;
+    }
+
     public IndividualDto buildIndividualDto() {
         var address = new AddressDto();
         address.setAddress("Minskaya 15, d.8, kv.5");

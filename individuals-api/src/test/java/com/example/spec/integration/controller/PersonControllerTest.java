@@ -8,18 +8,13 @@ import org.mockito.Mockito;
 
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.example.person.api.PersonApiClient;
 import com.example.person.dto.IndividualWriteResponseDto;
 import com.example.spec.integration.LifecycleSpecification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PersonControllerTest extends LifecycleSpecification {
-
-    @MockitoBean
-    private PersonApiClient personApiClient;
 
     @BeforeEach
     void setUp() {
@@ -40,7 +35,7 @@ class PersonControllerTest extends LifecycleSpecification {
         var response = personControllerService.findById(PERSON_ID);
 
         //then
-        assertEquals(dtoCreator.buildIndividualDtoWithoutPassword(), response);
+        assertEquals(dtoCreator.buildIndividualDto(), response);
     }
 
     @Test
@@ -53,7 +48,7 @@ class PersonControllerTest extends LifecycleSpecification {
         var response = personControllerService.findByEmail(PERSON_EMAIL);
 
         //then
-        assertEquals(dtoCreator.buildIndividualDtoWithoutPassword(), response);
+        assertEquals(dtoCreator.buildIndividualDto(), response);
     }
 
     @Test

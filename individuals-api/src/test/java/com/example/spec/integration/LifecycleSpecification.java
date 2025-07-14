@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.example.IndividualApiApplication;
 import com.example.enivronment.config.testcontainer.TestcontainersApplicationContextInitializer;
@@ -16,6 +17,7 @@ import com.example.enivronment.config.testcontainer.service.IndividualApiTestSer
 import com.example.enivronment.config.testcontainer.service.KeycloakApiTestService;
 import com.example.enivronment.config.testcontainer.service.PersonApiTestService;
 import com.example.mapper.PersonMapper;
+import com.example.person.api.PersonApiClient;
 
 @Slf4j
 @SpringBootTest(
@@ -34,6 +36,9 @@ public abstract class LifecycleSpecification {
     protected IndividualApiTestService individualControllerService;
     protected PersonApiTestService personControllerService;
     protected KeycloakApiTestService keycloakApiTestService;
+
+    @MockitoBean
+    protected PersonApiClient personApiClient;
 
     @AfterEach
     public void clear() {
