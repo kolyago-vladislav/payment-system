@@ -1,0 +1,48 @@
+@startuml
+title IndividualService.register() Sequence Diagram
+
+actor Client
+participant IndividualService
+participant PersonService
+participant KeycloakClient
+
+Client -> IndividualService : POST /v1/auth/registration (IndividualWriteDto)
+activate IndividualService
+
+IndividualService -> PersonService :POST /person/v1/persons (IndividualWriteDto)
+activate PersonService
+PersonService --> IndividualService : personId
+deactivate PersonService
+
+IndividualService -> KeycloakClient : obtainAdminServiceToken()
+activate KeycloakClient
+IndividualService --> KeycloakClient : adminTokenResponse
+deactivate KeycloakClient
+
+IndividualService -> KeycloakClient : registerUser(adminToken, userLogin, personId)
+activate KeycloakClient
+KeycloakClient --> IndividualService : keycloakId
+deactivate KeycloakClient
+
+IndividualService -> KeycloakClient : resetUserPassword(keycloakId, userPassword)
+activate KeycloakClient
+KeycloakClient --> IndividualService : OK
+deactivate KeycloakClient
+
+IndividualService -> KeycloakClient : login(email, password)
+activate KeycloakClient
+KeycloakClient --> IndividualService : TokenResponse
+deactivate KeycloakClient
+
+IndividualService --> Client : TokenResponse
+deactivate IndividualService
+
+... Error branch when error occurs inside registerUser or resetUserPassword ...
+
+IndividualService -> PersonService : DELETE /person/v1/persons/{id}/hard
+activate PersonService
+PersonService --> IndividualService : OK
+deactivate PersonService
+
+IndividualService --> Client : error
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+title IndividualService.refreshToken() Sequence Diagram
+
+actor Client
+participant IndividualService
+participant KeycloakClient
+
+Client -> IndividualService : refreshToken(tokenRefreshRequest)
+activate IndividualService
+
+IndividualService -> KeycloakClient : refreshToken(tokenRefreshRequest)
+activate KeycloakClient
+KeycloakClient --> IndividualService : tokenResponse
+deactivate KeycloakClient
+
+IndividualService --> Client : tokenResponse
+deactivate IndividualService
+
+@enduml

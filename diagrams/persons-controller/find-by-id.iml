@@ -1,0 +1,20 @@
+@startuml
+title IndividualService.findById Sequence Diagram
+
+actor Client
+participant IndividualService
+participant PersonService
+
+Client -> IndividualService : findById(id)
+
+activate IndividualService
+IndividualService -> PersonService : findById(id)
+
+activate PersonService
+PersonService --> IndividualService : IndividualDto
+deactivate PersonService
+
+IndividualService --> Client : IndividualDto
+deactivate IndividualService
+
+@enduml
