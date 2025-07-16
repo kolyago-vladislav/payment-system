@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.individual.dto.IndividualDto;
+import com.example.individual.dto.IndividualPageDto;
 import com.example.person.dto.IndividualWriteDto;
 import com.example.person.dto.IndividualWriteResponseDto;
 
@@ -34,8 +35,17 @@ public class PersonApiTestService {
         return findBy(url + "/persons/" + personId);
     }
 
-    public IndividualDto findByEmail(String email) {
-        return findBy(url + "/persons/email/" + email);
+    public IndividualPageDto findAll(String email) {
+        var headers = setUpAdminToken();
+
+        var entity = new HttpEntity<>(headers);
+
+        return restTemplate.exchange(
+            url + "/persons?email=" + email,
+            HttpMethod.GET,
+            entity,
+            IndividualPageDto.class
+        ).getBody();
     }
 
     private IndividualDto findBy(String url) {
