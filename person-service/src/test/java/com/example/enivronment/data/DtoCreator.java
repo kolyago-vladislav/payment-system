@@ -12,13 +12,6 @@ import static com.example.spec.integration.LifecycleSpecification.PERSON_EMAIL;
 @Component
 public class DtoCreator {
 
-    public IndividualDto buildIndividualDtoWithoutPassword() {
-        var dto = buildIndividualDto();
-        dto.setPassword(null);
-        dto.setConfirmPassword(null);
-        return dto;
-    }
-
     public IndividualDto buildIndividualDto() {
         var address = new AddressDto();
         address.setAddress("Minskaya 15, d.8, kv.5");
@@ -30,8 +23,6 @@ public class DtoCreator {
         dto.setFirstName("Vlad");
         dto.setLastName("Kaliaha");
         dto.setEmail(PERSON_EMAIL);
-        dto.setPassword("password");
-        dto.setConfirmPassword("password");
         dto.passportNumber("BY24003");
         dto.phoneNumber("+375298082919");
         dto.setAddress(address);
@@ -50,8 +41,6 @@ public class DtoCreator {
         request.setFirstName("Vlad");
         request.setLastName("Kaliaha");
         request.setEmail(PERSON_EMAIL);
-        request.setPassword("password");
-        request.setConfirmPassword("password");
         request.passportNumber("BY24003");
         request.phoneNumber("+375298082919");
         request.setAddress(address);

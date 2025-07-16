@@ -1,6 +1,6 @@
 package com.example.repository;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,9 +14,12 @@ public interface IndividualRepository extends JpaRepository<Individual, UUID> {
 
     @Query("""
         FROM Individual i
-        WHERE i.user.email = :email
+            WHERE (:emails IS NULL OR i.user.email IN :emails)
     """)
-    Optional<Individual> findByEmail(String email);
+    List<Individual> findAll(
+        @Param("emails")
+        List<String> emails
+    );
 
     @Modifying
     @Query("""

@@ -26,27 +26,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IndividualWriteResponseDto'
-
-  /person/v1/persons/email/{email}:
     get:
-      summary: Get person by email
-      operationId: "findByEmail"
+      summary: Get persons
+      operationId: "findAll"
       tags:
         - Person
       parameters:
-        - in: path
+        - in: query
           name: email
-          required: true
+          required: false
           schema:
-            type: string
-            format: email
+            type: array
+            items:
+              type: string
+              format: email
       responses:
         '201':
           description: Successfully found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IndividualDto'
+                $ref: '#/components/schemas/IndividualPageDto'
 
   /person/v1/persons/{id}:
     get:
@@ -140,8 +140,6 @@ components:
       type: object
       required: [
         email,
-        password,
-        confirm_password,
         firstName,
         lastName,
         passport_number,
@@ -158,10 +156,6 @@ components:
         email:
           type: string
           format: email
-        password:
-          type: string
-        confirm_password:
-          type: string
         passport_number:
           type: string
         phone_number:
@@ -186,8 +180,6 @@ components:
       type: object
       required: [
         email,
-        password,
-        confirm_password,
         firstName,
         lastName,
         passport_number,
@@ -204,10 +196,6 @@ components:
         email:
           type: string
           format: email
-        password:
-          type: string
-        confirm_password:
-          type: string
         passport_number:
           type: string
         phone_number:
@@ -227,3 +215,12 @@ components:
           type: string
         country_code:
           type: string
+
+    IndividualPageDto:
+      type: object
+      required: [ ]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IndividualDto'

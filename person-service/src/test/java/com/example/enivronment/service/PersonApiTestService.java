@@ -7,9 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.dto.IndividualPageRequest;
 import com.example.person.dto.IndividualDto;
+import com.example.person.dto.IndividualPageDto;
 import com.example.person.dto.IndividualWriteDto;
 import com.example.person.dto.IndividualWriteResponseDto;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Component
 public class PersonApiTestService {
@@ -30,11 +34,33 @@ public class PersonApiTestService {
         return findBy(url + "/v1/persons/" + personId);
     }
 
-    public IndividualDto findByEmail(String email) {
-        return findBy(url + "/v1/persons/email/" + email);
+    public IndividualPageDto findAll(IndividualPageRequest individualPageRequest) {
+        var path = buildPath(url + "/v1/persons", individualPageRequest);
+
+        return restTemplate.getForObject(path, IndividualPageDto.class);
     }
 
-    private IndividualDto findBy(String url) {
+    private String buildPath(
+        String path,
+        IndividualPageRequest individualPageRequest
+    ) {
+        if (isEmpty(individualPageRequest.emails())) {
+            return path;
+        }
+
+        var stringBuilder = new StringBuilder(path + "?");
+        int count = 0;
+        for (var email : individualPageRequest.emails()) {
+            stringBuilder.append("email=").append(email);
+
+            if (individualPageRequest.emails().size() > ++count) {
+                stringBuilder.append("&");
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    IndividualDto findBy(String url) {
         return restTemplate.getForObject(url, IndividualDto.class);
     }
 

@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -9,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.IndividualPageRequest;
 import com.example.person.api.PersonApi;
 import com.example.person.dto.IndividualDto;
+import com.example.person.dto.IndividualPageDto;
 import com.example.person.dto.IndividualWriteDto;
 import com.example.person.dto.IndividualWriteResponseDto;
 import com.example.service.IndividualService;
@@ -34,10 +37,14 @@ public class IndividualController implements PersonApi {
         return ResponseEntity.ok(individualService.findById(id));
     }
 
-
     @Override
-    public ResponseEntity<IndividualDto> findByEmail(String email) {
-        return ResponseEntity.ok(individualService.findByEmail(email));
+    public ResponseEntity<IndividualPageDto> findAll(
+        List<String> emails
+    ) {
+        var request = new IndividualPageRequest(
+            emails
+        );
+        return ResponseEntity.ok(individualService.findAll(request));
     }
 
     @Override

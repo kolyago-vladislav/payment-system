@@ -11,9 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.dto.IndividualPageRequest;
 import com.example.exception.PersonException;
 import com.example.mapper.IndividualMapper;
 import com.example.person.dto.IndividualDto;
+import com.example.person.dto.IndividualPageDto;
 import com.example.person.dto.IndividualWriteDto;
 import com.example.person.dto.IndividualWriteResponseDto;
 import com.example.repository.IndividualRepository;
@@ -47,13 +49,14 @@ public class IndividualService {
         return mapper.from(individual);
     }
 
-    public IndividualDto findByEmail(String email) {
-        var individual = repository.findByEmail(email)
-            .orElseThrow(() -> new PersonException("Individual not found by email=[%s]", email));
+    public IndividualPageDto findAll(IndividualPageRequest individualPageRequest) {
+        var individuals = repository.findAll(individualPageRequest.emails());
+        var from = mapper.from(individuals);
 
-        log.debug("Individual was successfully found by email=[{}]", email);
+        var individualPageDto = new IndividualPageDto();
+        individualPageDto.setItems(from);
 
-        return mapper.from(individual);
+        return individualPageDto;
     }
 
     @Transactional
