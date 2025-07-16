@@ -1,7 +1,10 @@
 package com.example.controller;
 
 import reactor.core.publisher.Mono;
+import java.util.List;
 import java.util.UUID;
+
+import javax.validation.constraints.Email;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +15,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 import com.example.individual.api.PersonApi;
 import com.example.individual.dto.IndividualDto;
+import com.example.individual.dto.IndividualPageDto;
 import com.example.individual.dto.IndividualWriteDto;
 import com.example.individual.dto.IndividualWriteResponseDto;
 import com.example.service.PersonService;
@@ -34,12 +38,12 @@ public class PersonController implements PersonApi {
     }
 
     @Override
-    public Mono<ResponseEntity<IndividualDto>> findByEmail(
-        String email,
+    public Mono<ResponseEntity<IndividualPageDto>> findAll(
+        List<@Email String> emails,
         ServerWebExchange exchange
     ) {
         return personService
-            .findByEmail(email)
+            .findAll(emails)
             .map(ResponseEntity::ok);
     }
 

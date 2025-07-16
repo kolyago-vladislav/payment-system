@@ -1,10 +1,13 @@
 package com.example.enivronment.config.testcontainer.data;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.example.individual.dto.AddressDto;
 import com.example.individual.dto.AddressWriteDto;
 import com.example.individual.dto.IndividualDto;
+import com.example.individual.dto.IndividualPageDto;
 import com.example.individual.dto.IndividualWriteDto;
 import com.example.individual.dto.UserLoginRequest;
 
@@ -12,6 +15,10 @@ import static com.example.spec.integration.LifecycleSpecification.PERSON_EMAIL;
 
 @Component
 public class DtoCreator {
+
+    public IndividualPageDto buildIndividualPageDto() {
+        return new IndividualPageDto().items(List.of(buildIndividualDto()));
+    }
 
     public IndividualDto buildIndividualDto() {
         var address = new AddressDto();
@@ -24,8 +31,6 @@ public class DtoCreator {
         dto.setFirstName("Vlad");
         dto.setLastName("Kaliaha");
         dto.setEmail(PERSON_EMAIL);
-        dto.setPassword("password");
-        dto.setConfirmPassword("password");
         dto.passportNumber("BY24003");
         dto.phoneNumber("+375298082919");
         dto.setAddress(address);

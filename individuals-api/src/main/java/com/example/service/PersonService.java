@@ -3,6 +3,7 @@ package com.example.service;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.individual.dto.IndividualDto;
+import com.example.individual.dto.IndividualPageDto;
 import com.example.individual.dto.IndividualWriteDto;
 import com.example.individual.dto.IndividualWriteResponseDto;
 import com.example.mapper.PersonMapper;
@@ -33,8 +35,8 @@ public class PersonService {
     }
 
     @WithSpan(value = "personService.findByEmail")
-    public Mono<IndividualDto> findByEmail(String email) {
-        return Mono.fromCallable(() -> personApiClient.findByEmail(email))
+    public Mono<IndividualPageDto> findAll(List<String> email) {
+        return Mono.fromCallable(() -> personApiClient.findAll(email))
             .map(dto -> personMapper.from(dto.getBody()))
             .subscribeOn(Schedulers.boundedElastic());
     }

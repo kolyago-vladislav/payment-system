@@ -48,8 +48,7 @@ public class SecurityConfig {
             .pathMatchers(HttpMethod.DELETE, "/individual/v1/persons/*").authenticated()
             .pathMatchers(
                 "/actuator/**",
-                "/individual/v1/persons/*",
-                "/individual/v1/persons/email/*"
+                "/individual/v1/persons/**"
             ).hasRole("individual.admin");
     }
 

@@ -1,5 +1,6 @@
 package com.example.spec.integration.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -42,13 +43,13 @@ class PersonControllerTest extends LifecycleSpecification {
     void shouldReturnDtoWhenFindByEmailCalled() {
         //when
         Mockito
-            .when(personApiClient.findByEmail(PERSON_EMAIL))
-            .thenReturn(ResponseEntity.ofNullable(personMapper.from(dtoCreator.buildIndividualDto())));
+            .when(personApiClient.findAll(List.of(PERSON_EMAIL)))
+            .thenReturn(ResponseEntity.ofNullable(personMapper.from(dtoCreator.buildIndividualPageDto())));
 
-        var response = personControllerService.findByEmail(PERSON_EMAIL);
+        var response = personControllerService.findAll(PERSON_EMAIL);
 
         //then
-        assertEquals(dtoCreator.buildIndividualDto(), response);
+        assertEquals(dtoCreator.buildIndividualPageDto(), response);
     }
 
     @Test
