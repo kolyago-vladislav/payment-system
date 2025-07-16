@@ -28,4 +28,16 @@ public interface IndividualRepository extends JpaRepository<Individual, UUID> {
         WHERE i.id = :id
     """)
     void softDelete(@Param("id") UUID id);
+
+    @Query(
+        value = """
+                SELECT EXISTS(
+                    SELECT email
+                    FROM person.users u
+                    WHERE u.email = :email
+                )
+            """, nativeQuery = true
+    )
+    boolean existsByEmail(String email);
+
 }

@@ -32,6 +32,10 @@ public class IndividualService {
     public IndividualWriteResponseDto register(
         IndividualWriteDto individualWriteDto
     ) {
+        if (repository.existsByEmail(individualWriteDto.getEmail())) {
+            throw PersonException.userExists(individualWriteDto.getEmail());
+        }
+
         var individual = mapper.to(individualWriteDto);
         repository.save(individual);
 
@@ -42,7 +46,7 @@ public class IndividualService {
 
     public IndividualDto findById(UUID id) {
         var individual = repository.findById(id)
-            .orElseThrow(() -> new PersonException("Individual not found by id=[%s]", id));
+            .orElseThrow(() -> PersonException.notFound(id));
 
         log.debug("Individual was successfully found by id=[{}]", id);
 
@@ -68,7 +72,7 @@ public class IndividualService {
     @Transactional
     public void hardDelete(UUID id) {
         var individual = repository.findById(id)
-            .orElseThrow(() -> new PersonException("Individual not found by uuid=[%s]", id));
+            .orElseThrow(() -> PersonException.notFound(id));
 
         log.info("Individual[id={}] was successfully hard deleted", id);
 
@@ -82,7 +86,7 @@ public class IndividualService {
         IndividualWriteDto dto
     ) {
         var individual = repository.findById(id)
-            .orElseThrow(() -> new PersonException("Individual not found by id=[%s]", id));
+            .orElseThrow(() -> PersonException.notFound(id));
         mapper.update(individual, dto);
         repository.save(individual);
         return new IndividualWriteResponseDto(individual.getId().toString());

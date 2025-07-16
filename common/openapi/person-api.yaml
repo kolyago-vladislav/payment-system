@@ -26,6 +26,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IndividualWriteResponseDto'
+        '400':
+          description: ValidationError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: User has already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     get:
       summary: Get persons
       operationId: "findAll"
@@ -93,6 +105,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IndividualWriteResponseDto'
+
     delete:
       summary: soft delete person by id
       operationId: "delete"
@@ -224,3 +237,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IndividualDto'
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: integer

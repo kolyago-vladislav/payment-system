@@ -10,8 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.example.exception.WebServiceException;
 import com.example.individual.dto.IndividualDto;
 import com.example.individual.dto.IndividualPageDto;
 import com.example.individual.dto.IndividualWriteDto;
@@ -48,7 +51,12 @@ public class PersonService {
             .mapNotNull(HttpEntity::getBody)
             .map(personMapper::from)
             .subscribeOn(Schedulers.boundedElastic())
-            .doOnNext(t -> log.info("Person registered id={}", t.getId()));
+            .doOnNext(t -> log.info("Person registered id={}", t.getId()))
+            .onErrorMap(
+                WebClientResponseException.class, ex -> {
+                    throw new WebServiceException(HttpStatus.valueOf(ex.getStatusCode().value()), ex.getMessage());
+                }
+            );
     }
 
     @WithSpan(value = "personService.update")
