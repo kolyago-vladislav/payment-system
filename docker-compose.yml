@@ -36,7 +36,7 @@ services:
       - ./individuals-api:/app
       - artifacts:/artifacts
     working_dir: /app
-    command: sh -c "gradle clean build -x test && cp build/libs/*.jar /artifacts/"
+    command: sh -c "gradle clean build --no-daemon -x test && cp build/libs/*.jar /artifacts/"
     environment:
       NEXUS_URL: http://nexus:8081/repository/maven-snapshots/
     depends_on:
@@ -77,7 +77,7 @@ services:
       - ./person-service:/app
       - artifacts:/artifacts
     working_dir: /app
-    command: sh -c "gradle clean build -x test && cp build/libs/*.jar /artifacts/"
+    command: sh -c "gradle clean build --no-daemon -x test && cp build/libs/*.jar /artifacts/"
     environment:
       NEXUS_URL: http://nexus:8081/repository/maven-snapshots/
     depends_on:
