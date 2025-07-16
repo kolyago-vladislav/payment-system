@@ -128,7 +128,8 @@ foundSpecifications.forEach { specFile ->
                 "skipDefaultInterface" to  "true",
                 "useBeanValidation"    to "true",
                 "openApiNullable"      to "false",
-                "reactive"             to "true"
+                "reactive"             to "true",
+                "useTags"              to "true"
             )
         )
 

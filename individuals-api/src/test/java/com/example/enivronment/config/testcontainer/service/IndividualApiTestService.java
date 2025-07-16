@@ -19,28 +19,28 @@ public class IndividualApiTestService {
     private final RestTemplate restTemplate;
     private final String url;
 
-    public IndividualApiTestService(RestTemplate restTemplate,
-                                    @Value("${server.port}")
-                                    int port
+    public IndividualApiTestService(
+        RestTemplate restTemplate,
+        @Value("${server.port}")
+        int port
     ) {
         this.restTemplate = restTemplate;
-        this.url = "http://localhost:" + port;
+        this.url = "http://localhost:" + port + "/individual/v1";
     }
 
     public TokenResponse register(IndividualWriteDto request) {
-        return restTemplate.postForObject(url + "/v1/auth/registration", request, TokenResponse.class);
+        return restTemplate.postForObject(url + "/auth/registration", request, TokenResponse.class);
     }
 
-
     public TokenResponse login(UserLoginRequest request) {
-        return restTemplate.postForObject(url + "/v1/auth/login", request, TokenResponse.class);
+        return restTemplate.postForObject(url + "/auth/login", request, TokenResponse.class);
     }
 
     public UserInfoResponse getMe(String accessToken) {
         var headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
 
-        var response = restTemplate.exchange(url + "/v1/auth/me", GET, new HttpEntity<>(headers), UserInfoResponse.class);
+        var response = restTemplate.exchange(url + "/auth/me", GET, new HttpEntity<>(headers), UserInfoResponse.class);
 
         return response.getBody();
     }

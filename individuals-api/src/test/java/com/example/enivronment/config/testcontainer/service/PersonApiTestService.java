@@ -26,16 +26,16 @@ public class PersonApiTestService {
         KeycloakApiTestService keycloakApiTestService
     ) {
         this.restTemplate = restTemplate;
-        this.url = "http://localhost:" + port;
+        this.url = "http://localhost:" + port + "/individual/v1";
         this.keycloakApiTestService = keycloakApiTestService;
     }
 
     public IndividualDto findById(String personId) {
-        return findBy(url + "/v1/persons/" + personId);
+        return findBy(url + "/persons/" + personId);
     }
 
     public IndividualDto findByEmail(String email) {
-        return findBy(url + "/v1/persons/email/" + email);
+        return findBy(url + "/persons/email/" + email);
     }
 
     private IndividualDto findBy(String url) {
@@ -68,7 +68,7 @@ public class PersonApiTestService {
         var entity = new HttpEntity<>(individualWriteDto, headers);
 
         return restTemplate.exchange(
-            url + "/v1/persons/" + personId,
+            url + "/persons/" + personId,
             HttpMethod.PUT,
             entity,
             IndividualWriteResponseDto.class
@@ -80,7 +80,7 @@ public class PersonApiTestService {
         var entity = new HttpEntity<>(headers);
 
         return restTemplate.exchange(
-            url + "/v1/persons/" + personId,
+            url + "/persons/" + personId,
             HttpMethod.DELETE,
             entity,
             ResponseEntity.class

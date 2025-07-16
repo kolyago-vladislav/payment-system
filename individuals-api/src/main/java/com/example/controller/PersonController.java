@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 
-import com.example.individual.api.PersonsApi;
+import com.example.individual.api.PersonApi;
 import com.example.individual.dto.IndividualDto;
 import com.example.individual.dto.IndividualWriteDto;
 import com.example.individual.dto.IndividualWriteResponseDto;
@@ -18,8 +18,8 @@ import com.example.service.PersonService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1")
-public class PersonController implements PersonsApi {
+@RequestMapping
+public class PersonController implements PersonApi {
 
     private final PersonService personService;
 

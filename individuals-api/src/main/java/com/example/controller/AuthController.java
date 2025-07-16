@@ -20,7 +20,7 @@ import com.example.service.UserService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping
 public class AuthController implements AuthApi {
 
     private final UserService userService;

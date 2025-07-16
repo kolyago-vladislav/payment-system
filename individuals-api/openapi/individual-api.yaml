@@ -4,10 +4,10 @@ info:
   description: REST API для регистрации, логина, обновления токена и получения информации о пользователе через Keycloak.
   version: 1.0.1
 servers:
-  - url: http://localhost:8081/v1
+  - url: http://localhost:8081
 
 paths:
-  /auth/registration:
+  /individual/v1/auth/registration:
     post:
       summary: Регистрация пользователя
       operationId: "registration"
@@ -39,7 +39,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/login:
+  /individual/v1/auth/login:
     post:
       summary: Аутентификация пользователя
       operationId: "login"
@@ -65,7 +65,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/refresh-token:
+  /individual/v1/auth/refresh-token:
     post:
       summary: Обновление токена доступа
       operationId: "refreshToken"
@@ -91,7 +91,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/me:
+  /individual/v1/auth/me:
     get:
       summary: Получение данных текущего пользователя
       operationId: "getMe"

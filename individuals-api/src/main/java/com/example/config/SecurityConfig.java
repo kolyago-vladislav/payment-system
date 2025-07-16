@@ -36,20 +36,20 @@ public class SecurityConfig {
         exchanges
             .pathMatchers(
                 "/actuator/prometheus",
-                "/v1/auth/registration",
-                "/v1/auth/login",
-                "/v1/auth/refresh-token"
+                "/individual/v1/auth/registration",
+                "/individual/v1/auth/login",
+                "/individual/v1/auth/refresh-token"
             ).permitAll();
     }
 
     private void applyProtectedRoutes(ServerHttpSecurity.AuthorizeExchangeSpec exchanges) {
         exchanges
-            .pathMatchers(HttpMethod.PUT, "/v1/persons/*").authenticated()
-            .pathMatchers(HttpMethod.DELETE, "/v1/persons/*").authenticated()
+            .pathMatchers(HttpMethod.PUT, "/individual/v1/persons/*").authenticated()
+            .pathMatchers(HttpMethod.DELETE, "/individual/v1/persons/*").authenticated()
             .pathMatchers(
                 "/actuator/**",
-                "/v1/persons/*",
-                "/v1/persons/email/*"
+                "/individual/v1/persons/*",
+                "/individual/v1/persons/email/*"
             ).hasRole("individual.admin");
     }
 
