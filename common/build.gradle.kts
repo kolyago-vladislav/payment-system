@@ -66,6 +66,7 @@ foundSpecifications.forEach { specFile ->
                 "useBeanValidation"    to "true",
                 "openApiNullable"      to "false",
                 "useFeignClientUrl"    to "true",
+                "useTags"              to "true",
                 "apiPackage"           to "${basePackage}.api",
                 "modelPackage"         to "${basePackage}.dto",
                 "configPackage"        to "${basePackage}.config"
