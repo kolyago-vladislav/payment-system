@@ -29,25 +29,13 @@ services:
     volumes:
       - ./flyway:/flyway/sql
 
-  individuals-api-builder:
-    image: gradle:8.14.0-jdk24
-    container_name: individuals-api-builder
-    volumes:
-      - ./individuals-api:/app
-      - artifacts:/artifacts
-    working_dir: /app
-    command: sh -c "gradle clean build --no-daemon -x test && cp build/libs/*.jar /artifacts/"
-    environment:
-      NEXUS_URL: http://nexus:8081/repository/maven-snapshots/
-    depends_on:
-      common:
-        condition: service_completed_successfully
-    restart: "no"
-
   individuals-api:
-    image: eclipse-temurin:24-jdk-alpine
+    build:
+      context: ./individuals-api
+      dockerfile: Dockerfile
     container_name: individuals-api
     environment:
+      NEXUS_URL: http://nexus:8081/repository/maven-public/
       KEYCLOAK_URL: http://keycloak:8080
       SPRING_PROFILES_ACTIVE: docker
       PERSONS_API_HOST: persons-api
@@ -56,12 +44,10 @@ services:
     ports:
       - "8091:8091"
     volumes:
-      - artifacts:/app
-    working_dir: /app
-    entrypoint: [ "java", "-jar", "individuals-api-0.0.1-SNAPSHOT.jar" ]
+      - nexus-data:/nexus-data
     depends_on:
-      individuals-api-builder:
-        condition: service_completed_successfully
+      nexus:
+        condition: service_healthy
       keycloak-healthcheck:
         condition: service_completed_successfully
     healthcheck:
