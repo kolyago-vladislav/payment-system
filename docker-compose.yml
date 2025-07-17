@@ -35,7 +35,6 @@ services:
       dockerfile: Dockerfile
     container_name: individuals-api
     environment:
-      NEXUS_URL: http://nexus:8081/repository/maven-public/
       KEYCLOAK_URL: http://keycloak:8080
       SPRING_PROFILES_ACTIVE: docker
       PERSONS_API_HOST: persons-api
@@ -50,37 +49,22 @@ services:
         condition: service_healthy
       keycloak-healthcheck:
         condition: service_completed_successfully
+      persons-api:
+        condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8091/actuator/health" ]
+      test: [ "CMD", "curl", "-i", "http://localhost:8091/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  persons-api-builder:
-    image: gradle:8.14.0-jdk24
-    container_name: persons-api-builder
-    volumes:
-      - ./person-service:/app
-      - artifacts:/artifacts
-    working_dir: /app
-    command: sh -c "gradle clean build --no-daemon -x test && cp build/libs/*.jar /artifacts/"
-    environment:
-      NEXUS_URL: http://nexus:8081/repository/maven-snapshots/
-    depends_on:
-      common:
-        condition: service_completed_successfully
-    restart: "no"
-
-
   persons-api:
-    image: eclipse-temurin:24-jdk-alpine
+    build:
+      context: ./person-service
+      dockerfile: Dockerfile
     container_name: persons-api
     ports:
       - "8092:8092"
-    volumes:
-      - artifacts:/app
     working_dir: /app
-    entrypoint: [ "java", "-jar", "person-service-0.0.1-SNAPSHOT.jar" ]
     environment:
       POSTGRES_HOST: postgres
       SPRING_PROFILES_ACTIVE: docker
@@ -88,13 +72,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      persons-api-builder:
+      flyway-persons:
         condition: service_completed_successfully
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8091/actuator/health" ]
-      interval: 10s
+      test: [ "CMD", "curl", "-i", "http://localhost:8092/actuator/health" ]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 30
 
   common:
     build:
@@ -239,6 +223,7 @@ services:
 
   nexus:
     image: sonatype/nexus3:3.76.0
+    container_name: nexus
     ports:
       - "8081:8081"
     volumes:
