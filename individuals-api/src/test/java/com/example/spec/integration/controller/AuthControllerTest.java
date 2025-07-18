@@ -1,11 +1,7 @@
 package com.example.spec.integration.controller;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import org.springframework.http.ResponseEntity;
-
-import com.example.person.dto.IndividualWriteResponseDto;
 import com.example.spec.integration.LifecycleSpecification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,10 +14,6 @@ class AuthControllerTest extends LifecycleSpecification {
 	void shouldCreateNewUserAndReturnAccessToken() {
 		//when
 		var request = dtoCreator.buildIndividualWriteDto();
-
-		Mockito
-			.when(personApiClient.registration(personMapper.from(request)))
-			.thenReturn(ResponseEntity.ofNullable(new IndividualWriteResponseDto(PERSON_ID)));
 
 		var response = individualControllerService.register(request);
 		var meResponse = individualControllerService.getMe(response.getAccessToken());
@@ -41,10 +33,6 @@ class AuthControllerTest extends LifecycleSpecification {
 		//given
 		var request = dtoCreator.buildIndividualWriteDto();
 
-		Mockito
-			.when(personApiClient.registration(personMapper.from(request)))
-			.thenReturn(ResponseEntity.ofNullable(new IndividualWriteResponseDto(PERSON_ID)));
-
 		individualControllerService.register(request);
 
 		//when
@@ -62,9 +50,6 @@ class AuthControllerTest extends LifecycleSpecification {
 	void shouldReturnUserInfo() {
 		//given
 		var individualWriteDto = dtoCreator.buildIndividualWriteDto();
-		Mockito
-			.when(personApiClient.registration(personMapper.from(individualWriteDto)))
-			.thenReturn(ResponseEntity.ofNullable(new IndividualWriteResponseDto(PERSON_ID)));
 
 		var registrationResponse = individualControllerService.register(individualWriteDto);
 
@@ -73,6 +58,4 @@ class AuthControllerTest extends LifecycleSpecification {
 
 		assertNotNull(meResponse.getEmail(), dtoCreator.buildIndividualWriteDto().getEmail());
 	}
-
-
 }

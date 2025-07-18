@@ -76,7 +76,7 @@ public class DtoCreator {
         address.setAddress("Minskaya 15, d.8, kv.5-update");
         address.setZipCode("210009-update");
         address.setCity("Vitebsk-update");
-
+        individualWriteDto.setAddress(address);
         return individualWriteDto;
     }
 }

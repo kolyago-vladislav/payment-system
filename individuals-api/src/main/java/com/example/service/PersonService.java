@@ -34,7 +34,7 @@ public class PersonService {
             .subscribeOn(Schedulers.boundedElastic());
     }
 
-    @WithSpan(value = "personService.findByEmail")
+    @WithSpan(value = "personService.findAll")
     public Mono<IndividualPageDto> findAll(List<String> email) {
         return Mono.fromCallable(() -> personApiClient.findAll(email))
             .map(dto -> personMapper.from(dto.getBody()))
