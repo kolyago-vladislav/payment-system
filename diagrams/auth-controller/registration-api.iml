@@ -39,7 +39,7 @@ deactivate IndividualService
 
 ... Error branch when error occurs inside registerUser or resetUserPassword ...
 
-IndividualService -> PersonService : DELETE /person/v1/persons/{id}/hard
+IndividualService -> PersonService : DELETE /person/v1/persons/compensate-registration/{id}
 activate PersonService
 PersonService --> IndividualService : OK
 deactivate PersonService

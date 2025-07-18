@@ -64,9 +64,9 @@ public class PersonService {
                         Mono.justOrEmpty(personMapper.from(responseEntity.getBody()))));
     }
 
-    @WithSpan(value = "personService.hardDelete")
-    public Mono<Void> hardDelete(String id) {
-        return Mono.fromRunnable(() -> personApiClient.hardDelete(UUID.fromString(id)))
+    @WithSpan(value = "personService.compensateRegistration")
+    public Mono<Void> compensateRegistration(String id) {
+        return Mono.fromRunnable(() -> personApiClient.compensateRegistration(UUID.fromString(id)))
             .subscribeOn(Schedulers.boundedElastic()).then();
     }
 

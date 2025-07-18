@@ -74,7 +74,7 @@ public class UserService {
                                     .then(Mono.defer(() -> tokenService.login(new UserLoginRequest(request.getEmail(), request.getPassword()))))))
                     .onErrorResume(throwable ->
                         personService
-                            .hardDelete(writeResponseDto.getId())
+                            .compensateRegistration(writeResponseDto.getId())
                             .then(Mono.error(throwable)))
             );
     }

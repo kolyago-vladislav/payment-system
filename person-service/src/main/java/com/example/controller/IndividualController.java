@@ -62,7 +62,7 @@ public class IndividualController implements PersonApi {
     }
 
     @Override
-    public ResponseEntity<Void> hardDelete(UUID id) {
+    public ResponseEntity<Void> compensateRegistration(UUID id) {
         individualService.hardDelete(id);
         return ResponseEntity.ok().build();
     }

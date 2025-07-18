@@ -109,10 +109,10 @@ paths:
         '200':
           description: Successfully deleted
 
-  /person/v1/persons/{id}/hard:
+  /person/v1/persons/compensate-registration/{id}:
     delete:
-      summary: soft delete person by id
-      operationId: "hardDelete"
+      summary: compensate-registration, hard delete person by id
+      operationId: "compensateRegistration"
       tags:
         - Person
       parameters:
