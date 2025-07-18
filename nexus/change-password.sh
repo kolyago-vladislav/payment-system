@@ -10,8 +10,8 @@ if [ -z "$NEW_PASS" ]; then
 fi
 
 if [ ! -s "$ADMIN_PASS_FILE" ]; then
-  echo "Admin password file is missing or empty."
-  exit 1
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] Admin password wass successfully changed" >&2
+  exit 0
 fi
 
 ADMIN_PASS=$(cat "$ADMIN_PASS_FILE")

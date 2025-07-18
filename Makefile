@@ -29,9 +29,8 @@ up:
 	@echo "Nexus is healthy!"
 
 build-artifacts:
-	@$(DOCKER_COMPOSE) run --rm common
+	@$(DOCKER_COMPOSE) build persons-api --no-cache
 
-# Шаг 3: Запуск всех остальных сервисов
 start:
 	$(DOCKER_COMPOSE) up -d
 

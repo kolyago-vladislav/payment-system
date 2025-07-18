@@ -74,27 +74,13 @@ services:
         condition: service_healthy
       flyway-persons:
         condition: service_completed_successfully
+      nexus-change-password:
+        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "curl", "-i", "http://localhost:8092/actuator/health" ]
       interval: 5s
       timeout: 5s
       retries: 30
-
-  common:
-    build:
-      context: ./common
-      dockerfile: Dockerfile
-    container_name: common
-    environment:
-      NEXUS_URL: "http://nexus:8081/repository/maven-snapshots/"
-      NEXUS_USERNAME: admin
-      NEXUS_PASSWORD: admin
-      ARTEFACT_VERSION: "1.0.0-SNAPSHOT"
-    depends_on:
-      nexus-change-password:
-        condition: service_completed_successfully
-    command: gradle clean build publish --no-daemon
-    restart: "no"
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
