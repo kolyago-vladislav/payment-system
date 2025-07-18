@@ -67,7 +67,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.mapstruct:mapstruct-processor:${versions["mapstructVersion"]}")
 
-    implementation("com.example:common:1.0.0-SNAPSHOT")
+    implementation("com.example:person-api:1.0.0-SNAPSHOT")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -189,14 +189,38 @@ tasks.named("compileJava") {
     dependsOn("generateAllOpenApi")
 }
 
+
+/*
+──────────────────────────────────────────────────────
+============== Resolve NEXUS credentials ==============
+──────────────────────────────────────────────────────
+*/
+
+file("../.env").takeIf { it.exists() }?.readLines()?.forEach {
+    val (k, v) = it.split("=", limit = 2)
+    System.setProperty(k.trim(), v.trim())
+    logger.lifecycle("${k.trim()}=${v.trim()}")
+}
+
+val nexusUrl = System.getenv("NEXUS_URL") ?: System.getProperty("NEXUS_URL")
+val nexusUser = System.getenv("NEXUS_USERNAME") ?: System.getProperty("NEXUS_USERNAME")
+val nexusPassword = System.getenv("NEXUS_PASSWORD") ?: System.getProperty("NEXUS_PASSWORD")
+
+if (nexusUrl.isNullOrBlank() || nexusUser.isNullOrBlank() || nexusPassword.isNullOrBlank()) {
+    throw GradleException(
+        "NEXUS_URL or NEXUS_USER or NEXUS_PASSWORD not set. " +
+        "Please create a .env file with these properties or set environment variables."
+    )
+}
+
 repositories {
 	mavenCentral()
 	maven {
-        url = uri(System.getenv("NEXUS_URL") ?: "http://localhost:8081/repository/maven-snapshots/")
+        url = uri(nexusUrl)
         isAllowInsecureProtocol = true
         credentials {
-            username = System.getenv("NEXUS_USER") ?: "admin"
-            password = System.getenv("NEXUS_PASSWORD") ?: "admin"
+            username = nexusUser
+            password = nexusPassword
         }
     }
 }

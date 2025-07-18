@@ -36,6 +36,7 @@ public class SecurityConfig {
         exchanges
             .pathMatchers(
                 "/actuator/prometheus",
+                "/actuator/health",
                 "/individual/v1/auth/registration",
                 "/individual/v1/auth/login",
                 "/individual/v1/auth/refresh-token"
