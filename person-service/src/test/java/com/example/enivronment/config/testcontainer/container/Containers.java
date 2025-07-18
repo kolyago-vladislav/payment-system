@@ -3,10 +3,8 @@ package com.example.enivronment.config.testcontainer.container;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 
 @Slf4j
 @UtilityClass
@@ -15,16 +13,8 @@ public class Containers {
     public static final Network GLOBAL_NETWORK = Network.newNetwork();
 
     public PostgreSQLContainer postgres = PostgresTestContainer.postgresTestContainer;
-    public GenericContainer flywayContainer = FlywayTestContainer.flywayContainer;
 
     public void run() {
         postgres.start();
-
-        flywayContainer
-            .waitingFor(
-                Wait.forLogMessage(".*(Successfully applied).*", 1)
-            );
-
-        flywayContainer.start();
     }
 }
