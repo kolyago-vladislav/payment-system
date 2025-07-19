@@ -1,5 +1,6 @@
 package com.example.client;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -20,11 +21,11 @@ import com.example.config.property.KeycloakProperties;
 import com.example.dto.KeycloakAccessTokenResponse;
 import com.example.dto.KeycloakCredentialRepresentation;
 import com.example.dto.KeycloakUserRepresentation;
-import com.example.dto.TokenRefreshRequest;
-import com.example.dto.TokenResponse;
-import com.example.dto.UserLoginRequest;
-import com.example.dto.UserRegistrationRequest;
 import com.example.exception.IndividualException;
+import com.example.individual.dto.IndividualWriteDto;
+import com.example.individual.dto.TokenRefreshRequest;
+import com.example.individual.dto.TokenResponse;
+import com.example.individual.dto.UserLoginRequest;
 import com.example.util.UserIdExtractor;
 
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.CLIENT_ID;
@@ -54,6 +55,7 @@ public class KeycloakClient {
         userPasswordResetUrl = userByIdUrl + "/reset-password";
     }
 
+    @WithSpan(value = "keycloakClient.login")
     public Mono<KeycloakAccessTokenResponse> login(UserLoginRequest userLoginRequest) {
         var formData = new LinkedMultiValueMap<String, String>();
         formData.add(GRANT_TYPE, PASSWORD);
@@ -70,6 +72,7 @@ public class KeycloakClient {
             .bodyToMono(KeycloakAccessTokenResponse.class);
     }
 
+    @WithSpan(value = "keycloakClient.refreshToken")
     public Mono<KeycloakAccessTokenResponse> refreshToken(TokenRefreshRequest tokenRefreshRequest) {
         var formData = new LinkedMultiValueMap<String, String>();
         formData.add(GRANT_TYPE, REFRESH_TOKEN);
@@ -84,8 +87,9 @@ public class KeycloakClient {
             .bodyToMono(KeycloakAccessTokenResponse.class);
     }
 
+    @WithSpan(value = "keycloakClient.registerUser")
     public Mono<String> registerUser(
-        UserRegistrationRequest request,
+        IndividualWriteDto dto,
         TokenResponse adminTokenResponse,
         KeycloakUserRepresentation userRepresentation
     ) {
@@ -94,7 +98,8 @@ public class KeycloakClient {
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + adminTokenResponse.getAccessToken())
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(userRepresentation)
-            .exchangeToMono(this::extractIdFromPath);
+            .exchangeToMono(this::extractIdFromPath)
+            .doOnNext(id -> log.info("User with id={} registered", id));
     }
 
     private Mono<String> extractIdFromPath(ClientResponse response) {
@@ -114,6 +119,7 @@ public class KeycloakClient {
         }
     }
 
+    @WithSpan("keycloakClient.resetUserPassword")
     public Mono<Void> resetUserPassword(
         String userId,
         KeycloakCredentialRepresentation dto,
@@ -126,10 +132,12 @@ public class KeycloakClient {
             .bodyValue(dto)
             .retrieve()
             .toBodilessEntity()
+            .doOnNext(s -> log.info("Reset password request started for userId={}", userId))
             .onErrorResume(e -> executeOnError(userId, adminAccessToken, e))
             .then();
     }
 
+    @WithSpan("keycloakClient.resetUserPassword.executeOnError")
     private Mono<ResponseEntity<Void>> executeOnError(
         String userId,
         String adminAccessToken,

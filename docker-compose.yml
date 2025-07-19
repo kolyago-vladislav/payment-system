@@ -1,23 +1,72 @@
 services:
-  individuals-api:
-    build: ./individuals-api
-    container_name: individuals-api
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5434" ]
+    volumes:
+      - ./databases/init.sh:/docker-entrypoint-initdb.d/init.sh
     ports:
-      - "8091:8091"
+      - "5434:5434"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5434" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
+
+  individuals-api:
+    build:
+      context: ./individuals-api
+      dockerfile: Dockerfile
+    container_name: individuals-api
     environment:
       KEYCLOAK_URL: http://keycloak:8080
       SPRING_PROFILES_ACTIVE: docker
+      PERSONS_API_HOST: persons-api
+      PERSONS_API_URL: http://persons-api:8092
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    ports:
+      - "8091:8091"
+    volumes:
+      - nexus-data:/nexus-data
     depends_on:
-      grafana:
+      nexus:
         condition: service_healthy
       keycloak-healthcheck:
         condition: service_completed_successfully
-
+      persons-api:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8091/actuator/health"]
+      test: [ "CMD", "curl", "-i", "http://localhost:8091/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  persons-api:
+    build:
+      context: ./person-service
+      dockerfile: Dockerfile
+    container_name: persons-api
+    ports:
+      - "8092:8092"
+    working_dir: /app
+    environment:
+      POSTGRES_HOST: postgres
+      SPRING_PROFILES_ACTIVE: docker
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nexus-change-password:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-i", "http://localhost:8092/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
@@ -90,6 +139,8 @@ services:
         condition: service_healthy
       loki:
         condition: service_healthy
+      tempo:
+        condition: service_started
       alloy:
         condition: service_started
     environment:
@@ -99,6 +150,7 @@ services:
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - nexus-data:/nexus-data
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000/api/health"]
       interval: 10s
@@ -125,10 +177,9 @@ services:
     container_name: alloy
     user: root
     ports:
-      - "9080:9080"
-    depends_on:
-      loki:
-        condition: service_healthy
+      - "9080:9080"  # HTTP-интерфейс Alloy (по умолчанию)
+      - "4317:4317"   # OTLP gRPC (важно!)
+      - "4318:4318"   # OTLP HTTP (если нужен)
     volumes:
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -142,7 +193,46 @@ services:
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
 
+  nexus:
+    image: sonatype/nexus3:3.76.0
+    container_name: nexus
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus-data:/nexus-data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/service/rest/v1/status"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+
+  nexus-change-password:
+    image: appropriate/curl
+    environment:
+      - NEXUS_ADMIN_PASSWORD_FILE=/nexus-data/admin.password
+      - NEXUS_NEW_PASSWORD=admin
+    depends_on:
+      nexus:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/scripts/change-password.sh"]
+    volumes:
+      - nexus-data:/nexus-data
+      - ./nexus:/scripts:ro
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+
 volumes:
+  artifacts:
+  tempo_data:
+  nexus-data:
   loki_data:
   loki_chunks:
   loki_index:

@@ -1,5 +1,6 @@
 package com.example.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import reactor.core.publisher.Mono;
 
 import lombok.RequiredArgsConstructor;
@@ -9,9 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.client.KeycloakClient;
 import com.example.config.property.KeycloakProperties;
-import com.example.dto.TokenRefreshRequest;
-import com.example.dto.TokenResponse;
-import com.example.dto.UserLoginRequest;
+import com.example.individual.dto.TokenRefreshRequest;
+import com.example.individual.dto.TokenResponse;
+import com.example.individual.dto.UserLoginRequest;
 import com.example.mapper.TokenResponseMapper;
 
 @Slf4j
@@ -23,13 +24,15 @@ public class TokenService {
     private final TokenResponseMapper tokenResponseMapper;
     private final KeycloakClient keycloakClient;
 
+    @WithSpan("tokenService.login")
     public Mono<TokenResponse> login(UserLoginRequest userLoginRequest) {
         return keycloakClient.login(userLoginRequest)
             .doOnNext(t -> log.info("Token was successfully generated for email={}", userLoginRequest.getEmail()))
-            .doOnError(e -> log.warn("Failed to generate token for email={}", userLoginRequest.getEmail(), e))
+            .doOnError(e -> log.error("Failed to generate token for email={}", userLoginRequest.getEmail(), e))
             .map(tokenResponseMapper::toTokenResponse);
     }
 
+    @WithSpan(value = "tokenService.refreshToken")
     public Mono<TokenResponse> refreshToken(TokenRefreshRequest tokenRefreshRequest) {
         return keycloakClient.refreshToken(tokenRefreshRequest)
             .doOnNext(r -> log.info("Token was successfully refreshed"))
@@ -41,9 +44,6 @@ public class TokenService {
             keycloakProperties.adminEmail(),
             keycloakProperties.adminPassword()
         );
-
-        log.info("Admin login request was created");
-
         return login(adminLoginRequest);
     }
 }

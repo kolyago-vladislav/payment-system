@@ -1,5 +1,6 @@
 package com.example.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import reactor.core.publisher.Mono;
 import java.time.ZoneOffset;
 
@@ -13,11 +14,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.example.client.KeycloakClient;
-import com.example.dto.TokenResponse;
-import com.example.dto.UserInfoResponse;
-import com.example.dto.UserLoginRequest;
-import com.example.dto.UserRegistrationRequest;
+import com.example.dto.KeycloakCredentialRepresentation;
+import com.example.dto.KeycloakUserRepresentation;
 import com.example.exception.IndividualException;
+import com.example.individual.dto.IndividualWriteDto;
+import com.example.individual.dto.TokenResponse;
+import com.example.individual.dto.UserInfoResponse;
+import com.example.individual.dto.UserLoginRequest;
 import com.example.mapper.KeycloakMapper;
 
 @Slf4j
@@ -25,11 +28,12 @@ import com.example.mapper.KeycloakMapper;
 @RequiredArgsConstructor
 public class UserService {
 
-
+    private final PersonService personService;
     private final KeycloakMapper keycloakMapper;
     private final TokenService tokenService;
     private final KeycloakClient keycloakClient;
 
+    @WithSpan(value = "userService.getCurrentUserInfo")
     public Mono<UserInfoResponse> getCurrentUserInfo() {
         return ReactiveSecurityContextHolder.getContext()
             .map(SecurityContext::getAuthentication)
@@ -56,14 +60,33 @@ public class UserService {
         return Mono.error(new IndividualException("Can not get current user info: Invalid principal"));
     }
 
-    public Mono<TokenResponse> register(UserRegistrationRequest request) {
-        var userRepresentation = keycloakMapper.toUserRepresentation(request);
+    @WithSpan("userService.register")
+    public Mono<TokenResponse> register(IndividualWriteDto request) {
+        return personService.register(request)
+            .flatMap(writeResponseDto ->
+                tokenService.obtainAdminServiceToken()
+                    .flatMap(adminTokenResponse ->
+                        keycloakClient
+                            .registerUser(request, adminTokenResponse, createRepresentation(request, writeResponseDto.getId()))
+                            .flatMap(userId ->
+                                keycloakClient
+                                    .resetUserPassword(userId, toCredentialRepresentation(request), adminTokenResponse.getAccessToken())
+                                    .then(Mono.defer(() -> tokenService.login(new UserLoginRequest(request.getEmail(), request.getPassword()))))))
+                    .onErrorResume(throwable ->
+                        personService
+                            .compensateRegistration(writeResponseDto.getId())
+                            .then(Mono.error(throwable)))
+            );
+    }
 
-        return tokenService.obtainAdminServiceToken()
-            .flatMap(adminTokenResponse ->
-                keycloakClient.registerUser(request, adminTokenResponse, userRepresentation)
-                    .flatMap(userId ->
-                        keycloakClient.resetUserPassword(userId, keycloakMapper.toCredentialRepresentation(request), adminTokenResponse.getAccessToken())
-                            .then(Mono.defer(() -> tokenService.login(new UserLoginRequest(request.getEmail(), request.getPassword()))))));
+    private KeycloakCredentialRepresentation toCredentialRepresentation(IndividualWriteDto request) {
+        return keycloakMapper.toCredentialRepresentation(request);
+    }
+
+    private KeycloakUserRepresentation createRepresentation(
+        IndividualWriteDto request,
+        String id
+    ) {
+        return keycloakMapper.toUserRepresentation(request, id);
     }
 }

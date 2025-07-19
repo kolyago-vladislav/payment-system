@@ -5,10 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.example.dto.KeycloakAccessTokenResponse;
-import com.example.dto.KeycloakCredentialRepresentation;
-import com.example.dto.KeycloakUserRepresentation;
-import com.example.dto.TokenResponse;
-import com.example.dto.UserRegistrationRequest;
+import com.example.individual.dto.TokenResponse;
 
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;

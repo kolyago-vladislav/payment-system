@@ -1,2 +1,2 @@
 logging:
-  config: "classpath:logback-local.xml"
+  config: "classpath:logback.xml"

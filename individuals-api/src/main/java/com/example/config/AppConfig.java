@@ -1,5 +1,6 @@
 package com.example.config;
 
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -23,5 +24,10 @@ public class AppConfig {
             .baseUrl(keycloakProperties.realmUrl())
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .build();
+    }
+
+    @Bean
+    public HttpMessageConverters messageConverters() {
+        return new HttpMessageConverters();
     }
 }

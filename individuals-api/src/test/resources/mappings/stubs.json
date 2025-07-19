@@ -1,0 +1,80 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/person/v1/persons",
+        "bodyPatterns": [
+          {
+            "equalToJson": "{\n    \"firstName\": \"Vlad\",\n    \"lastName\": \"Kaliaha\",\n    \"email\": \"newuser@gmail.com\",\n    \"passport_number\": \"BY24003\",\n    \"phone_number\": \"+375298082919\",\n    \"address\": {\n        \"address\": \"Minskaya 15, d.8, kv.5\",\n        \"zip_code\": \"210009\",\n        \"city\": \"Vitebsk\",\n        \"country_code\": \"BLR\"\n    }\n}"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "body": "{\n    \"id\": \"3ddcecd5-5004-4a8a-9447-ed110912b7ee\"\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "urlPathPattern": "/person/v1/persons/3ddcecd5-5004-4a8a-9447-ed110912b7ee",
+        "bodyPatterns": [
+          {
+            "equalToJson": "{\n    \"firstName\": \"Vlad-update\",\n    \"lastName\": \"Kaliaha-update\",\n    \"email\": \"newuser@gmail.com\",\n    \"passport_number\": \"BY24003-update\",\n    \"phone_number\": \"+375298082919-update\",\n    \"address\": {\n        \"address\": \"Minskaya 15, d.8, kv.5-update\",\n        \"zip_code\": \"210009-update\",\n        \"city\": \"Vitebsk-update\",\n        \"country_code\": \"BLR\"\n    }\n}"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "body": "{\n    \"id\": \"3ddcecd5-5004-4a8a-9447-ed110912b7ee\"\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/person/v1/persons/3ddcecd5-5004-4a8a-9447-ed110912b7ee"
+      },
+      "response": {
+        "status": 201,
+        "body": "{\n    \"firstName\": \"Vlad\",\n    \"lastName\": \"Kaliaha\",\n    \"email\": \"newuser@gmail.com\",\n    \"passport_number\": \"BY24003\",\n    \"phone_number\": \"+375298082919\",\n    \"address\": {\n        \"address\": \"Minskaya 15, d.8, kv.5\",\n        \"zip_code\": \"210009\",\n        \"city\": \"Vitebsk\",\n        \"country_code\": \"BLR\"\n    }\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/person/v1/persons",
+        "queryParameters": {
+          "email": {
+            "equalTo": "newuser@gmail.com"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": "{\n    \"items\": [\n        {\n            \"firstName\": \"Vlad\",\n            \"lastName\": \"Kaliaha\",\n            \"email\": \"newuser@gmail.com\",\n            \"passport_number\": \"BY24003\",\n            \"phone_number\": \"+375298082919\",\n            \"address\": {\n                \"address\": \"Minskaya 15, d.8, kv.5\",\n                \"zip_code\": \"210009\",\n                \"city\": \"Vitebsk\",\n                \"country_code\": \"BLR\"\n            }\n        }\n    ]\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "urlPathPattern": "/person/v1/persons/3ddcecd5-5004-4a8a-9447-ed110912b7ee"
+      },
+      "response": {
+        "status": 200
+      }
+    }
+  ]
+}

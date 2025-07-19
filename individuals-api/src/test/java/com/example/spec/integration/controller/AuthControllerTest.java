@@ -2,22 +2,26 @@ package com.example.spec.integration.controller;
 
 import org.junit.jupiter.api.Test;
 
-import com.example.dto.UserLoginRequest;
-import com.example.dto.UserRegistrationRequest;
 import com.example.spec.integration.LifecycleSpecification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 class AuthControllerTest extends LifecycleSpecification {
 
 	@Test
 	void shouldCreateNewUserAndReturnAccessToken() {
 		//when
-		var request = buildUserRegistrationRequest();
-		var response = apiService.register(request);
-		var meResponse = apiService.getMe(response.getAccessToken());
+		var request = dtoCreator.buildIndividualWriteDto();
+
+		var response = individualControllerService.register(request);
+		var meResponse = individualControllerService.getMe(response.getAccessToken());
+
+		var personId = keycloakApiTestService.getUserAttributes(request.getEmail()).get("personId").get(0);
+
 		//then
+		assertEquals(PERSON_ID, personId);
 		assertNotNull(response, "Response must not be null");
 		assertNotNull(response.getAccessToken(), "Access token must not be null");
 		assertEquals("Bearer", response.getTokenType(), "Token type must be Bearer");
@@ -27,12 +31,14 @@ class AuthControllerTest extends LifecycleSpecification {
 	@Test
 	void shouldLoginAndReturnAccessToken() {
 		//given
-		var request = buildUserRegistrationRequest();
-		apiService.register(request);
+		var request = dtoCreator.buildIndividualWriteDto();
+
+		individualControllerService.register(request);
 
 		//when
-		var response = apiService.login(buildUserLoginRequest());
-		var meResponse = apiService.getMe(response.getAccessToken());
+		var response = individualControllerService.login(dtoCreator.buildUserLoginRequest());
+		var meResponse = individualControllerService.getMe(response.getAccessToken());
+
 		//then
 		assertNotNull(response, "Response must not be null");
 		assertNotNull(response.getAccessToken(), "Access token must not be null");
@@ -43,26 +49,13 @@ class AuthControllerTest extends LifecycleSpecification {
 	@Test
 	void shouldReturnUserInfo() {
 		//given
-		var registrationResponse = apiService.register(buildUserRegistrationRequest());
+		var individualWriteDto = dtoCreator.buildIndividualWriteDto();
+
+		var registrationResponse = individualControllerService.register(individualWriteDto);
 
 		//when
-		var meResponse = apiService.getMe(registrationResponse.getAccessToken());
+		var meResponse = individualControllerService.getMe(registrationResponse.getAccessToken());
 
-		assertNotNull(meResponse.getEmail(), buildUserRegistrationRequest().getEmail());
-	}
-
-	private UserRegistrationRequest buildUserRegistrationRequest() {
-		var request = new UserRegistrationRequest();
-		request.setEmail("newUser@gmail.com");
-		request.setPassword("password");
-		request.setConfirmPassword("password");
-		return request;
-	}
-
-	private UserLoginRequest buildUserLoginRequest() {
-		var request = new UserLoginRequest();
-		request.setEmail("newUser@gmail.com");
-		request.setPassword("password");
-		return request;
+		assertNotNull(meResponse.getEmail(), dtoCreator.buildIndividualWriteDto().getEmail());
 	}
 }

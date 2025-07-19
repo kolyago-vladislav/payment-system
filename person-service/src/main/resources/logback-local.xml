@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+
+<configuration scan="true">
+
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}", "trace_id": "%X{trace_id}", "span_id":"%X{span_id}", "level":"%level", "thread":"%thread", "logger":"%logger{36}","message":"%msg"}%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--    <logger name="org.springframework.transaction" level="TRACE"/>-->
+<!--        <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>-->
+<!--        <logger name="org.springframework.orm.jpa" level="TRACE"/>-->
+    <!--    <logger name="org.springframework.kafka.listener" level="TRACE"/>-->
+    <!--    <logger name="org.springframework.security" level="TRACE"/>-->
+    <!--    <logger name="com.zaxxer.hikari" level="TRACE"/>-->
+
+    <root level="INFO">
+        <appender-ref ref="console"/>
+    </root>
+
+</configuration>

@@ -1,0 +1,19 @@
+@startuml
+title IndividualService.login() Sequence Diagram
+
+actor Client
+participant IndividualService
+participant KeycloakClient
+
+Client -> IndividualService : login(userLoginRequest)
+activate IndividualService
+
+IndividualService -> KeycloakClient : login(userLoginRequest)
+activate KeycloakClient
+KeycloakClient --> IndividualService : tokenResponse
+deactivate KeycloakClient
+
+IndividualService --> Client : TokenResponse
+deactivate IndividualService
+
+@enduml

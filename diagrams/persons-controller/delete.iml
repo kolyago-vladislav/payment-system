@@ -1,0 +1,20 @@
+@startuml
+title IndividualService.delete Sequence Diagram
+
+actor Client
+participant IndividualService
+participant PersonService
+
+Client -> IndividualService : delete(id)
+
+activate IndividualService
+IndividualService -> PersonService : delete(id)
+
+activate PersonService
+PersonService --> IndividualService : OK
+deactivate PersonService
+
+IndividualService --> Client : OK
+deactivate IndividualService
+
+@enduml

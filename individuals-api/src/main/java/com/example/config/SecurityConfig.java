@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,15 +36,21 @@ public class SecurityConfig {
         exchanges
             .pathMatchers(
                 "/actuator/prometheus",
-                "/v1/auth/registration",
-                "/v1/auth/login",
-                "/v1/auth/refresh-token"
+                "/actuator/health",
+                "/individual/v1/auth/registration",
+                "/individual/v1/auth/login",
+                "/individual/v1/auth/refresh-token"
             ).permitAll();
     }
 
     private void applyProtectedRoutes(ServerHttpSecurity.AuthorizeExchangeSpec exchanges) {
         exchanges
-            .pathMatchers("/actuator/**").hasRole("individual.admin");
+            .pathMatchers(HttpMethod.PUT, "/individual/v1/persons/*").authenticated()
+            .pathMatchers(HttpMethod.DELETE, "/individual/v1/persons/*").authenticated()
+            .pathMatchers(
+                "/actuator/**",
+                "/individual/v1/persons/**"
+            ).hasRole("individual.admin");
     }
 
     private Converter<Jwt, ? extends Mono<? extends AbstractAuthenticationToken>> keycloakAuthenticationConverter() {

@@ -1,0 +1,20 @@
+@startuml
+title IndividualService.findByEmail Sequence Diagram
+
+actor Client
+participant IndividualService
+participant PersonService
+
+Client -> IndividualService : findByEmail(email)
+
+activate IndividualService
+IndividualService -> PersonService : findByEmail(email)
+
+activate PersonService
+PersonService --> IndividualService : IndividualDto
+deactivate PersonService
+
+IndividualService --> Client : IndividualDto
+deactivate IndividualService
+
+@enduml
