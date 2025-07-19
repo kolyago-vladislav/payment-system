@@ -1,0 +1,60 @@
+package com.example.transaction.controller;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.transaction.api.TransactionApi;
+import com.example.transaction.dto.ConfirmRequest;
+import com.example.transaction.dto.InitRequest;
+import com.example.transaction.dto.TransactionConfirmResponse;
+import com.example.transaction.dto.TransactionInitResponse;
+import com.example.transaction.dto.TransactionStatusResponse;
+import com.example.transaction.service.TransactionService;
+
+@RestController
+@RequiredArgsConstructor
+public class TransactionController implements TransactionApi {
+
+    private final TransactionService transactionService;
+
+    @Override
+    public ResponseEntity<TransactionInitResponse> init(
+        String type,
+        InitRequest initRequest
+    ) {
+        return ResponseEntity.ok(transactionService.init(type, initRequest));
+    }
+
+    @Override
+    public ResponseEntity<TransactionConfirmResponse> confirm(
+        String type,
+        ConfirmRequest confirmRequest
+    ) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<List<TransactionStatusResponse>> findAll(
+        String userUid,
+        String walletUid,
+        String type,
+        String status,
+        OffsetDateTime dateFrom,
+        OffsetDateTime dateTo,
+        Integer page,
+        Integer size
+    ) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<TransactionStatusResponse> getSTatus(String transactionId) {
+        return null;
+    }
+
+}
