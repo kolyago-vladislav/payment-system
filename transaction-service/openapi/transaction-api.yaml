@@ -7,9 +7,12 @@ servers:
   - url: http://localhost:8093/api/v1
 
 paths:
+  #########################################################
+  ######################## WALLETS ########################
+  #########################################################
   /transaction/v1/wallets:
     post:
-      summary: Создание кошелька пользователя
+      summary: Creating a user wallet
       operationId: "create"
       tags:
         - Wallet
@@ -21,59 +24,59 @@ paths:
               $ref: '#/components/schemas/CreateWalletRequest'
       responses:
         '201':
-          description: Кошелёк успешно создан
+          description: Wallet successfully created
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/WalletResponse'
         '400':
-          description: Ошибка валидации
+          description: Validation errors
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /transaction/v1/wallets/{walletUid}:
+  /transaction/v1/wallets/{walletId}:
     get:
-      summary: Получение информации о кошельке
+      summary: Getting wallet information
       operationId: "findById"
       tags:
         - Wallet
       parameters:
-        - name: walletUid
+        - name: walletId
           in: path
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: Данные кошелька
+          description: Wallet details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/WalletResponse'
         '404':
-          description: Кошелёк не найден
+          description: Wallet not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /transaction/v1/wallets/user/{userUid}:
+  /transaction/v1/wallets/user/{userId}:
     get:
-      summary: Получение всех кошельков пользователя
+      summary: Get all wallets of a user
       operationId: "findByUserId"
       tags:
         - Wallet
       parameters:
-        - name: userUid
+        - name: userId
           in: path
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: Список кошельков пользователя
+          description: List of user wallets
           content:
             application/json:
               schema:
@@ -81,10 +84,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/WalletResponse'
 
-  # Transactions
+
+  #########################################################
+  ######################## TRANSACTIONS ###################
+  #########################################################
   /transaction/v1/transactions/{type}/init:
     post:
-      summary: Инициализация транзакции (без создания)
+      summary: Initialize a transaction (without creating)
       operationId: "init"
       tags:
         - Transaction
@@ -92,9 +98,9 @@ paths:
         - name: type
           in: path
           required: true
+          description: Transaction type
           schema:
-            type: string
-            enum: [ deposit, withdrawal, transfer ]
+            $ref: '#/components/schemas/TransactionType'
       requestBody:
         required: true
         content:
@@ -106,13 +112,13 @@ paths:
                 - $ref: '#/components/schemas/TransferInitRequest'
       responses:
         '200':
-          description: Условия транзакции
+          description: Transaction terms
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransactionInitResponse'
         '400':
-          description: Ошибка валидации
+          description: Validation error
           content:
             application/json:
               schema:
@@ -120,7 +126,7 @@ paths:
 
   /transaction/v1/transactions/{type}/confirm:
     post:
-      summary: Подтверждение и запуск транзакции
+      summary: Confirming and starting a transaction
       operationId: "confirm"
       tags:
         - Transaction
@@ -128,9 +134,9 @@ paths:
         - name: type
           in: path
           required: true
+          description: Transaction type
           schema:
-            type: string
-            enum: [ deposit, withdrawal, transfer ]
+            $ref: '#/components/schemas/TransactionType'
       requestBody:
         required: true
         content:
@@ -142,13 +148,13 @@ paths:
                 - $ref: '#/components/schemas/TransferConfirmRequest'
       responses:
         '200':
-          description: Транзакция подтверждена
+          description: Transaction confirmed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransactionConfirmResponse'
         '400':
-          description: Ошибка подтверждения
+          description: Confirmation error
           content:
             application/json:
               schema:
@@ -156,8 +162,8 @@ paths:
 
   /transaction/v1/transactions/{transactionId}/status:
     get:
-      summary: Получение статуса транзакции
-      operationId: "getS tatus"
+      summary: Getting transaction status
+      operationId: "getStatus"
       tags:
         - Transaction
       parameters:
@@ -168,13 +174,13 @@ paths:
             type: string
       responses:
         '200':
-          description: Статус и детали транзакции
+          description: Transaction status and details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransactionStatusResponse'
         '404':
-          description: Транзакция не найдена
+          description: Transaction not found
           content:
             application/json:
               schema:
@@ -182,28 +188,27 @@ paths:
 
   /transaction/v1/transactions:
     get:
-      summary: Поиск транзакций по фильтрам с пагинацией
+      summary: Search transactions by filters with pagination
       operationId: "findAll"
       tags:
         - Transaction
       parameters:
         - in: query
-          name: userUid
+          name: userId
           schema:
             type: string
         - in: query
-          name: walletUid
+          name: walletId
           schema:
             type: string
         - in: query
           name: type
           schema:
-            type: string
-            enum: [ deposit, withdrawal, transfer ]
+            $ref: '#/components/schemas/TransactionType'
         - in: query
           name: status
           schema:
-            type: string
+            $ref: '#/components/schemas/TransactionStatus'
         - in: query
           name: dateFrom
           schema:
@@ -226,7 +231,7 @@ paths:
             default: 20
       responses:
         '200':
-          description: Список транзакций
+          description: List of transactions
           content:
             application/json:
               schema:
@@ -239,41 +244,61 @@ components:
     CreateWalletRequest:
       type: object
       required:
-        - userUid
+        - userId
         - currency
       properties:
-        userUid:
+        name:
           type: string
-          description: Уникальный идентификатор пользователя
-        currency:
+          description: Wallet name
+        walletType:
           type: string
-          description: Валюта кошелька (например, RUB, USD)
+          description: Wallet type
+        userId:
+          type: string
+          description: Unique user identifier
 
     WalletResponse:
       type: object
       properties:
-        walletUid:
+        id:
           type: string
-          description: Уникальный идентификатор кошелька
-        userUid:
+          description: Unique wallet identifier
+        name:
           type: string
+          description: Wallet name
+        walletType:
+          type: string
+          description: Wallet type
         currency:
           type: string
+        userId:
+          type: string
+        status:
+          $ref: '#/components/schemas/WalletStatus'
         balance:
           type: number
           format: double
-        createdAt:
-          type: string
-          format: date-time
 
-    # Transactions Init Requests
     DepositInitRequest:
       type: object
       required:
-        - walletUid
+        - walletId
         - amount
       properties:
-        walletUid:
+        walletId:
+          type: string
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+
+    DepositConfirmRequest:
+      type: object
+      required:
+        - walletId
+        - amount
+      properties:
+        walletId:
           type: string
         amount:
           type: number
@@ -283,10 +308,23 @@ components:
     WithdrawalInitRequest:
       type: object
       required:
-        - walletUid
+        - walletId
         - amount
       properties:
-        walletUid:
+        walletId:
+          type: string
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+
+    WithdrawalConfirmRequest:
+      type: object
+      required:
+        - walletId
+        - amount
+      properties:
+        walletId:
           type: string
         amount:
           type: number
@@ -296,99 +334,50 @@ components:
     TransferInitRequest:
       type: object
       required:
-        - fromWalletUid
-        - toWalletUid
+        - fromWalletId
+        - toWalletId
         - amount
       properties:
-        fromWalletUid:
+        fromWalletId:
           type: string
-        toWalletUid:
+        toWalletId:
           type: string
         amount:
           type: number
           format: double
           minimum: 0.01
 
-    # Transactions Confirm Requests
-    DepositConfirmRequest:
-      type: object
-      required:
-        - walletUid
-        - amount
-        - metadata
-      properties:
-        walletUid:
-          type: string
-        amount:
-          type: number
-          format: double
-        metadata:
-          type: object
-          description: Дополнительные данные (например, источник пополнения)
-          additionalProperties: true
-
-    WithdrawalConfirmRequest:
-      type: object
-      required:
-        - walletUid
-        - amount
-        - metadata
-      properties:
-        walletUid:
-          type: string
-        amount:
-          type: number
-          format: double
-        metadata:
-          type: object
-          description: Дополнительные данные (например, причина списания)
-          additionalProperties: true
-
     TransferConfirmRequest:
       type: object
       required:
-        - fromWalletUid
-        - toWalletUid
+        - fromWalletId
+        - toWalletId
         - amount
-        - metadata
       properties:
-        fromWalletUid:
+        fromWalletId:
           type: string
-        toWalletUid:
+        toWalletId:
           type: string
         amount:
           type: number
           format: double
-        metadata:
-          type: object
-          description: Дополнительные данные (например, назначение перевода)
-          additionalProperties: true
+          minimum: 0.01
 
-    # Transactions Responses
     TransactionInitResponse:
       type: object
       properties:
-        transactionToken:
-          type: string
-          description: Токен, необходимый для подтверждения транзакции
         fee:
           type: number
           format: double
-        expiresAt:
-          type: string
-          format: date-time
 
     TransactionConfirmResponse:
       type: object
       properties:
         transactionId:
           type: string
+          description: Id required to monitor the transaction
         status:
-          type: string
-          enum: [ pending, completed, failed ]
-        executedAt:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/TransactionStatus'
 
     TransactionStatusResponse:
       type: object
@@ -396,22 +385,14 @@ components:
         transactionId:
           type: string
         type:
-          type: string
-          enum: [ deposit, withdrawal, transfer ]
+          $ref: '#/components/schemas/TransactionType'
         status:
-          type: string
-          enum: [ pending, completed, failed ]
+          $ref: '#/components/schemas/TransactionStatus'
         amount:
           type: number
           format: double
         currency:
           type: string
-        fromWalletUid:
-          type: string
-          nullable: true
-        toWalletUid:
-          type: string
-          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -420,7 +401,6 @@ components:
           format: date-time
           nullable: true
 
-    # Error
     ErrorResponse:
       type: object
       properties:
@@ -430,3 +410,27 @@ components:
         message:
           type: string
           description: Описание ошибки
+
+    TransactionType:
+      type: string
+      description: enum transaction types
+      enum:
+        - deposit
+        - withdrawal
+        - transfer
+
+    TransactionStatus:
+      type: string
+      description: enum transaction statuses
+      enum:
+        - confirmed
+        - failed
+        - pending
+
+    WalletStatus:
+      type: string
+      description: enum wallet statuses
+      enum:
+        - active
+        - archived
+        - blocked

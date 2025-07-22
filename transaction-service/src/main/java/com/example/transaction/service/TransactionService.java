@@ -1,22 +1,27 @@
 package com.example.transaction.service;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.stereotype.Service;
-
 import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionInitResponse;
+import com.example.transaction.dto.TransactionType;
+import com.example.transaction.service.init.base.InitRequestHandler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
 
+    private final Map<TransactionType, InitRequestHandler> initRequestHandlers;
+
     public TransactionInitResponse init(
-        String type,
+        TransactionType type,
         InitRequest initRequest
     ) {
-        log.info("Transaction was successfully processed");
-
-        return new TransactionInitResponse();
+        return initRequestHandlers.get(type).handle(initRequest);
     }
+
 }
