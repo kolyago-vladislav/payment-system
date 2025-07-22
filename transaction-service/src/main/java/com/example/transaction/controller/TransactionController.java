@@ -25,11 +25,19 @@ public class TransactionController implements TransactionApi {
     private final TransactionService transactionService;
 
     @Override
+    public ResponseEntity<TransactionInitResponse> init(
+        TransactionType type,
+        InitRequest initRequest
+    ) {
+        return ResponseEntity.ok(transactionService.init(type, initRequest));
+    }
+
+    @Override
     public ResponseEntity<TransactionConfirmResponse> confirm(
         TransactionType type,
         ConfirmRequest confirmRequest
     ) {
-        return null;
+        return ResponseEntity.ok(transactionService.confirm(type, confirmRequest));
     }
 
     @Override
@@ -51,12 +59,6 @@ public class TransactionController implements TransactionApi {
         return null;
     }
 
-    @Override
-    public ResponseEntity<TransactionInitResponse> init(
-        TransactionType type,
-        InitRequest initRequest
-    ) {
-        return ResponseEntity.ok(transactionService.init(type, initRequest));
-    }
+
 
 }

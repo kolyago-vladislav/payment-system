@@ -300,6 +300,14 @@ components:
       properties:
         walletId:
           type: string
+        userId:
+          type: string
+        paymentMethodId:
+          type: integer
+        fee:
+          type: number
+          format: double
+          minimum: 0.01
         amount:
           type: number
           format: double
@@ -326,6 +334,14 @@ components:
       properties:
         walletId:
           type: string
+        paymentMethodId:
+          type: integer
+        userId:
+          type: string
+        fee:
+          type: number
+          format: double
+          minimum: 0.01
         amount:
           type: number
           format: double
@@ -358,6 +374,12 @@ components:
           type: string
         toWalletId:
           type: string
+        userId:
+          type: string
+        fee:
+          type: number
+          format: double
+          minimum: 0.01
         amount:
           type: number
           format: double

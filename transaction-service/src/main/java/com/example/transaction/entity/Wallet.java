@@ -15,7 +15,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.example.transaction.dto.TransactionStatus;
+import com.example.transaction.dto.WalletStatus;
 import com.example.transaction.entity.base.BaseEntity;
 
 @Getter
@@ -37,7 +37,7 @@ public class Wallet extends BaseEntity {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private TransactionStatus transactionStatus;
+    private WalletStatus walletStatus;
 
     @Column(name = "balance")
     private BigDecimal balance;

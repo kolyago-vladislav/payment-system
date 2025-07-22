@@ -1,0 +1,31 @@
+{
+  "name": "source_postgres_transaction",
+  "config": {
+    "database.hostname": "postgres",
+    "database.port": "5434",
+    "database.dbname": "transaction",
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.server.name": "postgres",
+    "snapshot.mode": "never",
+    "name": "source_postgres_transaction",
+    "slot.name": "source_postgres_transaction",
+    "publication.name": "source_postgres_transaction",
+    "publication.autocreate": "true",
+    "table.include.list": "transaction.transactions",
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "time.precision.mode": "connect",
+    "topic.prefix": "postgres",
+    "plugin.name": "pgoutput",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "slot.drop.on.stop": "true",
+    "tombstones.on.delete": "false",
+    "transforms": "IdentifierExtractor,Unwrap",
+    "transforms.IdentifierExtractor.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.IdentifierExtractor.field": "id",
+    "transforms.Unwrap.type": "io.debezium.transforms.ExtractNewRecordState"
+  }
+}

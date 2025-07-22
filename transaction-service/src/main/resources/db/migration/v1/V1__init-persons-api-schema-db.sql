@@ -35,7 +35,7 @@ ALTER TABLE transaction.wallets
             REFERENCES transaction.wallet_types (id);
 ALTER TABLE transaction.wallets
     ADD CONSTRAINT chk_archived_at_required
-        CHECK (status = 'ARCHIVED' AND archived_at IS NOT NULL);
+        CHECK (status != 'ARCHIVED'::transaction.wallet_status OR archived_at IS NOT NULL);
 
 
 CREATE TYPE transaction.payment_type AS ENUM ('DEPOSIT', 'WITHDRAWAL', 'TRANSFER');
