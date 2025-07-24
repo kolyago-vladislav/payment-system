@@ -16,10 +16,12 @@ public class OutboxEventConsumer {
     private final OutboxService outboxService;
     private final JsonWrapper jsonWrapper;
 
-    @KafkaListener(topics = "postgres.transaction.outbox_events", groupId = "transaction-service", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(
+        topics = "postgres.transaction.outbox_events",
+        groupId = "transaction-service",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
     public void processMessage(byte[] event) {
-        var outboxEvent = jsonWrapper.read(event, OutboxEvent.class);
-
-        outboxService.process(outboxEvent);
+        outboxService.process(jsonWrapper.read(event, OutboxEvent.class));
     }
 }
