@@ -15,6 +15,8 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.hibernate.annotations.ColumnTransformer;
+
 import com.example.transaction.model.entity.base.BaseEntity;
 import com.example.transaction.model.entity.type.WalletStatus;
 
@@ -37,6 +39,7 @@ public class Wallet extends BaseEntity {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
+    @ColumnTransformer(write = "?::transaction.wallet_status")
     private WalletStatus walletStatus;
 
     @Column(name = "balance")

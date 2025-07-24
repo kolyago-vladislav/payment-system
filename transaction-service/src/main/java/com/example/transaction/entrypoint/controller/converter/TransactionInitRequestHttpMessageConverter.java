@@ -15,12 +15,13 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 
+import com.example.transaction.core.exception.TransactionServiceException;
+import com.example.transaction.core.util.EnumUtil;
 import com.example.transaction.dto.DepositInitRequest;
 import com.example.transaction.dto.InitRequest;
+import com.example.transaction.dto.TransactionTypeDto;
 import com.example.transaction.dto.TransferInitRequest;
 import com.example.transaction.dto.WithdrawalInitRequest;
-import com.example.transaction.model.entity.type.TransactionType;
-import com.example.transaction.core.exception.TransactionServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static java.util.Optional.ofNullable;
@@ -57,12 +58,12 @@ public class TransactionInitRequestHttpMessageConverter extends AbstractHttpMess
     }
 
     @SuppressWarnings("unchecked")
-    private TransactionType extractTransactionTypeFromPath() {
+    private TransactionTypeDto extractTransactionTypeFromPath() {
         return ofNullable((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
             .map(ServletRequestAttributes::getRequest)
             .map(request -> (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE))
             .map(uriVars -> uriVars.get(INIT_REQUEST_TYPE_PATH_VARIABLE))
-            .map(TransactionType::from)
+            .map(type -> EnumUtil.from(TransactionTypeDto.class, type, () -> new TransactionServiceException("Unknown TransactionTypeDto: %s", type)))
             .orElseThrow(() -> new TransactionServiceException("Cannot extract transaction type from URI variables"));
     }
 

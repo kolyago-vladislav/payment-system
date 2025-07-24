@@ -39,7 +39,7 @@ ALTER TABLE transaction.wallets
 
 
 CREATE TYPE transaction.transaction_type AS ENUM ('DEPOSIT', 'WITHDRAWAL', 'TRANSFER');
-CREATE TYPE transaction.transaction_status AS ENUM ('FAILED', 'CONFIRMED', 'PENDING');
+CREATE TYPE transaction.transaction_status AS ENUM ('FAILED', 'CONFIRMED', 'PENDING', 'COMPLETED');
 CREATE TABLE transaction.transactions
 (
     id                uuid PRIMARY KEY                        DEFAULT uuid_generate_v4(),

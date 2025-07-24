@@ -5,9 +5,11 @@ import java.util.UUID;
 
 import com.example.transaction.model.entity.type.ExternalServiceStatus;
 
-public record WithdrawalCompletedDto(
+public record DepositCompletedDto(
     UUID transactionId,
     ExternalServiceStatus status,
-    String failureReason,
+    double amount,
     Instant timestamp
-) {}
+) {
+
+}

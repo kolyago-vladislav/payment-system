@@ -100,7 +100,7 @@ paths:
           required: true
           description: Transaction type
           schema:
-            enum: [deposit, withdrawal, transfer]
+            $ref: '#/components/schemas/TransactionTypeDto'
       requestBody:
         required: true
         content:
@@ -136,7 +136,7 @@ paths:
           required: true
           description: Transaction type
           schema:
-            enum: [deposit, withdrawal, transfer]
+            $ref: '#/components/schemas/TransactionTypeDto'
       requestBody:
         required: true
         content:
@@ -204,11 +204,11 @@ paths:
         - in: query
           name: type
           schema:
-            enum: [deposit, withdrawal, transfer]
+            $ref: '#/components/schemas/TransactionTypeDto'
         - in: query
           name: status
           schema:
-            enum: [confirmed, failed, pending]
+            $ref: '#/components/schemas/TransactionStatusDto'
         - in: query
           name: dateFrom
           schema:
@@ -274,7 +274,7 @@ components:
         userId:
           type: string
         status:
-          enum: [active, archived, blocked]
+          $ref: '#/components/schemas/TransactionStatusDto'
         balance:
           type: number
           format: double
@@ -399,7 +399,7 @@ components:
           type: string
           description: Id required to monitor the transaction
         status:
-          enum: [confirmed, failed, pending]
+          $ref: '#/components/schemas/TransactionStatusDto'
 
     TransactionStatusResponse:
       type: object
@@ -407,9 +407,9 @@ components:
         transactionId:
           type: string
         type:
-          enum: [deposit, withdrawal, transfer]
+          $ref: '#/components/schemas/TransactionTypeDto'
         status:
-          enum: [confirmed, failed, pending]
+          $ref: '#/components/schemas/TransactionStatusDto'
         amount:
           type: number
           format: double
@@ -433,3 +433,17 @@ components:
           type: string
           description: Описание ошибки
 
+    TransactionStatusDto:
+      type: string
+      enum: [confirmed, failed, pending, completed]
+      description: Current transaction status
+
+    TransactionTypeDto:
+      type: string
+      enum: [deposit, withdrawal, transfer]
+      description: Current transaction type
+
+    WalletStatusDto:
+      type: string
+      enum: [active, archived, blocked]
+      description: Current wallet status
