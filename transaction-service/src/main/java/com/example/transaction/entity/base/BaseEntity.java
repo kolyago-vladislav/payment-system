@@ -11,9 +11,6 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.example.transaction.util.CustomInstantDeserializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 @Getter
 @Setter
 @MappedSuperclass
@@ -24,11 +21,9 @@ public class BaseEntity {
     @Column(name = "id")
     private UUID id;
 
-    @JsonDeserialize(using = CustomInstantDeserializer.class)
     @Column(name = "created")
     private Instant created;
 
-    @JsonDeserialize(using = CustomInstantDeserializer.class)
     @Column(name = "updated")
     private Instant updated;
 
