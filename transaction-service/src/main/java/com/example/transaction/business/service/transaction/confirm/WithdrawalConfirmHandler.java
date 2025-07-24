@@ -3,7 +3,9 @@ package com.example.transaction.business.service.transaction.confirm;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.transaction.business.service.WalletService;
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
 import com.example.transaction.dto.WithdrawalConfirmRequest;
@@ -19,6 +21,8 @@ import com.example.transaction.business.service.transaction.confirm.base.Confirm
 import com.example.transaction.core.util.DateTimeUtil;
 import com.example.transaction.core.util.JsonWrapper;
 
+import static org.springframework.transaction.annotation.Isolation.REPEATABLE_READ;
+
 import static com.example.transaction.model.entity.type.TransactionType.WITHDRAWAL;
 
 @Component
@@ -31,12 +35,14 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
     private final DateTimeUtil dateTimeUtil;
     private final TransactionRepository transactionRepository;
     private final ExternalDtoMapper externalDtoMapper;
+    private final WalletService walletService;
 
     @Override
+    @Transactional(isolation = REPEATABLE_READ)
     public TransactionConfirmResponse handle(ConfirmRequest confirmRequest) {
         var request = (WithdrawalConfirmRequest) confirmRequest;
         var transaction = transactionRepository.save(transactionMapper.to(request, WITHDRAWAL));
-
+        walletService.debit(transaction);
         saveOutboxEvent(transaction);
 
         return transactionMapper.from(transaction);

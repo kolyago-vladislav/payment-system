@@ -21,9 +21,16 @@ public class WalletService {
     private final WalletRepository walletRepository;
 
     @Transactional(isolation = REPEATABLE_READ)
-    public void deposit(Transaction transaction) {
+    public void credit(Transaction transaction) {
         var wallet = tryGetWalletWithLock(transaction);
         wallet.setBalance(wallet.getBalance().add(transaction.getAmount()));
+        walletRepository.save(wallet);
+    }
+
+    @Transactional(isolation = REPEATABLE_READ)
+    public void debit(Transaction transaction) {
+        var wallet = tryGetWalletWithLock(transaction);
+        wallet.setBalance(wallet.getBalance().subtract(transaction.getAmount()));
         walletRepository.save(wallet);
     }
 

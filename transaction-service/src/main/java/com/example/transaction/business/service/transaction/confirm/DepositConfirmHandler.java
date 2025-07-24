@@ -3,6 +3,7 @@ package com.example.transaction.business.service.transaction.confirm;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.DepositConfirmRequest;
@@ -33,6 +34,7 @@ public class DepositConfirmHandler implements ConfirmRequestHandler {
     private final ExternalDtoMapper externalDtoMapper;
 
     @Override
+    @Transactional
     public TransactionConfirmResponse handle(ConfirmRequest confirmRequest) {
         var request = (DepositConfirmRequest) confirmRequest;
         var transaction = transactionRepository.save(transactionMapper.to(request, DEPOSIT));

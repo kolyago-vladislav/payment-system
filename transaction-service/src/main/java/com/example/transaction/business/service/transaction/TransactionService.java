@@ -1,6 +1,7 @@
 package com.example.transaction.business.service.transaction;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import com.example.transaction.business.repository.TransactionRepository;
 import com.example.transaction.business.service.WalletService;
 import com.example.transaction.business.service.transaction.confirm.base.ConfirmRequestHandler;
 import com.example.transaction.business.service.transaction.init.base.InitRequestHandler;
-import com.example.transaction.core.exception.TransactionServiceException;
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
@@ -55,41 +55,55 @@ public class TransactionService {
 
     @Transactional(isolation = REPEATABLE_READ)
     public void processDepositCompleteEvent(DepositCompletedDto dto) {
-        var transaction = tryGetTransactionWithLock(dto.transactionId());
-
-        if (transaction.getStatus() != TransactionStatus.PENDING) {
-            return;
-        }
-
-        switch (dto.status()) {
-            case FAILED -> failTransaction(transaction);
-            case COMPLETED -> completeTransaction(transaction);
-        }
+        tryGetTransactionWithLock(dto.transactionId())
+            .ifPresent(transaction -> {
+                switch (dto.status()) {
+                    case FAILED -> failDepositTransaction(transaction);
+                    case COMPLETED -> completeDepositTransaction(transaction);
+                }
+            });
     }
 
-    private Transaction tryGetTransactionWithLock(UUID transactionId) {
+    private Optional<Transaction> tryGetTransactionWithLock(UUID transactionId) {
         try {
             return repository.findByIdForUpdate(transactionId)
-                .orElseThrow(() -> new TransactionServiceException("Transaction not found: %s", transactionId));
+                .filter(tx -> tx.getStatus() == TransactionStatus.PENDING);
         } catch (CannotAcquireLockException e) {
             log.warn("Cannot acquire lock for transaction: {}", transactionId);
             return tryGetTransactionWithLock(transactionId);
         }
     }
 
-    private void failTransaction(Transaction transaction) {
+    private void failDepositTransaction(Transaction transaction) {
         transaction.setStatus(TransactionStatus.FAILED);
         repository.save(transaction);
     }
 
-    private void completeTransaction(Transaction transaction) {
-        walletService.deposit(transaction);
+    private void completeDepositTransaction(Transaction transaction) {
+        walletService.credit(transaction);
         transaction.setStatus(TransactionStatus.COMPLETED);
         repository.save(transaction);
     }
 
-    @Transactional
-    public void processWithdrawalCompleteEvent(WithdrawalCompletedDto read) {
+    @Transactional(isolation = REPEATABLE_READ)
+    public void processWithdrawalCompleteEvent(WithdrawalCompletedDto dto) {
+        tryGetTransactionWithLock(dto.transactionId())
+            .ifPresent(transaction -> {
+                switch (dto.status()) {
+                    case FAILED -> failWithdrawalTransaction(transaction);
+                    case COMPLETED -> completeWithdrawalTransaction(transaction);
+                }
+            });
+    }
 
+    private void failWithdrawalTransaction(Transaction transaction) {
+        walletService.credit(transaction);
+        transaction.setStatus(TransactionStatus.FAILED);
+        repository.save(transaction);
+    }
+
+    private void completeWithdrawalTransaction(Transaction transaction) {
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        repository.save(transaction);
     }
 }
