@@ -1,10 +1,12 @@
 package com.example.transaction.business.service.transaction;
 
 import java.util.Map;
+import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,8 +55,7 @@ public class TransactionService {
 
     @Transactional(isolation = REPEATABLE_READ)
     public void processDepositCompleteEvent(DepositCompletedDto dto) {
-        var transaction = repository.findByIdForUpdate(dto.transactionId())
-            .orElseThrow(() -> new TransactionServiceException("Transaction not found: %s", dto.transactionId()));
+        var transaction = tryGetTransactionWithLock(dto.transactionId());
 
         if (transaction.getStatus() != TransactionStatus.PENDING) {
             return;
@@ -63,6 +64,16 @@ public class TransactionService {
         switch (dto.status()) {
             case FAILED -> failTransaction(transaction);
             case COMPLETED -> completeTransaction(transaction);
+        }
+    }
+
+    private Transaction tryGetTransactionWithLock(UUID transactionId) {
+        try {
+            return repository.findByIdForUpdate(transactionId)
+                .orElseThrow(() -> new TransactionServiceException("Transaction not found: %s", transactionId));
+        } catch (CannotAcquireLockException e) {
+            log.error("Cannot acquire lock for transaction: {}", transactionId);
+            return tryGetTransactionWithLock(transactionId);
         }
     }
 
