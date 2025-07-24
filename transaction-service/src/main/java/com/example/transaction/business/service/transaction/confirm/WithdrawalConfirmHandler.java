@@ -11,7 +11,7 @@ import com.example.transaction.model.dto.WithdrawalRequestDto;
 import com.example.transaction.model.entity.OutboxEvent;
 import com.example.transaction.model.entity.Transaction;
 import com.example.transaction.model.entity.type.TransactionType;
-import com.example.transaction.external.mapper.ExternalMapper;
+import com.example.transaction.business.mapper.ExternalDtoMapper;
 import com.example.transaction.business.mapper.TransactionMapper;
 import com.example.transaction.business.repository.OutboxRepository;
 import com.example.transaction.business.repository.TransactionRepository;
@@ -30,7 +30,7 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
     private final JsonWrapper jsonWrapper;
     private final DateTimeUtil dateTimeUtil;
     private final TransactionRepository transactionRepository;
-    private final ExternalMapper externalMapper;
+    private final ExternalDtoMapper externalDtoMapper;
 
     @Override
     public TransactionConfirmResponse handle(ConfirmRequest confirmRequest) {
@@ -43,7 +43,7 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
     }
 
     private void saveOutboxEvent(Transaction transaction) {
-        var payload = externalMapper.toWithdrawalRequestDto(transaction);
+        var payload = externalDtoMapper.toWithdrawalRequestDto(transaction);
         var outboxEvent = buildOutboxEvent(payload);
 
         repository.save(outboxEvent);

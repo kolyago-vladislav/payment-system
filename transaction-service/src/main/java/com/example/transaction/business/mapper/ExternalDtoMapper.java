@@ -1,4 +1,4 @@
-package com.example.transaction.external.mapper;
+package com.example.transaction.business.mapper;
 
 import lombok.Setter;
 
@@ -17,7 +17,7 @@ import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
 @Mapper(componentModel = SPRING, injectionStrategy = CONSTRUCTOR)
 @Setter(onMethod_ = {@Autowired})
-public abstract class ExternalMapper {
+public abstract class ExternalDtoMapper {
     protected DateTimeUtil dateTimeUtil;
 
     @Mapping(target = "transactionId", source = "id")
