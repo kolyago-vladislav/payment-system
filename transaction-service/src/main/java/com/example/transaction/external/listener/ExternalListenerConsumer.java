@@ -5,16 +5,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import com.example.transaction.dto.DepositCompleted;
-import com.example.transaction.dto.DepositRequestDto;
-import com.example.transaction.dto.WithdrawalRequestDto;
-import com.example.transaction.dto.WithdrawalCompletedDto;
-import com.example.transaction.service.KafkaService;
-import com.example.transaction.util.DateTimeUtil;
-import com.example.transaction.util.JsonWrapper;
+import com.example.transaction.model.dto.DepositCompleted;
+import com.example.transaction.model.dto.DepositRequestDto;
+import com.example.transaction.model.dto.WithdrawalRequestDto;
+import com.example.transaction.model.dto.WithdrawalCompletedDto;
+import com.example.transaction.business.service.KafkaService;
+import com.example.transaction.core.util.DateTimeUtil;
+import com.example.transaction.core.util.JsonWrapper;
 
-import static com.example.transaction.service.outbox.event.DepositEventHandler.TOPIC_EXTERNAL_DEPOSIT;
-import static com.example.transaction.service.outbox.event.WithdrawalEventHandler.TOPIC_EXTERNAL_WITHDRAWAL;
+import static com.example.transaction.business.service.outbox.event.DepositEventHandler.TOPIC_EXTERNAL_DEPOSIT;
+import static com.example.transaction.business.service.outbox.event.WithdrawalEventHandler.TOPIC_EXTERNAL_WITHDRAWAL;
 
 @Service
 @RequiredArgsConstructor
