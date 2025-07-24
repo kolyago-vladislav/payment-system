@@ -1,4 +1,4 @@
-package com.example.transaction.service.confirm;
+package com.example.transaction.service.transaction.confirm;
 
 import lombok.RequiredArgsConstructor;
 
@@ -8,25 +8,28 @@ import com.example.transaction.dto.TransactionType;
 import com.example.transaction.dto.TransferConfirmRequest;
 import com.example.transaction.entity.Transaction;
 import com.example.transaction.mapper.TransactionMapper;
-import com.example.transaction.service.confirm.base.AbstractConfirmHandler;
 
 @Component
 @RequiredArgsConstructor
-public class ConfirmTransferHandler extends AbstractConfirmHandler<TransferConfirmRequest> {
+public class TransferConfirmHandler {
 
     private final TransactionMapper transactionMapper;
 
-    @Override
     protected Transaction map(TransferConfirmRequest request) {
         return transactionMapper.to(request, getType());
     }
 
-    @Override
     public TransactionType getType() {
         return TransactionType.TRANSFER;
     }
 
-    @Override
+    protected void saveOutboxEvent(
+        TransferConfirmRequest request,
+        Transaction transaction
+    ) {
+
+    }
+
     public Class<TransferConfirmRequest> getRequestType() {
         return TransferConfirmRequest.class;
     }

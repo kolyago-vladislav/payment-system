@@ -16,7 +16,7 @@ import com.example.transaction.dto.TransactionInitResponse;
 import com.example.transaction.dto.TransactionStatus;
 import com.example.transaction.dto.TransactionStatusResponse;
 import com.example.transaction.dto.TransactionType;
-import com.example.transaction.service.TransactionService;
+import com.example.transaction.service.transaction.TransactionService;
 
 @RestController
 @RequiredArgsConstructor

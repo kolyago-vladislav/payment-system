@@ -1,4 +1,4 @@
-package com.example.transaction.service;
+package com.example.transaction.service.transaction;
 
 import java.util.Map;
 
@@ -13,8 +13,8 @@ import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
 import com.example.transaction.dto.TransactionInitResponse;
 import com.example.transaction.dto.TransactionType;
-import com.example.transaction.service.confirm.base.ConfirmRequestHandler;
-import com.example.transaction.service.init.base.InitRequestHandler;
+import com.example.transaction.service.transaction.confirm.base.ConfirmRequestHandler;
+import com.example.transaction.service.transaction.init.base.InitRequestHandler;
 
 @Slf4j
 @Service

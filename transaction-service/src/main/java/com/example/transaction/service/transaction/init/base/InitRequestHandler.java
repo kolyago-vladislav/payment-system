@@ -1,4 +1,4 @@
-package com.example.transaction.service.init.base;
+package com.example.transaction.service.transaction.init.base;
 
 import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionInitResponse;

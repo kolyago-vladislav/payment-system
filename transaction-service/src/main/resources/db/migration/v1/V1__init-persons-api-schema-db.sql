@@ -38,7 +38,7 @@ ALTER TABLE transaction.wallets
         CHECK (status != 'ARCHIVED'::transaction.wallet_status OR archived_at IS NOT NULL);
 
 
-CREATE TYPE transaction.payment_type AS ENUM ('DEPOSIT', 'WITHDRAWAL', 'TRANSFER');
+CREATE TYPE transaction.transaction_type AS ENUM ('DEPOSIT', 'WITHDRAWAL', 'TRANSFER');
 CREATE TYPE transaction.transaction_status AS ENUM ('FAILED', 'CONFIRMED', 'PENDING');
 CREATE TABLE transaction.transactions
 (
@@ -48,7 +48,7 @@ CREATE TABLE transaction.transactions
     user_id           uuid                           NOT NULL,
     wallet_id         uuid                           NOT NULL,
     amount            DECIMAL                        NOT NULL DEFAULT 0.0,
-    type              transaction.payment_type       NOT NULL,
+    type              transaction.transaction_type   NOT NULL,
     status            transaction.transaction_status NOT NULL,
     comment           VARCHAR(256),
     fee               DECIMAL                        NOT NULL DEFAULT 0.0,
@@ -88,3 +88,12 @@ ALTER TABLE transaction.transactions
                 OR
             (status <> 'FAILED' AND failure_reason IS NULL)
             );
+
+CREATE TABLE transaction.outbox_events
+(
+    id             uuid PRIMARY KEY                      DEFAULT uuid_generate_v4(),
+    created        TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    transaction_id uuid                         NOT NULL,
+    type           transaction.transaction_type NOT NULL,
+    payload        jsonb                        NOT NULL
+);

@@ -15,9 +15,10 @@ import lombok.Setter;
 
 import org.hibernate.annotations.ColumnTransformer;
 
-import com.example.transaction.dto.TransactionStatus;
-import com.example.transaction.dto.TransactionType;
 import com.example.transaction.entity.base.BaseEntity;
+import com.example.transaction.entity.type.TransactionStatus;
+import com.example.transaction.entity.type.TransactionType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Getter
 @Setter
@@ -37,7 +38,7 @@ public class Transaction extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    @ColumnTransformer(write = "?::transaction.payment_type")
+    @ColumnTransformer(write = "?::transaction.transaction_type")
     private TransactionType type;
 
     @Enumerated(EnumType.STRING)
@@ -55,6 +56,7 @@ public class Transaction extends BaseEntity {
     @JoinColumn(name = "target_wallet_id")
     private Wallet targetWallet;
 
+    @JsonProperty("payment_method_id")
     @Column(name = "payment_method_id")
     private Long paymentMethodId;
 

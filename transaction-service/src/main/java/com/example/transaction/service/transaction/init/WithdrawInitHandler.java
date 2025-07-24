@@ -1,11 +1,11 @@
-package com.example.transaction.service.init;
+package com.example.transaction.service.transaction.init;
 
 import org.springframework.stereotype.Component;
 
 import com.example.transaction.dto.TransactionInitResponse;
 import com.example.transaction.dto.TransactionType;
 import com.example.transaction.dto.WithdrawalInitRequest;
-import com.example.transaction.service.init.base.AbstractInitHandler;
+import com.example.transaction.service.transaction.init.base.AbstractInitHandler;
 
 @Component
 public class WithdrawInitHandler extends AbstractInitHandler<WithdrawalInitRequest> {

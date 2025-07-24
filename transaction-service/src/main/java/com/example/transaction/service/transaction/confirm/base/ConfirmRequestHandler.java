@@ -1,4 +1,4 @@
-package com.example.transaction.service.confirm.base;
+package com.example.transaction.service.transaction.confirm.base;
 
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;

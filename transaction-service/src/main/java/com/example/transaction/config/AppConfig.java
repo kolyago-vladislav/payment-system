@@ -11,8 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.example.transaction.dto.TransactionType;
-import com.example.transaction.service.confirm.base.ConfirmRequestHandler;
-import com.example.transaction.service.init.base.InitRequestHandler;
+import com.example.transaction.service.transaction.confirm.base.ConfirmRequestHandler;
+import com.example.transaction.service.outbox.event.base.OutboxEventHandler;
+import com.example.transaction.service.transaction.init.base.InitRequestHandler;
 
 @Configuration
 public class AppConfig {
@@ -32,5 +33,11 @@ public class AppConfig {
     public Map<TransactionType, ConfirmRequestHandler> confirmRequestHandlers(List<ConfirmRequestHandler> handlers) {
         return handlers.stream()
             .collect(Collectors.toMap(ConfirmRequestHandler::getType, Function.identity()));
+    }
+
+    @Bean
+    public Map<com.example.transaction.entity.type.TransactionType, OutboxEventHandler<?>> outboxEventHandlers(List<OutboxEventHandler<?>> handlers) {
+        return handlers.stream()
+            .collect(Collectors.toMap(OutboxEventHandler::getOutboxEventType, Function.identity()));
     }
 }
