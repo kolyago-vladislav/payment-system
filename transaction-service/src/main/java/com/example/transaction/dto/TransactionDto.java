@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import com.example.transaction.entity.type.TransactionStatus;
 import com.example.transaction.entity.type.TransactionType;
-import com.example.transaction.util.BigDecimalFromObjectDeserializer;
+import com.example.transaction.util.BigDecimalDeserializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -15,12 +15,12 @@ public record TransactionDto (
     UUID userId,
     @JsonProperty("wallet_id")
     UUID walletId,
-    @JsonDeserialize(using = BigDecimalFromObjectDeserializer.class)
+    @JsonDeserialize(using = BigDecimalDeserializer.class)
     BigDecimal amount,
     TransactionType type,
     TransactionStatus status,
     String comment,
-    @JsonDeserialize(using = BigDecimalFromObjectDeserializer.class)
+    @JsonDeserialize(using = BigDecimalDeserializer.class)
     BigDecimal fee,
     @JsonProperty("target_wallet_id")
     UUID targetWalletId,

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class BigDecimalFromObjectDeserializer extends JsonDeserializer<BigDecimal> {
+public class BigDecimalDeserializer extends JsonDeserializer<BigDecimal> {
 
     @Override
     public BigDecimal deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
