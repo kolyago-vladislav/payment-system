@@ -15,8 +15,8 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.example.transaction.dto.WalletStatus;
 import com.example.transaction.entity.base.BaseEntity;
+import com.example.transaction.entity.type.WalletStatus;
 
 @Getter
 @Setter

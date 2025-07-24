@@ -17,11 +17,10 @@ import org.springframework.web.servlet.HandlerMapping;
 
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.DepositConfirmRequest;
-import com.example.transaction.dto.TransactionType;
 import com.example.transaction.dto.TransferConfirmRequest;
 import com.example.transaction.dto.WithdrawalConfirmRequest;
+import com.example.transaction.entity.type.TransactionType;
 import com.example.transaction.exception.TransactionServiceException;
-import com.example.transaction.util.TransactionTypeUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static java.util.Optional.ofNullable;
@@ -63,7 +62,7 @@ public class TransactionConfirmRequestHttpMessageConverter extends AbstractHttpM
             .map(ServletRequestAttributes::getRequest)
             .map(request -> (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE))
             .map(uriVars -> uriVars.get(Confirm_REQUEST_TYPE_PATH_VARIABLE))
-            .map(TransactionTypeUtil::from)
+            .map(TransactionType::from)
             .orElseThrow(() -> new TransactionServiceException("Cannot extract transaction type from URI variables"));
     }
 

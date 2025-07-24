@@ -12,7 +12,7 @@ import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
 import com.example.transaction.dto.TransactionInitResponse;
-import com.example.transaction.dto.TransactionType;
+import com.example.transaction.entity.type.TransactionType;
 import com.example.transaction.service.transaction.confirm.base.ConfirmRequestHandler;
 import com.example.transaction.service.transaction.init.base.InitRequestHandler;
 
@@ -26,18 +26,18 @@ public class TransactionService {
 
 
     public TransactionInitResponse init(
-        TransactionType type,
+        String type,
         InitRequest initRequest
     ) {
-        return initRequestHandlers.get(type).handle(initRequest);
+        return initRequestHandlers.get(TransactionType.from(type)).handle(initRequest);
     }
 
     @Transactional
     public TransactionConfirmResponse confirm(
-        TransactionType type,
+        String type,
         ConfirmRequest confirmRequest
     ) {
-        return confirmRequestHandlers.get(type).handle(confirmRequest);
+        return confirmRequestHandlers.get(TransactionType.from(type)).handle(confirmRequest);
     }
 
 }

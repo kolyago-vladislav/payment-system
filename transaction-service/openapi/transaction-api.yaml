@@ -100,7 +100,7 @@ paths:
           required: true
           description: Transaction type
           schema:
-            $ref: '#/components/schemas/TransactionType'
+            enum: [deposit, withdrawal, transfer]
       requestBody:
         required: true
         content:
@@ -136,7 +136,7 @@ paths:
           required: true
           description: Transaction type
           schema:
-            $ref: '#/components/schemas/TransactionType'
+            enum: [deposit, withdrawal, transfer]
       requestBody:
         required: true
         content:
@@ -204,11 +204,11 @@ paths:
         - in: query
           name: type
           schema:
-            $ref: '#/components/schemas/TransactionType'
+            enum: [deposit, withdrawal, transfer]
         - in: query
           name: status
           schema:
-            $ref: '#/components/schemas/TransactionStatus'
+            enum: [confirmed, failed, pending]
         - in: query
           name: dateFrom
           schema:
@@ -274,7 +274,7 @@ components:
         userId:
           type: string
         status:
-          $ref: '#/components/schemas/WalletStatus'
+          enum: [active, archived, blocked]
         balance:
           type: number
           format: double
@@ -399,7 +399,7 @@ components:
           type: string
           description: Id required to monitor the transaction
         status:
-          $ref: '#/components/schemas/TransactionStatus'
+          enum: [confirmed, failed, pending]
 
     TransactionStatusResponse:
       type: object
@@ -407,9 +407,9 @@ components:
         transactionId:
           type: string
         type:
-          $ref: '#/components/schemas/TransactionType'
+          enum: [deposit, withdrawal, transfer]
         status:
-          $ref: '#/components/schemas/TransactionStatus'
+          enum: [confirmed, failed, pending]
         amount:
           type: number
           format: double
@@ -433,26 +433,3 @@ components:
           type: string
           description: Описание ошибки
 
-    TransactionType:
-      type: string
-      description: enum transaction types
-      enum:
-        - deposit
-        - withdrawal
-        - transfer
-
-    TransactionStatus:
-      type: string
-      description: enum transaction statuses
-      enum:
-        - confirmed
-        - failed
-        - pending
-
-    WalletStatus:
-      type: string
-      description: enum wallet statuses
-      enum:
-        - active
-        - archived
-        - blocked

@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.example.transaction.dto.TransactionType;
-import com.example.transaction.service.transaction.confirm.base.ConfirmRequestHandler;
+import com.example.transaction.entity.type.TransactionType;
 import com.example.transaction.service.outbox.event.base.OutboxEventHandler;
+import com.example.transaction.service.transaction.confirm.base.ConfirmRequestHandler;
 import com.example.transaction.service.transaction.init.base.InitRequestHandler;
 
 @Configuration

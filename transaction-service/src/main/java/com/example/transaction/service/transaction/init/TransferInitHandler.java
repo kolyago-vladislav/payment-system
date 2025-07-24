@@ -3,8 +3,8 @@ package com.example.transaction.service.transaction.init;
 import org.springframework.stereotype.Component;
 
 import com.example.transaction.dto.TransactionInitResponse;
-import com.example.transaction.dto.TransactionType;
 import com.example.transaction.dto.TransferInitRequest;
+import com.example.transaction.entity.type.TransactionType;
 import com.example.transaction.service.transaction.init.base.AbstractInitHandler;
 
 @Component

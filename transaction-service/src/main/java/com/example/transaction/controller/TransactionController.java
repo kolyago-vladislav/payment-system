@@ -13,9 +13,8 @@ import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
 import com.example.transaction.dto.TransactionInitResponse;
-import com.example.transaction.dto.TransactionStatus;
 import com.example.transaction.dto.TransactionStatusResponse;
-import com.example.transaction.dto.TransactionType;
+import com.example.transaction.entity.type.TransactionType;
 import com.example.transaction.service.transaction.TransactionService;
 
 @RestController
@@ -26,7 +25,7 @@ public class TransactionController implements TransactionApi {
 
     @Override
     public ResponseEntity<TransactionInitResponse> init(
-        TransactionType type,
+        String type,
         InitRequest initRequest
     ) {
         return ResponseEntity.ok(transactionService.init(type, initRequest));
@@ -34,7 +33,7 @@ public class TransactionController implements TransactionApi {
 
     @Override
     public ResponseEntity<TransactionConfirmResponse> confirm(
-        TransactionType type,
+        String type,
         ConfirmRequest confirmRequest
     ) {
         return ResponseEntity.ok(transactionService.confirm(type, confirmRequest));
@@ -44,8 +43,8 @@ public class TransactionController implements TransactionApi {
     public ResponseEntity<List<TransactionStatusResponse>> findAll(
         String userUid,
         String walletUid,
-        TransactionType type,
-        TransactionStatus status,
+        String type,
+        String status,
         OffsetDateTime dateFrom,
         OffsetDateTime dateTo,
         Integer page,

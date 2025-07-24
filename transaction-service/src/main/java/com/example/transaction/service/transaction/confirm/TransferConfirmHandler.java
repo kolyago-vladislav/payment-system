@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 
-import com.example.transaction.dto.TransactionType;
 import com.example.transaction.dto.TransferConfirmRequest;
 import com.example.transaction.entity.Transaction;
+import com.example.transaction.entity.type.TransactionType;
 import com.example.transaction.mapper.TransactionMapper;
 
 @Component

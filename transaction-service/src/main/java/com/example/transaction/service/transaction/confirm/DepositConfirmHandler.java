@@ -8,9 +8,9 @@ import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.DepositConfirmRequest;
 import com.example.transaction.dto.DepositRequestDto;
 import com.example.transaction.dto.TransactionConfirmResponse;
-import com.example.transaction.dto.TransactionType;
 import com.example.transaction.entity.OutboxEvent;
 import com.example.transaction.entity.Transaction;
+import com.example.transaction.entity.type.TransactionType;
 import com.example.transaction.external.mapper.ExternalMapper;
 import com.example.transaction.mapper.TransactionMapper;
 import com.example.transaction.repository.OutboxRepository;
@@ -19,7 +19,7 @@ import com.example.transaction.service.transaction.confirm.base.ConfirmRequestHa
 import com.example.transaction.util.DateTimeUtil;
 import com.example.transaction.util.JsonWrapper;
 
-import static com.example.transaction.dto.TransactionType.DEPOSIT;
+import static com.example.transaction.entity.type.TransactionType.DEPOSIT;
 
 @Component
 @RequiredArgsConstructor
@@ -52,7 +52,7 @@ public class DepositConfirmHandler implements ConfirmRequestHandler {
     private OutboxEvent buildOutboxEvent(DepositRequestDto payload) {
         return new OutboxEvent()
             .setTransactionId(payload.transactionId())
-            .setType(com.example.transaction.entity.type.TransactionType.DEPOSIT)
+            .setType(DEPOSIT)
             .setPayload(jsonWrapper.write(payload))
             .setCreated(dateTimeUtil.now());
     }

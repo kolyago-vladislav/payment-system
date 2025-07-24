@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.transaction.dto.DepositConfirmRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
-import com.example.transaction.dto.TransactionType;
 import com.example.transaction.dto.TransferConfirmRequest;
 import com.example.transaction.dto.WithdrawalConfirmRequest;
 import com.example.transaction.entity.Transaction;
 import com.example.transaction.entity.Wallet;
+import com.example.transaction.entity.type.TransactionType;
 import com.example.transaction.exception.TransactionServiceException;
 import com.example.transaction.repository.WalletRepository;
 import com.example.transaction.util.DateTimeUtil;

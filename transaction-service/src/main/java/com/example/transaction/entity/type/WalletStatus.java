@@ -3,16 +3,16 @@ package com.example.transaction.entity.type;
 import com.example.transaction.exception.TransactionServiceException;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-public enum TransactionType {
+public enum WalletStatus {
 
-    DEPOSIT,
+    ACTIVE,
 
-    WITHDRAWAL,
+    ARCHIVED,
 
-    TRANSFER;
+    BLOCKED;
 
     @JsonCreator
-    public static TransactionType from(String value) {
+    public static WalletStatus fromValue(String value) {
         for (var type : values()) {
             if (type.name().equalsIgnoreCase(value)) {
                 return type;
