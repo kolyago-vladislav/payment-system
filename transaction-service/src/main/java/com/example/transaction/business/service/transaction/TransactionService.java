@@ -72,7 +72,7 @@ public class TransactionService {
             return repository.findByIdForUpdate(transactionId)
                 .orElseThrow(() -> new TransactionServiceException("Transaction not found: %s", transactionId));
         } catch (CannotAcquireLockException e) {
-            log.error("Cannot acquire lock for transaction: {}", transactionId);
+            log.warn("Cannot acquire lock for transaction: {}", transactionId);
             return tryGetTransactionWithLock(transactionId);
         }
     }

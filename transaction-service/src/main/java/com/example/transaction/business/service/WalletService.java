@@ -31,7 +31,7 @@ public class WalletService {
         try {
             return walletRepository.findByIdForUpdate(transaction.getWallet().getId());
         } catch (CannotAcquireLockException e) {
-            log.error("Cannot acquire lock for wallet: {}", transaction.getWallet().getId());
+            log.warn("Cannot acquire lock for wallet: {}", transaction.getWallet().getId());
             return tryGetWalletWithLock(transaction);
         }
     }
