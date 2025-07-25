@@ -1,7 +1,7 @@
 package com.example.transaction.business.repository;
 
 import jakarta.persistence.LockModeType;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +15,6 @@ public interface WalletRepository extends JpaRepository<Wallet, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT w FROM Wallet w WHERE w.id = :id")
     Wallet findByIdForUpdate(UUID id);
+
+    List<Wallet> findByUserId(UUID uuid);
 }

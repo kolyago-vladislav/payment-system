@@ -35,12 +35,12 @@ public class Wallet extends BaseEntity {
     private WalletType walletType;
     
     @Column(name = "user_id")
-    private UUID userid;
+    private UUID userId;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     @ColumnTransformer(write = "?::transaction.wallet_status")
-    private WalletStatus walletStatus;
+    private WalletStatus status;
 
     @Column(name = "balance")
     private BigDecimal balance;

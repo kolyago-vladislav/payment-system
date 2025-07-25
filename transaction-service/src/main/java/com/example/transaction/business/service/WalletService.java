@@ -10,7 +10,13 @@ import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.transaction.business.mapper.WalletMapper;
 import com.example.transaction.business.repository.WalletRepository;
+import com.example.transaction.core.exception.TransactionServiceException;
+import com.example.transaction.dto.WalletDto;
+import com.example.transaction.dto.WalletPageDto;
+import com.example.transaction.dto.WalletWriteDto;
+import com.example.transaction.dto.WalletWriteResponseDto;
 import com.example.transaction.model.entity.Wallet;
 
 import static org.springframework.transaction.annotation.Isolation.REPEATABLE_READ;
@@ -21,6 +27,7 @@ import static org.springframework.transaction.annotation.Isolation.REPEATABLE_RE
 public class WalletService {
 
     private final WalletRepository walletRepository;
+    private final WalletMapper walletMapper;
 
     @Transactional(isolation = REPEATABLE_READ)
     public void credit(UUID walletId, BigDecimal amount) {
@@ -43,5 +50,25 @@ public class WalletService {
             log.warn("Cannot acquire lock for wallet: {}", walletId);
             return tryGetWalletWithLock(walletId);
         }
+    }
+
+    @Transactional
+    public WalletWriteResponseDto create(WalletWriteDto walletWriteDto) {
+        var wallet = walletMapper.to(walletWriteDto);
+        walletRepository.save(wallet);
+        return new WalletWriteResponseDto(wallet.getId().toString());
+    }
+
+    public WalletDto findById(String walletId) {
+        var wallet = walletRepository.findById(UUID.fromString(walletId))
+            .orElseThrow(() -> new TransactionServiceException("Cannot find wallet with id: %s", walletId));
+
+        return walletMapper.from(wallet);
+    }
+
+    public WalletPageDto findByUserId(String userId) {
+        var wallets = walletRepository.findByUserId(UUID.fromString(userId));
+
+        return new WalletPageDto().items(walletMapper.from(wallets));
     }
 }

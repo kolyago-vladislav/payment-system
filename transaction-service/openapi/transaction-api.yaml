@@ -21,14 +21,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateWalletRequest'
+              $ref: '#/components/schemas/WalletWriteDto'
       responses:
         '201':
           description: Wallet successfully created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WalletResponse'
+                $ref: '#/components/schemas/WalletWriteResponseDto'
         '400':
           description: Validation errors
           content:
@@ -54,7 +54,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WalletResponse'
+                $ref: '#/components/schemas/WalletDto'
         '404':
           description: Wallet not found
           content:
@@ -80,10 +80,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/WalletResponse'
-
+                $ref: '#/components/schemas/WalletPageDto'
 
   #########################################################
   ######################## TRANSACTIONS ###################
@@ -241,23 +238,33 @@ paths:
 
 components:
   schemas:
-    CreateWalletRequest:
+    WalletWriteDto:
       type: object
       required:
+        - name
         - userId
-        - currency
+        - walletTypeId
       properties:
         name:
           type: string
           description: Wallet name
-        walletType:
+        walletTypeId:
           type: string
-          description: Wallet type
+          description: Wallet type id
         userId:
           type: string
           description: Unique user identifier
 
-    WalletResponse:
+    WalletWriteResponseDto:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Wallet id
+
+    WalletDto:
       type: object
       properties:
         id:
@@ -274,10 +281,19 @@ components:
         userId:
           type: string
         status:
-          $ref: '#/components/schemas/TransactionStatusDto'
+          $ref: '#/components/schemas/WalletStatusDto'
         balance:
           type: number
           format: double
+
+    WalletPageDto:
+      type: object
+      required: [ ]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WalletDto'
 
     DepositInitRequest:
       type: object

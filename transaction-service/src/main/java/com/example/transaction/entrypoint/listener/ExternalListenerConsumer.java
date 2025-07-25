@@ -1,4 +1,4 @@
-package com.example.transaction.external.listener;
+package com.example.transaction.entrypoint.listener;
 
 import lombok.RequiredArgsConstructor;
 
