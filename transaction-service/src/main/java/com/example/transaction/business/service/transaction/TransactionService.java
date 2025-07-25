@@ -80,7 +80,7 @@ public class TransactionService {
     }
 
     private void completeDepositTransaction(Transaction transaction) {
-        walletService.credit(transaction);
+        walletService.credit(transaction.getWallet().getId(), transaction.getAmount());
         transaction.setStatus(TransactionStatus.COMPLETED);
         repository.save(transaction);
     }
@@ -97,7 +97,7 @@ public class TransactionService {
     }
 
     private void failWithdrawalTransaction(Transaction transaction) {
-        walletService.credit(transaction);
+        walletService.credit(transaction.getWallet().getId(), transaction.getAmount());
         transaction.setStatus(TransactionStatus.FAILED);
         repository.save(transaction);
     }

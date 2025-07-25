@@ -60,7 +60,7 @@ public abstract class TransactionMapper {
     @Mapping(target = "wallet", source = "request.fromWalletId", qualifiedByName = "toWallet")
     @Mapping(target = "amount", source = "request.amount")
     @Mapping(target = "type", source = "type")
-    @Mapping(target = "status", constant = "PENDING")
+    @Mapping(target = "status", constant = "COMPLETED")
     @Mapping(target = "fee", source = "request.fee")
     @Mapping(target = "userId", source = "request.userId")
     @Mapping(target = "targetWallet", source = "request.toWalletId", qualifiedByName = "toWallet")
