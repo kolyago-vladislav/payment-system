@@ -11,13 +11,16 @@ import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.transaction.business.mapper.TransactionMapper;
 import com.example.transaction.business.repository.TransactionRepository;
 import com.example.transaction.business.service.WalletService;
 import com.example.transaction.business.service.transaction.confirm.base.ConfirmRequestHandler;
 import com.example.transaction.business.service.transaction.init.base.InitRequestHandler;
+import com.example.transaction.core.exception.TransactionServiceException;
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
+import com.example.transaction.dto.TransactionDto;
 import com.example.transaction.dto.TransactionInitResponse;
 import com.example.transaction.dto.TransactionTypeDto;
 import com.example.transaction.model.dto.DepositCompletedDto;
@@ -37,6 +40,8 @@ public class TransactionService {
     private final Map<TransactionType, ConfirmRequestHandler> confirmRequestHandlers;
     private final WalletService walletService;
     private final TransactionRepository repository;
+    private final TransactionRepository transactionRepository;
+    private final TransactionMapper transactionMapper;
 
     public TransactionInitResponse init(
         TransactionTypeDto type,
@@ -105,5 +110,11 @@ public class TransactionService {
     private void completeWithdrawalTransaction(Transaction transaction) {
         transaction.setStatus(TransactionStatus.COMPLETED);
         repository.save(transaction);
+    }
+
+    public TransactionDto getStatus(String transactionId) {
+        var transaction = transactionRepository.findById(UUID.fromString(transactionId))
+            .orElseThrow(() -> new TransactionServiceException("Transaction is not found by id=%s", transactionId));
+        return transactionMapper.toTransactionDto(transaction);
     }
 }

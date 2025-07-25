@@ -1,5 +1,7 @@
 package com.example.transaction.business.mapper;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import lombok.Setter;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.transaction.dto.DepositConfirmRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
+import com.example.transaction.dto.TransactionDto;
 import com.example.transaction.dto.TransferConfirmRequest;
 import com.example.transaction.dto.WithdrawalConfirmRequest;
 import com.example.transaction.model.entity.Transaction;
@@ -82,4 +85,17 @@ public abstract class TransactionMapper {
         WithdrawalConfirmRequest request,
         TransactionType type
     );
+
+    @Mapping(target = "transactionId", source = "id")
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "amount", source = "amount")
+    @Mapping(target = "currency", source = "wallet.walletType.currencyCode")
+    @Mapping(target = "created", source = "created", qualifiedByName = "toOffsetDateTime")
+    @Mapping(target = "updated", source = "updated", qualifiedByName = "toOffsetDateTime" )
+    public abstract TransactionDto toTransactionDto(Transaction transaction);
+
+    @Named("toOffsetDateTime")
+    protected OffsetDateTime toWallet(Instant instant) {
+        return dateTimeUtil.to(instant);
+    }
 }

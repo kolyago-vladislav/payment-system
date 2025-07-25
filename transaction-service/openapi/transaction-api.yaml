@@ -175,7 +175,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionStatusResponse'
+                $ref: '#/components/schemas/TransactionDto'
         '404':
           description: Transaction not found
           content:
@@ -234,7 +234,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TransactionStatusResponse'
+                  $ref: '#/components/schemas/TransactionDto'
 
 components:
   schemas:
@@ -417,7 +417,7 @@ components:
         status:
           $ref: '#/components/schemas/TransactionStatusDto'
 
-    TransactionStatusResponse:
+    TransactionDto:
       type: object
       properties:
         transactionId:
@@ -431,13 +431,12 @@ components:
           format: double
         currency:
           type: string
-        createdAt:
+        created:
           type: string
           format: date-time
-        executedAt:
+        updated:
           type: string
           format: date-time
-          nullable: true
 
     ErrorResponse:
       type: object
