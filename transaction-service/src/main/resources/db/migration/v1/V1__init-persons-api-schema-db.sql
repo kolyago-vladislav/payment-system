@@ -1,8 +1,8 @@
 CREATE TABLE transaction.wallet_types
 (
     id            uuid PRIMARY KEY                     DEFAULT uuid_generate_v4(),
-    created       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
-    updated       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    created_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    updated_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
     name          VARCHAR(32)                 NOT NULL,
     currency_code VARCHAR(3)                  NOT NULL,
 
@@ -20,8 +20,8 @@ CREATE TYPE transaction.wallet_status AS ENUM ('ACTIVE', 'ARCHIVED', 'BLOCKED');
 CREATE TABLE transaction.wallets
 (
     id             uuid PRIMARY KEY                     DEFAULT uuid_generate_v4(),
-    created        TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
-    updated        TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    created_at        TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    updated_at        TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
     name           VARCHAR(32)                 NOT NULL,
     wallet_type_id uuid                        NOT NULL,
     user_id        uuid                        NOT NULL,
@@ -43,8 +43,8 @@ CREATE TYPE transaction.transaction_status AS ENUM ('FAILED', 'CONFIRMED', 'PEND
 CREATE TABLE transaction.transactions
 (
     id                uuid PRIMARY KEY                        DEFAULT uuid_generate_v4(),
-    created           TIMESTAMP WITHOUT TIME ZONE    NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
-    updated           TIMESTAMP WITHOUT TIME ZONE    NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    created_at           TIMESTAMP WITHOUT TIME ZONE    NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    updated_at           TIMESTAMP WITHOUT TIME ZONE    NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
     user_id           uuid                           NOT NULL,
     wallet_id         uuid                           NOT NULL,
     amount            DECIMAL                        NOT NULL DEFAULT 0.0,
@@ -92,7 +92,7 @@ ALTER TABLE transaction.transactions
 CREATE TABLE transaction.outbox_events
 (
     id             uuid PRIMARY KEY                      DEFAULT uuid_generate_v4(),
-    created        TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+    created_at        TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
     transaction_id uuid                         NOT NULL,
     type           transaction.transaction_type NOT NULL,
     payload        jsonb                        NOT NULL

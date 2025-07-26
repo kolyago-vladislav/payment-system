@@ -32,8 +32,8 @@ public class OutboxEvent {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "created")
-    private Instant created;
+    @Column(name = "created_at")
+    private Instant createdAt;
 
     @JsonProperty("transaction_id")
     @Column(name = "transaction_id")

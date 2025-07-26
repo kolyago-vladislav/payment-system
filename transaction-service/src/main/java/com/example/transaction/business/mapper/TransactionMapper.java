@@ -34,8 +34,8 @@ public abstract class TransactionMapper {
     @Mapping(target = "status", source = "status")
     public abstract TransactionConfirmResponse from(Transaction transaction);
 
-    @Mapping(target = "created", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
+    @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
+    @Mapping(target = "updatedAt", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "walletId", source = "request.walletId")
     @Mapping(target = "amount", source = "request.amount")
     @Mapping(target = "type", source = "type")
@@ -48,8 +48,8 @@ public abstract class TransactionMapper {
         TransactionType type
     );
 
-    @Mapping(target = "created", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
+    @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
+    @Mapping(target = "updatedAt", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "walletId", source = "request.fromWalletId")
     @Mapping(target = "amount", source = "request.amount")
     @Mapping(target = "type", source = "type")
@@ -62,8 +62,8 @@ public abstract class TransactionMapper {
         TransactionType type
     );
 
-    @Mapping(target = "created", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
+    @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
+    @Mapping(target = "updatedAt", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "walletId", source = "request.walletId")
     @Mapping(target = "amount", source = "request.amount")
     @Mapping(target = "type", source = "type")
@@ -80,8 +80,8 @@ public abstract class TransactionMapper {
     @Mapping(target = "status", source = "status")
     @Mapping(target = "amount", source = "amount")
     @Mapping(target = "currency", source = "wallet.walletType.currencyCode")
-    @Mapping(target = "created", source = "created", qualifiedByName = "toOffsetDateTime")
-    @Mapping(target = "updated", source = "updated", qualifiedByName = "toOffsetDateTime" )
+    @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "toOffsetDateTime")
+    @Mapping(target = "updatedAt", source = "updatedAt", qualifiedByName = "toOffsetDateTime" )
     public abstract TransactionDto toTransactionDto(Transaction transaction);
 
     public abstract List<TransactionDto> from(List<Transaction> transactions);

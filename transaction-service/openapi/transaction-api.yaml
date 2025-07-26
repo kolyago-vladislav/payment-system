@@ -24,7 +24,7 @@ paths:
               $ref: '#/components/schemas/WalletWriteDto'
       responses:
         '201':
-          description: Wallet successfully created
+          description: Wallet successfully createdAt
           content:
             application/json:
               schema:
@@ -441,10 +441,10 @@ components:
           format: double
         currency:
           type: string
-        created:
+        createdAt:
           type: string
           format: date-time
-        updated:
+        updatedAt:
           type: string
           format: date-time
 

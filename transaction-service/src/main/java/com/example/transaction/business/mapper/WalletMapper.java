@@ -31,8 +31,8 @@ public abstract class WalletMapper {
     private WalletTypeRepository walletTypeRepository;
 
     @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "created", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
+    @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
+    @Mapping(target = "updatedAt", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "walletType", source = "walletTypeId", qualifiedByName = "toWalletType" )
     @Mapping(target = "userId", source = "userId")

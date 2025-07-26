@@ -21,10 +21,10 @@ public class BaseEntity {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "created")
-    private Instant created;
+    @Column(name = "created_at")
+    private Instant createdAt;
 
-    @Column(name = "updated")
-    private Instant updated;
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
 }

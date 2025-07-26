@@ -48,5 +48,5 @@ public class Wallet extends BaseEntity {
     private BigDecimal balance;
 
     @Column(name = "archived_at")
-    private Instant archived;
+    private Instant archivedAt;
 }

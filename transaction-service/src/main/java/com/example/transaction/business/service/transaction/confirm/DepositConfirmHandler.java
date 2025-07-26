@@ -56,7 +56,7 @@ public class DepositConfirmHandler implements ConfirmRequestHandler {
             .setTransactionId(payload.transactionId())
             .setType(DEPOSIT)
             .setPayload(jsonWrapper.write(payload))
-            .setCreated(dateTimeUtil.now());
+            .setCreatedAt(dateTimeUtil.now());
     }
 
     @Override

@@ -26,9 +26,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
             AND (CARDINALITY(:userIds) = 0 OR t.user_id = ANY(:userIds))
             AND (CARDINALITY(:walletIds) = 0 OR t.wallet_id = ANY(:walletIds))
             AND (CARDINALITY(:statuses) = 0 OR t.status = ANY(CAST(:statuses AS transaction.transaction_status[])))
-            AND (COALESCE(:dateFrom) IS NULL OR t.created >= CAST(:dateFrom AS TIMESTAMP))
-            AND (COALESCE(:dateTo) IS NULL OR t.created <= CAST(:dateTo AS TIMESTAMP))
-        ORDER BY t.created DESC
+            AND (COALESCE(:dateFrom) IS NULL OR t.created_at >= CAST(:dateFrom AS TIMESTAMP))
+            AND (COALESCE(:dateTo) IS NULL OR t.created_at <= CAST(:dateTo AS TIMESTAMP))
+        ORDER BY t.created_at DESC
         LIMIT :limit
         OFFSET :offset
     """, nativeQuery = true)

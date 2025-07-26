@@ -60,7 +60,7 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
             .setTransactionId(payload.transactionId())
             .setType(WITHDRAWAL)
             .setPayload(jsonWrapper.write(payload))
-            .setCreated(dateTimeUtil.now());
+            .setCreatedAt(dateTimeUtil.now());
     }
 
     @Override

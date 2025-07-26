@@ -1,26 +1,47 @@
 services:
-  zookeeper:
-    image: wurstmeister/zookeeper
-    restart: "no"
-    ports:
-      - "2181:2181"
-
-  kafka:
-    image: wurstmeister/kafka:2.13-2.8.1
-    restart: "no"
-    ports:
-      - "9093:9093"
-    depends_on:
-      - zookeeper
+  nexus-change-password:
+    image: appropriate/curl
     environment:
-      KAFKA_LISTENERS: INTERNAL://:9092, EXTERNAL://:9093
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092, EXTERNAL://localhost:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      - NEXUS_ADMIN_PASSWORD_FILE=/nexus-data/admin.password
+      - NEXUS_NEW_PASSWORD=admin
+    depends_on:
+      nexus:
+        condition: service_healthy
+    entrypoint: [ "/bin/sh", "/scripts/change-password.sh" ]
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - nexus-data:/nexus-data
+      - ./nexus:/scripts:ro
+
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5434" ]
+    volumes:
+      - ./databases/init.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - "5434:5434"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5434" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
+
+  connector-creation:
+    image: curlimages/curl:8.5.0
+    user: root
+    depends_on:
+      kafka-connect:
+        condition: service_healthy
+    ports:
+      - '40012:40012'
+    volumes:
+      - ./kafka-connect:/kafka-connect
+    command:
+      sh -c "/kafka-connect/create-connector.sh"
 
   kafka-connect:
     image: confluentinc/cp-kafka-connect:7.4.0
@@ -56,98 +77,26 @@ services:
       timeout: 3s
       retries: 15
 
-
-  plugin-install:
-    image: curlimages/curl:8.5.0
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
     user: root
     ports:
-      - '40011:40011'
+      - "9080:9080"  # HTTP-интерфейс Alloy (по умолчанию)
+      - "4317:4317"   # OTLP gRPC (важно!)
+      - "4318:4318"   # OTLP HTTP (если нужен)
     volumes:
-      - ./kafka-connect:/kafka-connect
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log:/var/log:ro
+    environment:
+      GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push
     command:
-      sh -c "/kafka-connect/plugin-install.sh"
-
-  connector-creation:
-    image: curlimages/curl:8.5.0
-    user: root
-    depends_on:
-      kafka-connect:
-        condition: service_healthy
-    ports:
-      - '40012:40012'
-    volumes:
-      - ./kafka-connect:/kafka-connect
-    command:
-      sh -c "/kafka-connect/create-connector.sh"
-
-  postgres:
-    image: postgres:17
-    container_name: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: person
-    command: [ "postgres", "-c", "port=5434" ]
-    volumes:
-      - ./databases/init.sh:/docker-entrypoint-initdb.d/init.sh
-    ports:
-      - "5434:5434"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5434" ]
-      interval: 2s
-      timeout: 5s
-      retries: 25
-
-  individuals-api:
-    build:
-      context: ./individuals-api
-      dockerfile: Dockerfile
-    container_name: individuals-api
-    environment:
-      KEYCLOAK_URL: http://keycloak:8080
-      SPRING_PROFILES_ACTIVE: docker
-      PERSONS_API_HOST: persons-api
-      PERSONS_API_URL: http://persons-api:8092
-      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
-    ports:
-      - "8091:8091"
-    volumes:
-      - nexus-data:/nexus-data
-    depends_on:
-      nexus:
-        condition: service_healthy
-      keycloak-healthcheck:
-        condition: service_completed_successfully
-      persons-api:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-i", "http://localhost:8091/actuator/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  persons-api:
-    build:
-      context: ./person-service
-      dockerfile: Dockerfile
-    container_name: persons-api
-    ports:
-      - "8092:8092"
-    working_dir: /app
-    environment:
-      POSTGRES_HOST: postgres
-      SPRING_PROFILES_ACTIVE: docker
-      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
-    depends_on:
-      postgres:
-        condition: service_healthy
-      nexus-change-password:
-        condition: service_completed_successfully
-    healthcheck:
-      test: [ "CMD", "curl", "-i", "http://localhost:8092/actuator/health" ]
-      interval: 5s
-      timeout: 5s
-      retries: 30
+      - run
+      - --server.http.listen-addr=0.0.0.0:9080
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
@@ -253,27 +202,6 @@ services:
       timeout: 5s
       retries: 5
 
-  alloy:
-    image: grafana/alloy:latest
-    container_name: alloy
-    user: root
-    ports:
-      - "9080:9080"  # HTTP-интерфейс Alloy (по умолчанию)
-      - "4317:4317"   # OTLP gRPC (важно!)
-      - "4318:4318"   # OTLP HTTP (если нужен)
-    volumes:
-      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/log:/var/log:ro
-    environment:
-      GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push
-    command:
-      - run
-      - --server.http.listen-addr=0.0.0.0:9080
-      - --storage.path=/var/lib/alloy/data
-      - /etc/alloy/config.alloy
-
   nexus:
     image: sonatype/nexus3:3.76.0
     container_name: nexus
@@ -287,19 +215,6 @@ services:
       timeout: 10s
       retries: 30
 
-  nexus-change-password:
-    image: appropriate/curl
-    environment:
-      - NEXUS_ADMIN_PASSWORD_FILE=/nexus-data/admin.password
-      - NEXUS_NEW_PASSWORD=admin
-    depends_on:
-      nexus:
-        condition: service_healthy
-    entrypoint: ["/bin/sh", "/scripts/change-password.sh"]
-    volumes:
-      - nexus-data:/nexus-data
-      - ./nexus:/scripts:ro
-
   tempo:
     image: grafana/tempo:2.4.1
     container_name: tempo
@@ -309,6 +224,90 @@ services:
       - tempo_data:/var/tempo
     ports:
       - "3200:3200"
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    restart: "no"
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    restart: "no"
+    ports:
+      - "9093:9093"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_LISTENERS: INTERNAL://:9092, EXTERNAL://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092, EXTERNAL://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  plugin-install:
+    image: curlimages/curl:8.5.0
+    user: root
+    ports:
+      - '40011:40011'
+    volumes:
+      - ./kafka-connect:/kafka-connect
+    command:
+      sh -c "/kafka-connect/plugin-install.sh"
+
+  individuals-api:
+    build:
+      context: ./individuals-api
+      dockerfile: Dockerfile
+    container_name: individuals-api
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      SPRING_PROFILES_ACTIVE: docker
+      PERSONS_API_HOST: persons-api
+      PERSONS_API_URL: http://persons-api:8092
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    ports:
+      - "8091:8091"
+    volumes:
+      - nexus-data:/nexus-data
+    depends_on:
+      nexus:
+        condition: service_healthy
+      keycloak-healthcheck:
+        condition: service_completed_successfully
+      persons-api:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-i", "http://localhost:8091/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  persons-api:
+    build:
+      context: ./person-service
+      dockerfile: Dockerfile
+    container_name: persons-api
+    ports:
+      - "8092:8092"
+    working_dir: /app
+    environment:
+      POSTGRES_HOST: postgres
+      SPRING_PROFILES_ACTIVE: docker
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nexus-change-password:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-i", "http://localhost:8092/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
 volumes:
   artifacts:

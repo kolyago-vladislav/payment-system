@@ -26,7 +26,7 @@ public class WalletType  extends BaseEntity {
     private String status;
 
     @Column(name = "archived_at")
-    private Instant archived;
+    private Instant archivedAt;
 
     @Column(name = "user_type")
     private String userType;
