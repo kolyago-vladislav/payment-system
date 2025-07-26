@@ -32,6 +32,7 @@ public class OutboxEvent {
     @Column(name = "id")
     private UUID id;
 
+    @JsonProperty("created_at")
     @Column(name = "created_at")
     private Instant createdAt;
 
