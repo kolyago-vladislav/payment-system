@@ -20,6 +20,18 @@ public class DateTimeUtil {
     }
 
     public OffsetDateTime to(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
+
         return instant.atOffset(ZoneOffset.UTC);
+    }
+
+    public Instant to(OffsetDateTime offsetDateTime) {
+        if (offsetDateTime == null) {
+            return null;
+        }
+
+        return offsetDateTime.toInstant();
     }
 }

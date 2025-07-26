@@ -9,14 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.transaction.api.TransactionApi;
+import com.example.transaction.business.service.transaction.TransactionService;
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
 import com.example.transaction.dto.TransactionDto;
 import com.example.transaction.dto.TransactionInitResponse;
+import com.example.transaction.dto.TransactionPageDto;
 import com.example.transaction.dto.TransactionStatusDto;
-import com.example.transaction.business.service.transaction.TransactionService;
 import com.example.transaction.dto.TransactionTypeDto;
+import com.example.transaction.model.dto.TransactionPageRequestDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,17 +43,28 @@ public class TransactionController implements TransactionApi {
     }
 
     @Override
-    public ResponseEntity<List<TransactionDto>> findAll(
-        String userUid,
-        String walletUid,
-        TransactionTypeDto type,
-        TransactionStatusDto status,
+    public ResponseEntity<TransactionPageDto> findAll(
+        List<String> userIds,
+        List<String> walletIds,
+        List<TransactionTypeDto> types,
+        List<TransactionStatusDto> statuses,
         OffsetDateTime dateFrom,
         OffsetDateTime dateTo,
-        Integer page,
-        Integer size
+        Integer offset,
+        Integer limit
     ) {
-        return null;
+        var dto = TransactionPageRequestDto.builder()
+            .dateFrom(dateFrom)
+            .dateTo(dateTo)
+            .statuses(statuses)
+            .types(types)
+            .userIds(userIds)
+            .walletIds(walletIds)
+            .limit(limit)
+            .offset(offset)
+            .build();
+
+        return ResponseEntity.ok(transactionService.findAll(dto));
     }
 
     @Override

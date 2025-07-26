@@ -9,6 +9,10 @@ public class EnumUtil {
         String value,
         Supplier<? extends RuntimeException> exceptionSupplier
     ) {
+        if (value == null) {
+            return null;
+        }
+
         for (T constant : enumClass.getEnumConstants()) {
             if (constant.name().equalsIgnoreCase(value)) {
                 return constant;

@@ -1,5 +1,7 @@
 package com.example.transaction.model.entity.type;
 
+import java.util.List;
+
 import com.example.transaction.core.exception.TransactionServiceException;
 import com.example.transaction.core.util.EnumUtil;
 import com.example.transaction.dto.TransactionTypeDto;
@@ -17,7 +19,21 @@ public enum TransactionType {
     }
 
     public static TransactionType from(TransactionTypeDto value) {
+        if (value == null) {
+            return null;
+        }
+
         return from(value.getValue());
+    }
+
+    public static List<TransactionType> from(List<TransactionTypeDto> values) {
+        if (values == null) {
+            return null;
+        }
+
+        return values.stream()
+            .map(TransactionType::from)
+            .toList();
     }
 
 }

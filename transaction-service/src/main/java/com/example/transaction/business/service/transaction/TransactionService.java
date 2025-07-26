@@ -22,14 +22,18 @@ import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
 import com.example.transaction.dto.TransactionDto;
 import com.example.transaction.dto.TransactionInitResponse;
+import com.example.transaction.dto.TransactionPageDto;
 import com.example.transaction.dto.TransactionTypeDto;
 import com.example.transaction.model.dto.DepositCompletedDto;
+import com.example.transaction.model.dto.TransactionPageRequestDto;
 import com.example.transaction.model.dto.WithdrawalCompletedDto;
 import com.example.transaction.model.entity.Transaction;
 import com.example.transaction.model.entity.type.TransactionStatus;
 import com.example.transaction.model.entity.type.TransactionType;
 
 import static org.springframework.transaction.annotation.Isolation.REPEATABLE_READ;
+
+import static com.example.transaction.core.util.CollectionSqlQueryConverterUtil.toArray;
 
 @Slf4j
 @Service
@@ -42,6 +46,7 @@ public class TransactionService {
     private final TransactionRepository repository;
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
+
 
     public TransactionInitResponse init(
         TransactionTypeDto type,
@@ -116,5 +121,23 @@ public class TransactionService {
         var transaction = transactionRepository.findById(UUID.fromString(transactionId))
             .orElseThrow(() -> new TransactionServiceException("Transaction is not found by id=%s", transactionId));
         return transactionMapper.toTransactionDto(transaction);
+    }
+
+    public TransactionPageDto findAll(TransactionPageRequestDto dto) {
+        var transactions = transactionRepository.findAllByFilters(
+            toArray(dto.userIds(), UUID::fromString, UUID[]::new),
+            toArray(dto.walletIds(), UUID::fromString, UUID[]::new),
+            toArray(dto.types(), Enum::name, String[]::new),
+            toArray(dto.statuses(), Enum::name, String[]::new),
+            dto.dateFrom(),
+            dto.dateTo(),
+            dto.limit(),
+            dto.offset()
+        );
+        var items = transactionMapper.from(transactions);
+
+        return new TransactionPageDto()
+            .count(transactions.size())
+            .items(items);
     }
 }

@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import org.hibernate.annotations.ColumnTransformer;
 
@@ -23,15 +24,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Getter
 @Setter
 @Entity
+@Accessors(chain = true)
 @Table(name = "transactions", schema = "transaction")
 public class Transaction extends BaseEntity {
 
     @Column(name = "user_id")
     private UUID userId;
 
+    @Column(name = "wallet_id")
+    private UUID walletId;
+
     @ManyToOne(optional = false)
-    @JoinColumn(name = "wallet_id")
+    @JoinColumn(name = "wallet_id", insertable = false, updatable = false)
     private Wallet wallet;
+
+    @Column(name = "target_wallet_id")
+    private UUID targetWalletId;
+
+    @ManyToOne
+    @JoinColumn(name = "target_wallet_id", insertable = false, updatable = false)
+    private Wallet targetWallet;
 
     @Column(name = "amount")
     private BigDecimal amount;
@@ -51,10 +63,6 @@ public class Transaction extends BaseEntity {
 
     @Column(name = "fee")
     private BigDecimal fee;
-
-    @ManyToOne
-    @JoinColumn(name = "target_wallet_id")
-    private Wallet targetWallet;
 
     @JsonProperty("payment_method_id")
     @Column(name = "payment_method_id")

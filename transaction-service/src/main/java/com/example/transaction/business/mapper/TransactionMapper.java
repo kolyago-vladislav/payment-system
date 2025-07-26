@@ -2,7 +2,7 @@ package com.example.transaction.business.mapper;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.List;
 
 import lombok.Setter;
 
@@ -12,17 +12,14 @@ import org.mapstruct.Named;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.example.transaction.core.util.DateTimeUtil;
 import com.example.transaction.dto.DepositConfirmRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
 import com.example.transaction.dto.TransactionDto;
 import com.example.transaction.dto.TransferConfirmRequest;
 import com.example.transaction.dto.WithdrawalConfirmRequest;
 import com.example.transaction.model.entity.Transaction;
-import com.example.transaction.model.entity.Wallet;
 import com.example.transaction.model.entity.type.TransactionType;
-import com.example.transaction.core.exception.TransactionServiceException;
-import com.example.transaction.business.repository.WalletRepository;
-import com.example.transaction.core.util.DateTimeUtil;
 
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
@@ -32,7 +29,6 @@ import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 public abstract class TransactionMapper {
 
     protected DateTimeUtil dateTimeUtil;
-    private WalletRepository walletRepository;
 
     @Mapping(target = "transactionId", source = "id")
     @Mapping(target = "status", source = "status")
@@ -40,7 +36,7 @@ public abstract class TransactionMapper {
 
     @Mapping(target = "created", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "wallet", source = "request.walletId", qualifiedByName = "toWallet")
+    @Mapping(target = "walletId", source = "request.walletId")
     @Mapping(target = "amount", source = "request.amount")
     @Mapping(target = "type", source = "type")
     @Mapping(target = "status", constant = "PENDING")
@@ -52,21 +48,15 @@ public abstract class TransactionMapper {
         TransactionType type
     );
 
-    @Named("toWallet")
-    protected Wallet toWallet(String walletId) {
-        return walletRepository.findById(UUID.fromString(walletId))
-            .orElseThrow(() -> new TransactionServiceException("Cannot find wallet with id: %s", walletId));
-    }
-
     @Mapping(target = "created", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "wallet", source = "request.fromWalletId", qualifiedByName = "toWallet")
+    @Mapping(target = "walletId", source = "request.fromWalletId")
     @Mapping(target = "amount", source = "request.amount")
     @Mapping(target = "type", source = "type")
     @Mapping(target = "status", constant = "COMPLETED")
     @Mapping(target = "fee", source = "request.fee")
     @Mapping(target = "userId", source = "request.userId")
-    @Mapping(target = "targetWallet", source = "request.toWalletId", qualifiedByName = "toWallet")
+    @Mapping(target = "targetWalletId", source = "request.toWalletId")
     public abstract Transaction to(
         TransferConfirmRequest request,
         TransactionType type
@@ -74,7 +64,7 @@ public abstract class TransactionMapper {
 
     @Mapping(target = "created", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "wallet", source = "request.walletId", qualifiedByName = "toWallet")
+    @Mapping(target = "walletId", source = "request.walletId")
     @Mapping(target = "amount", source = "request.amount")
     @Mapping(target = "type", source = "type")
     @Mapping(target = "status", constant = "PENDING")
@@ -94,8 +84,10 @@ public abstract class TransactionMapper {
     @Mapping(target = "updated", source = "updated", qualifiedByName = "toOffsetDateTime" )
     public abstract TransactionDto toTransactionDto(Transaction transaction);
 
+    public abstract List<TransactionDto> from(List<Transaction> transactions);
+
     @Named("toOffsetDateTime")
-    protected OffsetDateTime toWallet(Instant instant) {
+    protected OffsetDateTime toOffsetDateTime(Instant instant) {
         return dateTimeUtil.to(instant);
     }
 }

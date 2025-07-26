@@ -18,6 +18,10 @@ public enum TransactionStatus {
     }
 
     public static TransactionStatus from(TransactionStatusDto value) {
+        if (value == null) {
+            return null;
+        }
+
         return from(value.getValue());
     }
 

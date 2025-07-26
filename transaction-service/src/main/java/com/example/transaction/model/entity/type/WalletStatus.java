@@ -17,6 +17,10 @@ public enum WalletStatus {
     }
 
     public static WalletStatus from(WalletStatusDto value) {
+        if (value == null) {
+            return null;
+        }
+
         return from(value.getValue());
     }
 

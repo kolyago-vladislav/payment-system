@@ -192,20 +192,32 @@ paths:
       parameters:
         - in: query
           name: userId
+          required: false
           schema:
-            type: string
+            type: array
+            items:
+              type: string
         - in: query
           name: walletId
+          required: false
           schema:
-            type: string
+            type: array
+            items:
+              type: string
         - in: query
           name: type
+          required: false
           schema:
-            $ref: '#/components/schemas/TransactionTypeDto'
+            type: array
+            items:
+              $ref: '#/components/schemas/TransactionTypeDto'
         - in: query
           name: status
+          required: false
           schema:
-            $ref: '#/components/schemas/TransactionStatusDto'
+            type: array
+            items:
+              $ref: '#/components/schemas/TransactionStatusDto'
         - in: query
           name: dateFrom
           schema:
@@ -217,12 +229,12 @@ paths:
             type: string
             format: date-time
         - in: query
-          name: page
+          name: offset
           schema:
             type: integer
             default: 0
         - in: query
-          name: size
+          name: limit
           schema:
             type: integer
             default: 20
@@ -232,9 +244,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TransactionDto'
+                $ref: '#/components/schemas/TransactionPageDto'
 
 components:
   schemas:
@@ -438,6 +448,17 @@ components:
           type: string
           format: date-time
 
+    TransactionPageDto:
+      type: object
+      required: [ ]
+      properties:
+        count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionDto'
+
     ErrorResponse:
       type: object
       properties:
@@ -450,15 +471,25 @@ components:
 
     TransactionStatusDto:
       type: string
-      enum: [confirmed, failed, pending, completed]
+      enum:
+        - CONFIRMED
+        - FAILED
+        - PENDING
+        - COMPLETED
       description: Current transaction status
 
     TransactionTypeDto:
       type: string
-      enum: [deposit, withdrawal, transfer]
+      enum:
+        - DEPOSIT
+        - WITHDRAWAL
+        - TRANSFER
       description: Current transaction type
 
     WalletStatusDto:
       type: string
-      enum: [active, archived, blocked]
+      enum:
+        - ACTIVE
+        - ARCHIVED
+        - BLOCKED
       description: Current wallet status

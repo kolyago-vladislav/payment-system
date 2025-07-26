@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import org.hibernate.annotations.ColumnTransformer;
 
@@ -23,6 +24,7 @@ import com.example.transaction.model.entity.type.WalletStatus;
 @Getter
 @Setter
 @Entity
+@Accessors(chain = true)
 @Table(name = "wallets", schema = "transaction")
 public class Wallet extends BaseEntity {
 
