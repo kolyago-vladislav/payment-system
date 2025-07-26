@@ -42,7 +42,7 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
     public TransactionConfirmResponse handle(ConfirmRequest confirmRequest) {
         var request = (WithdrawalConfirmRequest) confirmRequest;
         var transaction = transactionRepository.save(transactionMapper.to(request, WITHDRAWAL));
-        walletService.debit(transaction.getWallet().getId(), transaction.getAmount());
+        walletService.debit(transaction.getWalletId(), transaction.getAmount());
         saveOutboxEvent(transaction);
 
         return transactionMapper.from(transaction);

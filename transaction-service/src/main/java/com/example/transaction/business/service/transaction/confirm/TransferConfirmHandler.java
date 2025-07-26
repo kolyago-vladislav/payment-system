@@ -31,8 +31,8 @@ public class TransferConfirmHandler implements ConfirmRequestHandler {
     public TransactionConfirmResponse handle(ConfirmRequest confirmRequest) {
         var request = (TransferConfirmRequest) confirmRequest;
         var transaction = transactionRepository.save(transactionMapper.to(request, TRANSFER));
-        walletService.debit(transaction.getWallet().getId(), transaction.getAmount());
-        walletService.credit(transaction.getTargetWallet().getId(), transaction.getAmount());
+        walletService.debit(transaction.getWalletId(), transaction.getAmount());
+        walletService.credit(transaction.getTargetWalletId(), transaction.getAmount());
 
         return transactionMapper.from(transaction);
     }
