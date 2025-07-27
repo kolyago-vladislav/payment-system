@@ -37,7 +37,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      FLYWAY_URL: jdbc:postgresql://postgres:5434/transaction_shard_0
+      FLYWAY_URL: jdbc:postgresql://postgres:5434/transaction_shard_0?options=-c%20TimeZone=UTC
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: postgres
     command: migrate
@@ -51,7 +51,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      FLYWAY_URL: jdbc:postgresql://postgres:5434/transaction_shard_1
+      FLYWAY_URL: jdbc:postgresql://postgres:5434/transaction_shard_1?options=-c%20TimeZone=UTC
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: postgres
     command: migrate
