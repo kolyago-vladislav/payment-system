@@ -10,29 +10,3 @@ VALUES
     ('00000000-1111-2222-3333-000000000008'::uuid, 'Payroll Wallet',    'USD', 'ACTIVE'),
     ('00000000-1111-2222-3333-000000000009'::uuid, 'Gift Wallet',       'USD', 'ACTIVE'),
     ('00000000-1111-2222-3333-000000000010'::uuid, 'Backup Wallet',     'USD', 'ACTIVE');
-
-INSERT
-INTO
-    "transaction".wallets
-(
-    "id",
-    "name",
-    wallet_type_id,
-    user_id,
-    status,
-    balance
-)
-VALUES('123e4567-e89b-12d3-a456-426614174002'::uuid, 'wallet_name', '00000000-1111-2222-3333-000000000001'::uuid, '123e4567-e89b-12d3-a456-426614174000'::uuid, 'ACTIVE', 0.0);
-
-INSERT
-INTO
-    "transaction".wallets
-(
-    "id",
-    "name",
-    wallet_type_id,
-    user_id,
-    status,
-    balance
-)
-VALUES('123e4567-e89b-12d3-a456-426614174003'::uuid, 'wallet_name', '00000000-1111-2222-3333-000000000001'::uuid, '123e4567-e89b-12d3-a456-426614174000'::uuid, 'ACTIVE', 0.0);

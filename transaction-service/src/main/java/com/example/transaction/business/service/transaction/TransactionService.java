@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import com.example.transaction.business.service.WalletService;
 import com.example.transaction.business.service.transaction.confirm.base.ConfirmRequestHandler;
 import com.example.transaction.business.service.transaction.init.base.InitRequestHandler;
 import com.example.transaction.core.exception.TransactionServiceException;
+import com.example.transaction.core.util.DateTimeUtil;
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.InitRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
@@ -33,8 +36,9 @@ import com.example.transaction.model.entity.type.TransactionStatus;
 import com.example.transaction.model.entity.type.TransactionType;
 
 import static org.springframework.transaction.annotation.Isolation.REPEATABLE_READ;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
-import static com.example.transaction.core.util.CollectionSqlQueryConverterUtil.toArray;
+import static com.example.transaction.core.util.CollectionSqlQueryConverterUtil.toList;
 
 @Slf4j
 @Service
@@ -47,6 +51,7 @@ public class TransactionService {
     private final TransactionRepository repository;
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
+    private final DateTimeUtil dateTimeUtil;
 
 
     public TransactionInitResponse init(
@@ -138,20 +143,26 @@ public class TransactionService {
     }
 
     public TransactionPageDto findAll(TransactionPageRequestDto dto) {
+        var page = PageRequest.of(dto.offset(), dto.limit(), Sort.by("createdAt").descending());
         var transactions = transactionRepository.findAllByFilters(
-            toArray(dto.userIds(), UUID::fromString, UUID[]::new),
-            toArray(dto.walletIds(), UUID::fromString, UUID[]::new),
-            toArray(dto.types(), Enum::name, String[]::new),
-            toArray(dto.statuses(), Enum::name, String[]::new),
-            dto.dateFrom(),
-            dto.dateTo(),
-            dto.limit(),
-            dto.offset()
+            isEmpty(toList(dto.types(), TransactionType::from)),
+            isEmpty(dto.userIds()),
+            isEmpty(dto.walletIds()),
+            isEmpty(toList(dto.statuses(), TransactionStatus::from)),
+            dto.dateFrom() == null,
+            dto.dateTo() == null,
+            toList(dto.types(), TransactionType::from),
+            dto.userIds(),
+            dto.walletIds(),
+            toList(dto.statuses(), TransactionStatus::from),
+            dateTimeUtil.to(dto.dateFrom()),
+            dateTimeUtil.to(dto.dateTo()),
+            page
         );
-        var items = transactionMapper.from(transactions);
+        var items = transactionMapper.from(transactions.getContent());
 
         return new TransactionPageDto()
-            .count(transactions.size())
+            .count(transactions.getTotalPages())
             .items(items);
     }
 }

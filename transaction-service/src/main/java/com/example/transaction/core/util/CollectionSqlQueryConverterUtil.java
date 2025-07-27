@@ -1,22 +1,19 @@
 package com.example.transaction.core.util;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
-import static org.springframework.util.CollectionUtils.isEmpty;
-
 public class CollectionSqlQueryConverterUtil {
-    public static <T, R> R[] toArray(
+    public static <T, R> List<R> toList(
         Collection<T> collection,
-        Function<T, R> mapper,
-        java.util.function.IntFunction<R[]> generator
+        Function<T, R> mapper
     ) {
-        if (isEmpty(collection)) {
-            return generator.apply(0);
+        if (collection == null || collection.isEmpty()) {
+            return null;
         }
-
         return collection.stream()
             .map(mapper)
-            .toArray(generator);
+            .toList();
     }
 }
