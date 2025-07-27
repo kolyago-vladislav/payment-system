@@ -28,7 +28,7 @@ services:
 
   flyway-transactions-shard-1:
     image: flyway/flyway
-    container_name: flyway-transactions-shard-0
+    container_name: flyway-transactions-shard-1
     depends_on:
       postgres:
         condition: service_healthy
