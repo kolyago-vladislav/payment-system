@@ -1,4 +1,4 @@
-package com.example.transaction.core.converter;
+package com.example.transaction.core.config.converter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
