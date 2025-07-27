@@ -5,21 +5,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.transaction.business.service.WalletService;
-import com.example.transaction.dto.ConfirmRequest;
-import com.example.transaction.dto.TransactionConfirmResponse;
-import com.example.transaction.dto.WithdrawalConfirmRequest;
-import com.example.transaction.model.dto.WithdrawalRequestDto;
-import com.example.transaction.model.entity.OutboxEvent;
-import com.example.transaction.model.entity.Transaction;
-import com.example.transaction.model.entity.type.TransactionType;
 import com.example.transaction.business.mapper.ExternalDtoMapper;
+import com.example.transaction.business.mapper.OutboxMapper;
 import com.example.transaction.business.mapper.TransactionMapper;
 import com.example.transaction.business.repository.OutboxRepository;
 import com.example.transaction.business.repository.TransactionRepository;
+import com.example.transaction.business.service.WalletService;
 import com.example.transaction.business.service.transaction.confirm.base.ConfirmRequestHandler;
-import com.example.transaction.core.util.DateTimeUtil;
 import com.example.transaction.core.util.JsonWrapper;
+import com.example.transaction.dto.ConfirmRequest;
+import com.example.transaction.dto.TransactionConfirmResponse;
+import com.example.transaction.dto.WithdrawalConfirmRequest;
+import com.example.transaction.model.entity.Transaction;
+import com.example.transaction.model.entity.type.TransactionType;
 
 import static org.springframework.transaction.annotation.Isolation.REPEATABLE_READ;
 
@@ -32,7 +30,7 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
     private final TransactionMapper transactionMapper;
     private final OutboxRepository repository;
     private final JsonWrapper jsonWrapper;
-    private final DateTimeUtil dateTimeUtil;
+    private final OutboxMapper outboxMapper;
     private final TransactionRepository transactionRepository;
     private final ExternalDtoMapper externalDtoMapper;
     private final WalletService walletService;
@@ -50,17 +48,9 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
 
     private void saveOutboxEvent(Transaction transaction) {
         var payload = externalDtoMapper.toWithdrawalRequestDto(transaction);
-        var outboxEvent = buildOutboxEvent(payload);
+        var outboxEvent = outboxMapper.toWithdrawalEvent(transaction.getId(), jsonWrapper.write(payload));
 
         repository.save(outboxEvent);
-    }
-
-    private OutboxEvent buildOutboxEvent(WithdrawalRequestDto payload) {
-        return new OutboxEvent()
-            .setTransactionId(payload.transactionId())
-            .setType(WITHDRAWAL)
-            .setPayload(jsonWrapper.write(payload))
-            .setCreatedAt(dateTimeUtil.now());
     }
 
     @Override

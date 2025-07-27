@@ -5,20 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.transaction.dto.ConfirmRequest;
-import com.example.transaction.dto.DepositConfirmRequest;
-import com.example.transaction.model.dto.DepositRequestDto;
-import com.example.transaction.dto.TransactionConfirmResponse;
-import com.example.transaction.model.entity.OutboxEvent;
-import com.example.transaction.model.entity.Transaction;
-import com.example.transaction.model.entity.type.TransactionType;
 import com.example.transaction.business.mapper.ExternalDtoMapper;
+import com.example.transaction.business.mapper.OutboxMapper;
 import com.example.transaction.business.mapper.TransactionMapper;
 import com.example.transaction.business.repository.OutboxRepository;
 import com.example.transaction.business.repository.TransactionRepository;
 import com.example.transaction.business.service.transaction.confirm.base.ConfirmRequestHandler;
-import com.example.transaction.core.util.DateTimeUtil;
 import com.example.transaction.core.util.JsonWrapper;
+import com.example.transaction.dto.ConfirmRequest;
+import com.example.transaction.dto.DepositConfirmRequest;
+import com.example.transaction.dto.TransactionConfirmResponse;
+import com.example.transaction.model.entity.Transaction;
+import com.example.transaction.model.entity.type.TransactionType;
 
 import static com.example.transaction.model.entity.type.TransactionType.DEPOSIT;
 
@@ -28,8 +26,8 @@ public class DepositConfirmHandler implements ConfirmRequestHandler {
 
     private final TransactionMapper transactionMapper;
     private final OutboxRepository repository;
+    private final OutboxMapper outboxMapper;
     private final JsonWrapper jsonWrapper;
-    private final DateTimeUtil dateTimeUtil;
     private final TransactionRepository transactionRepository;
     private final ExternalDtoMapper externalDtoMapper;
 
@@ -46,17 +44,9 @@ public class DepositConfirmHandler implements ConfirmRequestHandler {
 
     private void saveOutboxEvent(Transaction transaction) {
         var payload = externalDtoMapper.toDepositRequestDto(transaction);
-        var outboxEvent = buildOutboxEvent(payload);
+        var outboxEvent = outboxMapper.toDepositEvent(transaction.getId(), jsonWrapper.write(payload));
 
         repository.save(outboxEvent);
-    }
-
-    private OutboxEvent buildOutboxEvent(DepositRequestDto payload) {
-        return new OutboxEvent()
-            .setTransactionId(payload.transactionId())
-            .setType(DEPOSIT)
-            .setPayload(jsonWrapper.write(payload))
-            .setCreatedAt(dateTimeUtil.now());
     }
 
     @Override

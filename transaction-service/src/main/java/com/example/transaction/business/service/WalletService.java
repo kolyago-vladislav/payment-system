@@ -1,5 +1,6 @@
 package com.example.transaction.business.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -29,6 +30,7 @@ public class WalletService {
     private final WalletRepository walletRepository;
     private final WalletMapper walletMapper;
 
+    @WithSpan("WalletService.credit")
     @Transactional(isolation = REPEATABLE_READ)
     public void credit(UUID walletId, BigDecimal amount) {
         var wallet = tryGetWalletWithLock(walletId);
@@ -38,6 +40,7 @@ public class WalletService {
         log.info("Wallet balance with id={} was credited", wallet.getId());
     }
 
+    @WithSpan("WalletService.debit")
     @Transactional(isolation = REPEATABLE_READ)
     public void debit(UUID walletId, BigDecimal amount) {
         var wallet = tryGetWalletWithLock(walletId);
@@ -56,6 +59,7 @@ public class WalletService {
         }
     }
 
+    @WithSpan("WalletService.create")
     @Transactional
     public WalletWriteResponseDto create(WalletWriteDto walletWriteDto) {
         var wallet = walletMapper.to(walletWriteDto);
@@ -64,6 +68,7 @@ public class WalletService {
         return new WalletWriteResponseDto(wallet.getId().toString());
     }
 
+    @WithSpan("WalletService.findById")
     public WalletDto findById(String walletId) {
         var wallet = walletRepository.findById(UUID.fromString(walletId))
             .orElseThrow(() -> new TransactionServiceException("Cannot find wallet with id: %s", walletId));
@@ -71,6 +76,7 @@ public class WalletService {
         return walletMapper.from(wallet);
     }
 
+    @WithSpan("WalletService.findByUserId")
     public WalletPageDto findByUserId(String userId) {
         var wallets = walletRepository.findByUserId(UUID.fromString(userId));
 

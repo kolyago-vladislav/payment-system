@@ -1,14 +1,17 @@
 package com.example.transaction.entrypoint.listener;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import com.example.transaction.model.entity.OutboxEvent;
 import com.example.transaction.business.service.outbox.OutboxService;
 import com.example.transaction.core.util.JsonWrapper;
+import com.example.transaction.core.util.TracingUtil;
+import com.example.transaction.model.entity.OutboxEvent;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OutboxEventConsumer {
@@ -22,6 +25,10 @@ public class OutboxEventConsumer {
         containerFactory = "kafkaListenerContainerFactory"
     )
     public void processMessage(byte[] event) {
-        outboxService.process(jsonWrapper.read(event, OutboxEvent.class));
+        var outboxEvent = jsonWrapper.read(event, OutboxEvent.class);
+        TracingUtil.withTraceContext(outboxEvent.getTraceId(), () -> {
+            log.debug("OutboxEventConsumer.processMessage: {}", outboxEvent.getTransactionId());
+            outboxService.process(outboxEvent);
+        });
     }
 }

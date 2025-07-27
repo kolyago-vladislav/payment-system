@@ -40,6 +40,10 @@ public class OutboxEvent {
     @Column(name = "transaction_id")
     private UUID transactionId;
 
+    @JsonProperty("trace_id")
+    @Column(name = "trace_id")
+    private String traceId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     @ColumnTransformer(write = "?::transaction.transaction_type")

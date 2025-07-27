@@ -16,7 +16,7 @@ import com.example.transaction.model.entity.Transaction;
 public interface TransactionRepository extends JpaRepository<Transaction, UUID>, JpaSpecificationExecutor<Transaction> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT t FROM Transaction t WHERE t.id = :id")
+    @Query("FROM Transaction t WHERE t.id = :id AND t.status != 'COMPLETED'")
     Optional<Transaction> findByIdForUpdate(UUID id);
 
     @Query(value = """

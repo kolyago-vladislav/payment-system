@@ -1,5 +1,6 @@
 package com.example.transaction.business.service.transaction;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,6 +56,7 @@ public class TransactionService {
         return initRequestHandlers.get(TransactionType.from(type)).handle(initRequest);
     }
 
+    @WithSpan("TransactionService.confirm")
     @Transactional
     public TransactionConfirmResponse confirm(
         TransactionTypeDto type,
@@ -63,11 +65,12 @@ public class TransactionService {
         return confirmRequestHandlers.get(TransactionType.from(type)).handle(confirmRequest);
     }
 
+    @WithSpan("TransactionService.processDepositCompleteEvent")
     @Transactional(isolation = REPEATABLE_READ)
     public void processDepositCompleteEvent(DepositCompletedDto dto) {
         tryGetTransactionWithLock(dto.transactionId())
             .ifPresent(transaction -> {
-                log.info("Locking transaction is successfully done in database: {}", transaction.getId());
+                log.debug("Locking transaction is successfully done in database: {}", transaction.getId());
                 switch (dto.status()) {
                     case FAILED -> failDepositTransaction(transaction);
                     case COMPLETED -> completeDepositTransaction(transaction);
@@ -77,8 +80,13 @@ public class TransactionService {
 
     private Optional<Transaction> tryGetTransactionWithLock(UUID transactionId) {
         try {
-            return repository.findByIdForUpdate(transactionId)
-                .filter(tx -> tx.getStatus() == TransactionStatus.PENDING);
+            var transaction = repository.findByIdForUpdate(transactionId);
+
+            if (transaction.isEmpty()) {
+                log.warn("Duplicated execution of transaction with id={} was skipped", transactionId);
+            }
+
+            return transaction;
         } catch (CannotAcquireLockException e) {
             log.warn("Cannot acquire lock for transaction: {}", transactionId);
             return tryGetTransactionWithLock(transactionId);
@@ -102,7 +110,7 @@ public class TransactionService {
     public void processWithdrawalCompleteEvent(WithdrawalCompletedDto dto) {
         tryGetTransactionWithLock(dto.transactionId())
             .ifPresent(transaction -> {
-                log.info("Locking transaction is successfully done in database: {}", transaction.getId());
+                log.debug("Locking transaction is successfully done in database: {}", transaction.getId());
                 switch (dto.status()) {
                     case FAILED -> failWithdrawalTransaction(transaction);
                     case COMPLETED -> completeWithdrawalTransaction(transaction);
