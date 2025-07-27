@@ -67,6 +67,7 @@ public class TransactionService {
     public void processDepositCompleteEvent(DepositCompletedDto dto) {
         tryGetTransactionWithLock(dto.transactionId())
             .ifPresent(transaction -> {
+                log.info("Locking transaction is successfully done in database: {}", transaction.getId());
                 switch (dto.status()) {
                     case FAILED -> failDepositTransaction(transaction);
                     case COMPLETED -> completeDepositTransaction(transaction);
@@ -87,18 +88,21 @@ public class TransactionService {
     private void failDepositTransaction(Transaction transaction) {
         transaction.setStatus(TransactionStatus.FAILED);
         repository.save(transaction);
+        log.error("Deposit transaction failed: {}", transaction.getId());
     }
 
     private void completeDepositTransaction(Transaction transaction) {
         walletService.credit(transaction.getWallet().getId(), transaction.getAmount());
         transaction.setStatus(TransactionStatus.COMPLETED);
         repository.save(transaction);
+        log.info("Deposit transaction successfully executed: {}", transaction.getId());
     }
 
     @Transactional(isolation = REPEATABLE_READ)
     public void processWithdrawalCompleteEvent(WithdrawalCompletedDto dto) {
         tryGetTransactionWithLock(dto.transactionId())
             .ifPresent(transaction -> {
+                log.info("Locking transaction is successfully done in database: {}", transaction.getId());
                 switch (dto.status()) {
                     case FAILED -> failWithdrawalTransaction(transaction);
                     case COMPLETED -> completeWithdrawalTransaction(transaction);
@@ -110,11 +114,13 @@ public class TransactionService {
         walletService.credit(transaction.getWallet().getId(), transaction.getAmount());
         transaction.setStatus(TransactionStatus.FAILED);
         repository.save(transaction);
+        log.error("Withdrawal transaction failed: {}", transaction.getId());
     }
 
     private void completeWithdrawalTransaction(Transaction transaction) {
         transaction.setStatus(TransactionStatus.COMPLETED);
         repository.save(transaction);
+        log.info("Withdrawal transaction successfully executed: {}", transaction.getId());
     }
 
     public TransactionDto getStatus(String transactionId) {

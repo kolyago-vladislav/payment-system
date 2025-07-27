@@ -1,16 +1,18 @@
 package com.example.transaction.business.service.outbox.event;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
-import com.example.transaction.model.dto.DepositRequestDto;
-import com.example.transaction.model.entity.OutboxEvent;
-import com.example.transaction.model.entity.type.TransactionType;
 import com.example.transaction.business.service.KafkaService;
 import com.example.transaction.business.service.outbox.event.base.OutboxEventHandler;
 import com.example.transaction.core.util.JsonWrapper;
+import com.example.transaction.model.dto.DepositRequestDto;
+import com.example.transaction.model.entity.OutboxEvent;
+import com.example.transaction.model.entity.type.TransactionType;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DepositEventHandler implements OutboxEventHandler<DepositRequestDto> {
@@ -26,6 +28,7 @@ public class DepositEventHandler implements OutboxEventHandler<DepositRequestDto
 
     public void handle(OutboxEvent outboxEvent) {
         kafkaService.send(TOPIC_EXTERNAL_DEPOSIT, outboxEvent.getTransactionId().toString(), jsonWrapper.read(outboxEvent.getPayload(), getType()));
+        log.info("Deposit event sent to external service: {}", outboxEvent.getTransactionId());
     }
 
     @Override

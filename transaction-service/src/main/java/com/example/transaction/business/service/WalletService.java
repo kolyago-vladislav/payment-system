@@ -32,15 +32,19 @@ public class WalletService {
     @Transactional(isolation = REPEATABLE_READ)
     public void credit(UUID walletId, BigDecimal amount) {
         var wallet = tryGetWalletWithLock(walletId);
+        log.debug("Locking wallet is successfully done in database: {}", wallet.getId());
         wallet.setBalance(wallet.getBalance().add(amount));
         walletRepository.save(wallet);
+        log.info("Wallet balance with id={} was credited", wallet.getId());
     }
 
     @Transactional(isolation = REPEATABLE_READ)
     public void debit(UUID walletId, BigDecimal amount) {
         var wallet = tryGetWalletWithLock(walletId);
+        log.debug("Locking wallet is successfully done in database: {}", wallet.getId());
         wallet.setBalance(wallet.getBalance().subtract(amount));
         walletRepository.save(wallet);
+        log.info("Wallet balance with id={} was debited", wallet.getId());
     }
 
     private Wallet tryGetWalletWithLock(UUID walletId) {
@@ -56,6 +60,7 @@ public class WalletService {
     public WalletWriteResponseDto create(WalletWriteDto walletWriteDto) {
         var wallet = walletMapper.to(walletWriteDto);
         walletRepository.save(wallet);
+        log.info("Wallet with id={} was created", wallet.getId());
         return new WalletWriteResponseDto(wallet.getId().toString());
     }
 
