@@ -9,7 +9,7 @@ import io.opentelemetry.sdk.trace.IdGenerator;
 
 public class TracingUtil {
 
-    public static <T> void withTraceContext(String traceId, Runnable runnable) {
+    public static <T> void injectTraceIdInTracingContext(String traceId, Runnable runnable) {
         var traceContext = SpanContext.createFromRemoteParent(
             traceId,
             IdGenerator.random().generateSpanId(),

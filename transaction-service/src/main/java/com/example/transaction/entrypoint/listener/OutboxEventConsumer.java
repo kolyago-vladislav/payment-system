@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.transaction.business.service.outbox.OutboxService;
 import com.example.transaction.core.util.JsonWrapper;
-import com.example.transaction.core.util.TracingUtil;
 import com.example.transaction.model.entity.OutboxEvent;
 
 @Slf4j
@@ -26,9 +25,7 @@ public class OutboxEventConsumer {
     )
     public void processMessage(byte[] event) {
         var outboxEvent = jsonWrapper.read(event, OutboxEvent.class);
-        TracingUtil.withTraceContext(outboxEvent.getTraceId(), () -> {
-            log.debug("OutboxEventConsumer.processMessage: {}", outboxEvent.getTransactionId());
-            outboxService.process(outboxEvent);
-        });
+        log.debug("OutboxEventConsumer.processMessage: {}", outboxEvent.getTransactionId());
+        outboxService.process(outboxEvent);
     }
 }

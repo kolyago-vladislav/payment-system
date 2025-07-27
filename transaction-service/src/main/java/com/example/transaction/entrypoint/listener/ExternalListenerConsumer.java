@@ -2,14 +2,14 @@ package com.example.transaction.entrypoint.listener;
 
 import lombok.RequiredArgsConstructor;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
 import com.example.transaction.business.service.KafkaService;
 import com.example.transaction.core.util.DateTimeUtil;
 import com.example.transaction.core.util.JsonWrapper;
-import com.example.transaction.core.util.TracingUtil;
 import com.example.transaction.model.dto.DepositCompletedDto;
 import com.example.transaction.model.dto.DepositRequestDto;
 import com.example.transaction.model.dto.WithdrawalCompletedDto;
@@ -31,24 +31,20 @@ public class ExternalListenerConsumer {
     private final JsonWrapper jsonWrapper;
 
     @KafkaListener(topics = TOPIC_EXTERNAL_DEPOSIT, groupId = "transaction-service", containerFactory = "kafkaListenerContainerFactory")
-    public void processDepositEvent(byte[] payload, @Header("traceId") String traceId) {
-        TracingUtil.withTraceContext(traceId, () -> {
-            var depositRequestDto = jsonWrapper.read(payload, DepositRequestDto.class);
-            var depositCompletedDto = new DepositCompletedDto(
-                depositRequestDto.transactionId(), ExternalServiceStatus.COMPLETED, depositRequestDto.amount(), dateTimeUtil.now());
+    public void processDepositEvent(ConsumerRecord<String, byte[]> record) {
+        var depositRequestDto = jsonWrapper.read(record.value(), DepositRequestDto.class);
+        var depositCompletedDto = new DepositCompletedDto(
+            depositRequestDto.transactionId(), ExternalServiceStatus.COMPLETED, depositRequestDto.amount(), dateTimeUtil.now());
 
-            kafkaService.send(TOPIC_TRANSACTION_DEPOSIT, depositRequestDto.transactionId().toString(), depositCompletedDto);
-        });
+        kafkaService.send(TOPIC_TRANSACTION_DEPOSIT, depositRequestDto.transactionId().toString(), depositCompletedDto);
     }
 
     @KafkaListener(topics = TOPIC_EXTERNAL_WITHDRAWAL, groupId = "transaction-service", containerFactory = "kafkaListenerContainerFactory")
-    public void processWithdrawalEvent(byte[] payload, @Header("traceId") String traceId) {
-        TracingUtil.withTraceContext(traceId, () -> {
-            var withdrawalRequestDto = jsonWrapper.read(payload, WithdrawalRequestDto.class);
-            var withdrawalCompletedDto = new WithdrawalCompletedDto(
-                withdrawalRequestDto.transactionId(), ExternalServiceStatus.COMPLETED, null, dateTimeUtil.now());
+    public void processWithdrawalEvent(ConsumerRecord<String, byte[]> record) {
+        var withdrawalRequestDto = jsonWrapper.read(record.value(), WithdrawalRequestDto.class);
+        var withdrawalCompletedDto = new WithdrawalCompletedDto(
+            withdrawalRequestDto.transactionId(), ExternalServiceStatus.COMPLETED, null, dateTimeUtil.now());
 
-            kafkaService.send(TOPIC_TRANSACTION_WITHDRAWAL, withdrawalRequestDto.transactionId().toString(), withdrawalCompletedDto);
-        });
+        kafkaService.send(TOPIC_TRANSACTION_WITHDRAWAL, withdrawalRequestDto.transactionId().toString(), withdrawalCompletedDto);
     }
 }

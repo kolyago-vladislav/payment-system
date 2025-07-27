@@ -2,13 +2,13 @@ package com.example.transaction.entrypoint.listener;
 
 import lombok.RequiredArgsConstructor;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
 import com.example.transaction.business.service.transaction.TransactionService;
 import com.example.transaction.core.util.JsonWrapper;
-import com.example.transaction.core.util.TracingUtil;
 import com.example.transaction.model.dto.DepositCompletedDto;
 import com.example.transaction.model.dto.WithdrawalCompletedDto;
 
@@ -24,10 +24,8 @@ public class CompleteTransactionEventConsumer {
         groupId = "transaction-service",
         containerFactory = "kafkaListenerContainerFactory"
     )
-    public void processDepositCompleteEvent(byte[] payload, @Header("traceId") String traceId) {
-        TracingUtil.withTraceContext(traceId, () ->
-            transactionService.processDepositCompleteEvent(jsonWrapper.read(payload, DepositCompletedDto.class))
-        );
+    public void processDepositCompleteEvent(ConsumerRecord<String, byte[]> record) {
+        transactionService.processDepositCompleteEvent(jsonWrapper.read(record.value(), DepositCompletedDto.class));
     }
 
     @KafkaListener(
@@ -35,9 +33,7 @@ public class CompleteTransactionEventConsumer {
         groupId = "transaction-service",
         containerFactory = "kafkaListenerContainerFactory"
     )
-    public void processWithdrawalCompleteEvent(byte[] payload, @Header("traceId") String traceId) {
-        TracingUtil.withTraceContext(traceId, () ->
-            transactionService.processWithdrawalCompleteEvent(jsonWrapper.read(payload, WithdrawalCompletedDto.class))
-        );
+    public void processWithdrawalCompleteEvent(ConsumerRecord<String, byte[]> record) {
+        transactionService.processWithdrawalCompleteEvent(jsonWrapper.read(record.value(), WithdrawalCompletedDto.class));
     }
 }
