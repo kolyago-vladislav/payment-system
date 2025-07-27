@@ -48,7 +48,7 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
 
     private void saveOutboxEvent(Transaction transaction) {
         var payload = externalDtoMapper.toWithdrawalRequestDto(transaction);
-        var outboxEvent = outboxMapper.toWithdrawalEvent(transaction.getId(), jsonWrapper.write(payload));
+        var outboxEvent = outboxMapper.toWithdrawalEvent(transaction, jsonWrapper.write(payload));
 
         repository.save(outboxEvent);
     }

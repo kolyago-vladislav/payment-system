@@ -94,6 +94,7 @@ CREATE TABLE transaction.outbox_events
     id             uuid PRIMARY KEY                      DEFAULT uuid_generate_v4(),
     created_at     TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
     transaction_id uuid                         NOT NULL,
+    user_id        uuid                         NOT NULL,
     trace_id       VARCHAR(64)                  NOT NULL,
     type           transaction.transaction_type NOT NULL,
     payload        jsonb                        NOT NULL

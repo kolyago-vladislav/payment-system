@@ -12,6 +12,34 @@ services:
       - nexus-data:/nexus-data
       - ./nexus:/scripts:ro
 
+  flyway-transactions-shard-0:
+    image: flyway/flyway
+    container_name: flyway-transactions-shard-0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5434/transaction_shard_0
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: postgres
+    command: migrate
+    volumes:
+      - ./databases/transaction:/flyway/sql
+
+  flyway-transactions-shard-1:
+    image: flyway/flyway
+    container_name: flyway-transactions-shard-0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5434/transaction_shard_1
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: postgres
+    command: migrate
+    volumes:
+      - ./databases/transaction:/flyway/sql
+
   postgres:
     image: postgres:17
     container_name: postgres

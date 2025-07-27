@@ -7,16 +7,27 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
+import org.apache.shardingsphere.driver.api.yaml.YamlShardingSphereDataSourceFactory;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 
-import com.example.transaction.model.entity.type.TransactionType;
 import com.example.transaction.business.service.outbox.event.base.OutboxEventHandler;
 import com.example.transaction.business.service.transaction.confirm.base.ConfirmRequestHandler;
 import com.example.transaction.business.service.transaction.init.base.InitRequestHandler;
+import com.example.transaction.model.entity.type.TransactionType;
 
 @Configuration
 public class AppConfig {
+
+   @Bean
+   public DataSource shardingSphereDataSource() throws Exception {
+       var resource = new ClassPathResource("META-INF/sharding.yml");
+       return YamlShardingSphereDataSourceFactory.createDataSource(resource.getFile());
+   }
 
     @Bean
     public Clock clock() {

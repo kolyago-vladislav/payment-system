@@ -1,6 +1,7 @@
 package com.example.transaction.model.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,6 +18,7 @@ import lombok.experimental.Accessors;
 
 import org.hibernate.annotations.ColumnTransformer;
 
+import com.example.transaction.core.util.JsonbStringConverter;
 import com.example.transaction.model.entity.type.TransactionType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -37,6 +39,10 @@ public class OutboxEvent {
     private Instant createdAt;
 
     @JsonProperty("transaction_id")
+    @Column(name = "user_id")
+    private UUID userId;
+
+    @JsonProperty("transaction_id")
     @Column(name = "transaction_id")
     private UUID transactionId;
 
@@ -51,5 +57,6 @@ public class OutboxEvent {
 
     @ColumnTransformer(write = "?::jsonb")
     @Column(name = "payload", columnDefinition = "jsonb")
+    @Convert(converter = JsonbStringConverter.class)
     private String payload;
 }

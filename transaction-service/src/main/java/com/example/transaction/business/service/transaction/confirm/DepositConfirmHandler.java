@@ -44,7 +44,7 @@ public class DepositConfirmHandler implements ConfirmRequestHandler {
 
     private void saveOutboxEvent(Transaction transaction) {
         var payload = externalDtoMapper.toDepositRequestDto(transaction);
-        var outboxEvent = outboxMapper.toDepositEvent(transaction.getId(), jsonWrapper.write(payload));
+        var outboxEvent = outboxMapper.toDepositEvent(transaction, jsonWrapper.write(payload));
 
         repository.save(outboxEvent);
     }
