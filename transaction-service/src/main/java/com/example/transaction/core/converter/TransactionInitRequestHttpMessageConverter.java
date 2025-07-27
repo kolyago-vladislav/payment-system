@@ -1,4 +1,4 @@
-package com.example.transaction.entrypoint.controller.converter;
+package com.example.transaction.core.converter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,32 +15,33 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 
-import com.example.transaction.dto.ConfirmRequest;
-import com.example.transaction.dto.DepositConfirmRequest;
-import com.example.transaction.dto.TransferConfirmRequest;
-import com.example.transaction.dto.WithdrawalConfirmRequest;
-import com.example.transaction.model.entity.type.TransactionType;
 import com.example.transaction.core.exception.TransactionServiceException;
+import com.example.transaction.core.util.EnumUtil;
+import com.example.transaction.dto.DepositInitRequest;
+import com.example.transaction.dto.InitRequest;
+import com.example.transaction.dto.TransactionTypeDto;
+import com.example.transaction.dto.TransferInitRequest;
+import com.example.transaction.dto.WithdrawalInitRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static java.util.Optional.ofNullable;
 
 @Component
-public class TransactionConfirmRequestHttpMessageConverter extends AbstractHttpMessageConverter<ConfirmRequest> {
+public class TransactionInitRequestHttpMessageConverter extends AbstractHttpMessageConverter<InitRequest> {
 
-    private static final String Confirm_REQUEST_TYPE_PATH_VARIABLE = "type";
+    private static final String INIT_REQUEST_TYPE_PATH_VARIABLE = "type";
 
     private final ObjectMapper mapper;
 
-    public TransactionConfirmRequestHttpMessageConverter(ObjectMapper mapper) {
+    public TransactionInitRequestHttpMessageConverter(ObjectMapper mapper) {
         super(MediaType.APPLICATION_JSON);
         this.mapper = mapper;
     }
 
     @Override
-    protected @NonNull ConfirmRequest readInternal(
+    protected @NonNull InitRequest readInternal(
         @NonNull
-        Class<? extends ConfirmRequest> clazz,
+        Class<? extends InitRequest> clazz,
         @NonNull
         HttpInputMessage inputMessage
     ) throws IOException, HttpMessageNotReadableException {
@@ -48,21 +49,21 @@ public class TransactionConfirmRequestHttpMessageConverter extends AbstractHttpM
         var body = new String(inputMessage.getBody().readAllBytes(), StandardCharsets.UTF_8);
 
         var targetClass = switch (type) {
-            case DEPOSIT -> DepositConfirmRequest.class;
-            case WITHDRAWAL -> WithdrawalConfirmRequest.class;
-            case TRANSFER -> TransferConfirmRequest.class;
+            case DEPOSIT -> DepositInitRequest.class;
+            case WITHDRAWAL -> WithdrawalInitRequest.class;
+            case TRANSFER -> TransferInitRequest.class;
         };
 
         return mapper.readValue(body, targetClass);
     }
 
     @SuppressWarnings("unchecked")
-    private TransactionType extractTransactionTypeFromPath() {
+    private TransactionTypeDto extractTransactionTypeFromPath() {
         return ofNullable((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
             .map(ServletRequestAttributes::getRequest)
             .map(request -> (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE))
-            .map(uriVars -> uriVars.get(Confirm_REQUEST_TYPE_PATH_VARIABLE))
-            .map(TransactionType::from)
+            .map(uriVars -> uriVars.get(INIT_REQUEST_TYPE_PATH_VARIABLE))
+            .map(type -> EnumUtil.from(TransactionTypeDto.class, type, () -> new TransactionServiceException("Unknown TransactionTypeDto: %s", type)))
             .orElseThrow(() -> new TransactionServiceException("Cannot extract transaction type from URI variables"));
     }
 
@@ -71,13 +72,13 @@ public class TransactionConfirmRequestHttpMessageConverter extends AbstractHttpM
         @NonNull
         Class<?> clazz
     ) {
-        return ConfirmRequest.class.isAssignableFrom(clazz);
+        return InitRequest.class.isAssignableFrom(clazz);
     }
 
     @Override
     protected void writeInternal(
         @NonNull
-        ConfirmRequest t,
+        InitRequest t,
         HttpOutputMessage outputMessage
     ) throws IOException {
         mapper.writeValue(outputMessage.getBody(), t);

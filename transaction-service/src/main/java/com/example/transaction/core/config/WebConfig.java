@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.example.transaction.entrypoint.controller.converter.TransactionConfirmRequestHttpMessageConverter;
-import com.example.transaction.entrypoint.controller.converter.TransactionInitRequestHttpMessageConverter;
+import com.example.transaction.core.converter.TransactionConfirmRequestHttpMessageConverter;
+import com.example.transaction.core.converter.TransactionInitRequestHttpMessageConverter;
 
 @Configuration
 @RequiredArgsConstructor

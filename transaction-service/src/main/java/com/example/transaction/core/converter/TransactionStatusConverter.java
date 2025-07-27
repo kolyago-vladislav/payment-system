@@ -1,4 +1,4 @@
-package com.example.transaction.entrypoint.controller.converter;
+package com.example.transaction.core.converter;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
