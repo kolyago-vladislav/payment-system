@@ -1,0 +1,33 @@
+{
+  "name": "source_postgres_transaction_shard_1",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.dbname": "transaction_shard_1",
+    "database.hostname": "postgres",
+    "database.password": "postgres",
+    "database.port": "5434",
+    "database.server.name": "postgres",
+    "database.user": "postgres",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter.schemas.enable": "false",
+    "name": "source_postgres_transaction_shard_1",
+    "plugin.name": "pgoutput",
+    "publication.autocreate": "true",
+    "publication.name": "source_postgres_transaction_shard_1",
+    "slot.drop.on.stop": "true",
+    "slot.name": "source_postgres_transaction_shard_1",
+    "snapshot.mode": "never",
+    "table.include.list": "transaction.outbox_events",
+    "time.precision.mode": "connect",
+    "tombstones.on.delete": "false",
+    "topic.prefix": "postgres",
+    "transforms": "Unwrap,ExtractKeyFromValue,UnwrapKey",
+    "transforms.Unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.ExtractKeyFromValue.type": "org.apache.kafka.connect.transforms.ValueToKey",
+    "transforms.ExtractKeyFromValue.fields": "transaction_id",
+    "transforms.UnwrapKey.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.UnwrapKey.field": "transaction_id",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}

@@ -1,4 +1,22 @@
 services:
+
+  connector-creation:
+    image: curlimages/curl:8.5.0
+    user: root
+    depends_on:
+      kafka-connect:
+        condition: service_healthy
+      flyway-transactions-shard-0:
+        condition: service_completed_successfully
+      flyway-transactions-shard-1:
+        condition: service_completed_successfully
+    ports:
+      - '40012:40012'
+    volumes:
+      - ./kafka-connect:/kafka-connect
+    command:
+      sh -c "/kafka-connect/create-connector.sh"
+
   nexus-change-password:
     image: appropriate/curl
     environment:
@@ -57,19 +75,6 @@ services:
       interval: 2s
       timeout: 5s
       retries: 25
-
-  connector-creation:
-    image: curlimages/curl:8.5.0
-    user: root
-    depends_on:
-      kafka-connect:
-        condition: service_healthy
-    ports:
-      - '40012:40012'
-    volumes:
-      - ./kafka-connect:/kafka-connect
-    command:
-      sh -c "/kafka-connect/create-connector.sh"
 
   kafka-connect:
     image: confluentinc/cp-kafka-connect:7.4.0

@@ -36,7 +36,7 @@ public class Wallet extends BaseEntity {
     @JoinColumn(name = "wallet_type_id")
     private WalletType walletType;
     
-    @Column(name = "user_id")
+    @Column(name = "user_id", updatable = false)
     private UUID userId;
 
     @Column(name = "status")

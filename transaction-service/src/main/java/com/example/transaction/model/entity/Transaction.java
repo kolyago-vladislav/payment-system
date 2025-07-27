@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Table(name = "transactions", schema = "transaction")
 public class Transaction extends BaseEntity {
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", updatable = false)
     private UUID userId;
 
     @Column(name = "wallet_id")

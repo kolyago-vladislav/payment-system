@@ -27,6 +27,12 @@ rules:
           standard:
             shardingColumn: user_id
             shardingAlgorithmName: user-id-mod
+      wallets:
+        actualDataNodes: ds_${0..1}.wallets
+        databaseStrategy:
+          standard:
+            shardingColumn: user_id
+            shardingAlgorithmName: user-id-mod
     shardingAlgorithms:
       user-id-mod:
         type: UUID_MOD
@@ -34,5 +40,4 @@ rules:
           sharding-count: 2
   - !BROADCAST
     tables:
-      - wallets
       - wallet_types
