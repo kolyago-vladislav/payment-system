@@ -18,6 +18,8 @@ import com.example.transaction.model.entity.OutboxEvent;
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
+import static com.example.transaction.core.util.TransactionCons.TRACE_ID_KEY;
+
 @Mapper(componentModel = SPRING, injectionStrategy = CONSTRUCTOR)
 @Setter(onMethod_ = {@Autowired})
 public abstract class OutboxMapper {
@@ -47,6 +49,6 @@ public abstract class OutboxMapper {
         @MappingTarget
         OutboxEvent outboxEvent
     ) {
-        outboxEvent.setTraceId(MDC.get("traceId"));
+        outboxEvent.setTraceId(MDC.get(TRACE_ID_KEY));
     }
 }

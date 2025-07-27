@@ -14,6 +14,7 @@ import com.example.transaction.core.util.JsonWrapper;
 import com.example.transaction.model.entity.OutboxEvent;
 
 import static com.example.transaction.core.util.TracingUtil.injectTraceIdInTracingContext;
+import static com.example.transaction.core.util.TransactionCons.TRACE_ID_KEY;
 
 @Aspect
 @Component
@@ -28,7 +29,7 @@ public class TraceContextAspect {
         && args(record)
     """)
     public void wrapKafkaListenerWithTraceId(ProceedingJoinPoint pjp, ConsumerRecord<String, byte[]> record) {
-        var traceId = new String(record.headers().lastHeader("traceId").value());
+        var traceId = new String(record.headers().lastHeader(TRACE_ID_KEY).value());
         injectTraceIdInTracingContext(traceId, () -> proceed(pjp));
     }
 

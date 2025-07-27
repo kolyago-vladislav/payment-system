@@ -9,6 +9,8 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
+import static com.example.transaction.core.util.TransactionCons.TRACE_ID_KEY;
+
 @Service
 @RequiredArgsConstructor
 public class KafkaService {
@@ -19,7 +21,7 @@ public class KafkaService {
             .withPayload(payload)
             .setHeader(KafkaHeaders.TOPIC, topic)
             .setHeader(KafkaHeaders.KEY, key)
-            .setHeader("traceId", MDC.get("traceId"))
+            .setHeader(TRACE_ID_KEY, MDC.get(TRACE_ID_KEY))
             .build();
 
         kafkaTemplate.send(message).join();
