@@ -34,10 +34,10 @@ services:
     image: flyway/flyway
     container_name: flyway-transactions-shard-0
     depends_on:
-      postgres:
+      postgres-shard-0:
         condition: service_healthy
     environment:
-      FLYWAY_URL: jdbc:postgresql://postgres:5434/transaction_shard_0?options=-c%20TimeZone=UTC
+      FLYWAY_URL: jdbc:postgresql://postgres-shard-0:5433/transaction_shard_0
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: postgres
     command: migrate
@@ -48,15 +48,51 @@ services:
     image: flyway/flyway
     container_name: flyway-transactions-shard-1
     depends_on:
-      postgres:
+      postgres-shard-1:
         condition: service_healthy
     environment:
-      FLYWAY_URL: jdbc:postgresql://postgres:5434/transaction_shard_1?options=-c%20TimeZone=UTC
+      FLYWAY_URL: jdbc:postgresql://postgres-shard-1:5435/transaction_shard_1
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: postgres
     command: migrate
     volumes:
       - ./databases/transaction:/flyway/sql
+
+  postgres-shard-0:
+    image: postgres:17
+    container_name: postgres-shard-0
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5433" ]
+    volumes:
+      - ./databases/init-0.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - "5433:5433"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5433" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
+
+  postgres-shard-1:
+    image: postgres:17
+    container_name: postgres-shard-1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5435" ]
+    volumes:
+      - ./databases/init-1.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - "5435:5435"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5435" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
 
   postgres:
     image: postgres:17

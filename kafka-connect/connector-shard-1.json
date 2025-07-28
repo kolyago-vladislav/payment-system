@@ -3,9 +3,9 @@
   "config": {
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
     "database.dbname": "transaction_shard_1",
-    "database.hostname": "postgres",
+    "database.hostname": "postgres-shard-1",
     "database.password": "postgres",
-    "database.port": "5434",
+    "database.port": "5435",
     "database.server.name": "postgres",
     "database.user": "postgres",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
