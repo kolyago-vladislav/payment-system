@@ -1,5 +1,7 @@
 package com.example.transaction.business.service.transaction.confirm;
 
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
@@ -10,10 +12,13 @@ import com.example.transaction.business.mapper.OutboxMapper;
 import com.example.transaction.business.mapper.TransactionMapper;
 import com.example.transaction.business.repository.OutboxRepository;
 import com.example.transaction.business.repository.TransactionRepository;
+import com.example.transaction.business.repository.WalletRepository;
 import com.example.transaction.business.service.WalletService;
 import com.example.transaction.business.service.transaction.confirm.base.ConfirmRequestHandler;
+import com.example.transaction.core.exception.TransactionServiceException;
 import com.example.transaction.core.util.JsonWrapper;
 import com.example.transaction.dto.ConfirmRequest;
+import com.example.transaction.dto.DepositConfirmRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
 import com.example.transaction.dto.WithdrawalConfirmRequest;
 import com.example.transaction.model.entity.Transaction;
@@ -34,6 +39,7 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
     private final TransactionRepository transactionRepository;
     private final ExternalDtoMapper externalDtoMapper;
     private final WalletService walletService;
+    private final WalletRepository walletRepository;
 
     @Override
     @Transactional(isolation = REPEATABLE_READ)
@@ -41,9 +47,21 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
         var request = (WithdrawalConfirmRequest) confirmRequest;
         var transaction = transactionRepository.save(transactionMapper.to(request, WITHDRAWAL));
         walletService.debit(transaction.getWalletId(), transaction.getAmount());
+
+        fillWallet(request, transaction);
         saveOutboxEvent(transaction);
 
         return transactionMapper.from(transaction);
+    }
+
+    private void fillWallet(
+        WithdrawalConfirmRequest request,
+        Transaction transaction
+    ) {
+        var wallet = walletRepository.findById(UUID.fromString(request.getWalletId()))
+            .orElseThrow(() -> new TransactionServiceException("Wallet not found by id=%s", request.getWalletId()));
+
+        transaction.setWallet(wallet);
     }
 
     private void saveOutboxEvent(Transaction transaction) {

@@ -1,5 +1,7 @@
 package com.example.transaction.business.service.transaction.confirm;
 
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
@@ -10,7 +12,9 @@ import com.example.transaction.business.mapper.OutboxMapper;
 import com.example.transaction.business.mapper.TransactionMapper;
 import com.example.transaction.business.repository.OutboxRepository;
 import com.example.transaction.business.repository.TransactionRepository;
+import com.example.transaction.business.repository.WalletRepository;
 import com.example.transaction.business.service.transaction.confirm.base.ConfirmRequestHandler;
+import com.example.transaction.core.exception.TransactionServiceException;
 import com.example.transaction.core.util.JsonWrapper;
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.DepositConfirmRequest;
@@ -26,6 +30,7 @@ public class DepositConfirmHandler implements ConfirmRequestHandler {
 
     private final TransactionMapper transactionMapper;
     private final OutboxRepository repository;
+    private final WalletRepository walletRepository;
     private final OutboxMapper outboxMapper;
     private final JsonWrapper jsonWrapper;
     private final TransactionRepository transactionRepository;
@@ -36,10 +41,21 @@ public class DepositConfirmHandler implements ConfirmRequestHandler {
     public TransactionConfirmResponse handle(ConfirmRequest confirmRequest) {
         var request = (DepositConfirmRequest) confirmRequest;
         var transaction = transactionRepository.save(transactionMapper.to(request, DEPOSIT));
+        fillWallet(request, transaction);
 
         saveOutboxEvent(transaction);
 
         return transactionMapper.from(transaction);
+    }
+
+    private void fillWallet(
+        DepositConfirmRequest request,
+        Transaction transaction
+    ) {
+        var wallet = walletRepository.findById(UUID.fromString(request.getWalletId()))
+            .orElseThrow(() -> new TransactionServiceException("Wallet not found by id=%s", request.getWalletId()));
+
+        transaction.setWallet(wallet);
     }
 
     private void saveOutboxEvent(Transaction transaction) {
