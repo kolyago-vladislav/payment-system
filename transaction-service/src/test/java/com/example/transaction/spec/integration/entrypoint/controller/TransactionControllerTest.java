@@ -20,7 +20,7 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
 
     @BeforeEach
     void setUp() {
-        var walletWriteDto = dtoCreator.createWalletWriteDto();
+        var walletWriteDto = dtoCreator.wallet.createWalletWriteDto();
 
         var response = walletApiTestService.register(walletWriteDto);
 
@@ -32,25 +32,25 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
     @Test
     void shouldReturnTransactionConfirmResponseWhenDepositConfirmedCalled() {
         //when
-        var request = dtoCreator.createDepositConfirmDto(walletId);
+        var request = dtoCreator.transaction.createDepositConfirmTransactionDto(walletId);
 
         var response = transactionApiTestService.confirmDeposit(request);
 
         var outboxEvent = outboxEventTestService.getOutboxEventByTransactionId(response.getTransactionId());
         var actualDepositEvent = jsonWrapper.read(outboxEvent.getPayload().getBytes(), DepositRequestDto.class);
 
-        var expectedEvent = dtoCreator.createDepositOutboxEvent(walletId, response.getTransactionId(), outboxEvent.getTraceId());
+        var expectedEvent = dtoCreator.outboxEvent.createDepositOutboxEvent(walletId, response.getTransactionId(), outboxEvent.getTraceId());
         var expectedDepositEvent = jsonWrapper.read(expectedEvent.getPayload().getBytes(), DepositRequestDto.class);
 
         //then
-        assertEquals(dtoCreator.createTransactionConfirmResponse(response.getTransactionId()), response);
+        assertEquals(dtoCreator.transaction.createTransactionConfirmResponse(response.getTransactionId()), response);
         assertEquals(expectedDepositEvent, actualDepositEvent);
     }
 
     @Test
     void shouldReturnTransactionConfirmResponseWhenWithdrawalConfirmedCalled() {
         //given
-        var request = dtoCreator.createWithdrawalConfirmDto(walletId);
+        var request = dtoCreator.transaction.createWithdrawalConfirmTransactionDto(walletId);
 
         //when
         var response = transactionApiTestService.confirmWithdrawal(request);
@@ -58,13 +58,13 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
         var outboxEvent = outboxEventTestService.getOutboxEventByTransactionId(response.getTransactionId());
         var actualWithdrawalEvent = jsonWrapper.read(outboxEvent.getPayload().getBytes(), WithdrawalRequestDto.class);
 
-        var expectedEvent = dtoCreator.createWithdrawalOutboxEvent(walletId, response.getTransactionId(), outboxEvent.getTraceId());
+        var expectedEvent = dtoCreator.outboxEvent.createWithdrawalOutboxEvent(walletId, response.getTransactionId(), outboxEvent.getTraceId());
         var expectedWithdrawalEvent = jsonWrapper.read(expectedEvent.getPayload().getBytes(), WithdrawalRequestDto.class);
 
         var walletDto = walletApiTestService.findById(walletId);
 
         //then
-        assertEquals(dtoCreator.createTransactionConfirmResponse(response.getTransactionId()), response);
+        assertEquals(dtoCreator.transaction.createTransactionConfirmResponse(response.getTransactionId()), response);
         assertEquals(expectedWithdrawalEvent, actualWithdrawalEvent);
         assertEquals(-100, walletDto.getBalance());
     }
@@ -72,17 +72,17 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
     @Test
     void shouldReturnTransactionConfirmResponseWhenTransferConfirmedCalled() {
         //given
-        var walletWriteDto = dtoCreator.createWalletWriteDto();
+        var walletWriteDto = dtoCreator.wallet.createWalletWriteDto();
         var secondWalletId = walletApiTestService.register(walletWriteDto);
 
-        var request = dtoCreator.createTransferConfirmDto(walletId, secondWalletId);
+        var request = dtoCreator.transaction.createTransferConfirmTransactionDto(walletId, secondWalletId);
 
         //when
         var response = transactionApiTestService.confirmTransfer(request);
         var walletFromDto = walletApiTestService.findById(walletId);
         var walletToDto = walletApiTestService.findById(secondWalletId);
 
-        var expected = dtoCreator.createTransactionConfirmResponse(response.getTransactionId()).status(TransactionStatusDto.COMPLETED);
+        var expected = dtoCreator.transaction.createTransactionConfirmResponse(response.getTransactionId()).status(TransactionStatusDto.COMPLETED);
 
         //then
         assertEquals(expected, response);
@@ -93,20 +93,20 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
     @Test
     void shouldReturnDtoWhenFindByTransactionIdCalled() {
         //given
-        var request = dtoCreator.createDepositConfirmDto(walletId);
+        var request = dtoCreator.transaction.createDepositConfirmTransactionDto(walletId);
         var responseId = transactionApiTestService.confirmDeposit(request);
 
         //when
         var response = transactionApiTestService.findByTransactionId(responseId.getTransactionId());
 
         //then
-        assertEquals(dtoCreator.createTransactionDto(response.getTransactionId()), response);
+        assertEquals(dtoCreator.transaction.createTransactionDto(response.getTransactionId()), response);
     }
 
     @Test
     void shouldReturnPageDtoWhenFindAllCalled() {
         //given
-        var request = dtoCreator.createDepositConfirmDto(walletId);
+        var request = dtoCreator.transaction.createDepositConfirmTransactionDto(walletId);
         var first = transactionApiTestService.confirmDeposit(request);
         var second = transactionApiTestService.confirmDeposit(request);
 
@@ -114,7 +114,7 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
         var response = transactionApiTestService.findAll(TransactionPageRequestDto.builder().walletIds(List.of(walletId)).build());
 
         //then
-        assertEquals(dtoCreator.createTransactionPageDto(first.getTransactionId(), second.getTransactionId()), response);
+        assertEquals(dtoCreator.transaction.createTransactionPageDto(first.getTransactionId(), second.getTransactionId()), response);
     }
 
 }

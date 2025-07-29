@@ -14,7 +14,7 @@ class WalletControllerTest extends NecessaryDependencyConfig {
 
     @BeforeEach
     void setUp() {
-        var walletWriteDto = dtoCreator.createWalletWriteDto();
+        var walletWriteDto = dtoCreator.wallet.createWalletWriteDto();
 
         var response = walletApiTestService.register(walletWriteDto);
 
@@ -29,7 +29,7 @@ class WalletControllerTest extends NecessaryDependencyConfig {
         var response = walletApiTestService.findById(id);
 
         //then
-        assertEquals(dtoCreator.createWalletDto(id), response);
+        assertEquals(dtoCreator.wallet.createWalletDto(id), response);
     }
 
     @Test
@@ -38,7 +38,7 @@ class WalletControllerTest extends NecessaryDependencyConfig {
         var response = walletApiTestService.findByUserId(USER_ID);
 
         //then
-        assertEquals(dtoCreator.createWalletPageDto(id), response);
+        assertEquals(dtoCreator.wallet.createWalletPageDto(id), response);
     }
 
 }

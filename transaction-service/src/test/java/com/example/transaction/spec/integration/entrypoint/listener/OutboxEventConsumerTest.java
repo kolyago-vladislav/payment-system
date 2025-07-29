@@ -41,7 +41,7 @@ public class OutboxEventConsumerTest extends NecessaryDependencyConfig {
     void setUp() {
         reset(kafkaTemplate);
 
-        var walletWriteDto = dtoCreator.createWalletWriteDto();
+        var walletWriteDto = dtoCreator.wallet.createWalletWriteDto();
 
         var response = walletApiTestService.register(walletWriteDto);
 
@@ -67,7 +67,7 @@ public class OutboxEventConsumerTest extends NecessaryDependencyConfig {
         verify(kafkaTemplate, times(1)).send(captor.capture());
         var sentMessage = captor.getValue();
 
-        assertEquals(dtoCreator.getDepositRequest(walletId, outboxEvent.getTransactionId().toString()), sentMessage.getPayload());
+        assertEquals(dtoCreator.outboxEvent.getDepositRequestOutboxEvent(walletId, outboxEvent.getTransactionId().toString()), sentMessage.getPayload());
         assertEquals(outboxEvent.getTraceId(), sentMessage.getHeaders().get(TRACE_ID_KEY));
         assertEquals(outboxEvent.getTransactionId().toString(), sentMessage.getHeaders().get(KafkaHeaders.KEY));
         verifyNoMoreInteractions(kafkaTemplate);
@@ -90,23 +90,23 @@ public class OutboxEventConsumerTest extends NecessaryDependencyConfig {
         verify(kafkaTemplate, times(1)).send(captor.capture());
         var sentMessage = captor.getValue();
 
-        assertEquals(dtoCreator.getWithdrawalRequest(walletId, outboxEvent.getTransactionId().toString()), sentMessage.getPayload());
+        assertEquals(dtoCreator.outboxEvent.getWithdrawalRequestOutboxEvent(walletId, outboxEvent.getTransactionId().toString()), sentMessage.getPayload());
         assertEquals(outboxEvent.getTraceId(), sentMessage.getHeaders().get(TRACE_ID_KEY));
         assertEquals(outboxEvent.getTransactionId().toString(), sentMessage.getHeaders().get(KafkaHeaders.KEY));
         verifyNoMoreInteractions(kafkaTemplate);
     }
 
     public OutboxEvent prepareDepositOutboxEvent() {
-        var request = dtoCreator.createDepositConfirmDto(walletId);
+        var request = dtoCreator.transaction.createDepositConfirmTransactionDto(walletId);
         var transactionConfirmResponse = transactionApiTestService.confirmDeposit(request);
         var outboxEvent = outboxEventTestService.getOutboxEventByTransactionId(transactionConfirmResponse.getTransactionId());
-        return dtoCreator.createDepositOutboxEvent(walletId, outboxEvent.getTransactionId().toString(), outboxEvent.getTraceId());
+        return dtoCreator.outboxEvent.createDepositOutboxEvent(walletId, outboxEvent.getTransactionId().toString(), outboxEvent.getTraceId());
     }
 
     public OutboxEvent prepareWithdrawalOutboxEvent() {
-        var request = dtoCreator.createWithdrawalConfirmDto(walletId);
+        var request = dtoCreator.transaction.createWithdrawalConfirmTransactionDto(walletId);
         var transactionConfirmResponse = transactionApiTestService.confirmWithdrawal(request);
         var outboxEvent = outboxEventTestService.getOutboxEventByTransactionId(transactionConfirmResponse.getTransactionId());
-        return dtoCreator.createWithdrawalOutboxEvent(walletId, outboxEvent.getTransactionId().toString(), outboxEvent.getTraceId());
+        return dtoCreator.outboxEvent.createWithdrawalOutboxEvent(walletId, outboxEvent.getTransactionId().toString(), outboxEvent.getTraceId());
     }
 }

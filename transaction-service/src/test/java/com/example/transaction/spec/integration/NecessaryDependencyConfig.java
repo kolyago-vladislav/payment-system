@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.example.transaction.core.util.JsonWrapper;
-import com.example.transaction.environment.data.DtoCreator;
+import com.example.transaction.environment.data.base.DtoCreators;
 import com.example.transaction.environment.service.DatabaseTestService;
 import com.example.transaction.environment.service.OutboxEventTestService;
 import com.example.transaction.environment.service.TransactionApiTestService;
@@ -25,7 +25,7 @@ import com.example.transaction.environment.service.WalletApiTestService;
 @Setter(onMethod_ = {@Autowired})
 public abstract class NecessaryDependencyConfig extends LifecycleSpecification {
 
-    protected DtoCreator dtoCreator;
+    protected DtoCreators dtoCreator;
     protected OutboxEventTestService outboxEventTestService;
     protected WalletApiTestService walletApiTestService;
     protected TransactionApiTestService transactionApiTestService;
