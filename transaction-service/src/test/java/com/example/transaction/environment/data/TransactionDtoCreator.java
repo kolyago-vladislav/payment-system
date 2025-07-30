@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 
-import com.example.transaction.core.util.JsonWrapper;
 import com.example.transaction.dto.ConfirmRequest;
 import com.example.transaction.dto.DepositConfirmRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
@@ -16,6 +15,7 @@ import com.example.transaction.dto.TransactionPageDto;
 import com.example.transaction.dto.TransactionStatusDto;
 import com.example.transaction.dto.TransactionTypeDto;
 import com.example.transaction.dto.TransferConfirmRequest;
+import com.example.transaction.dto.WithdrawalConfirmRequest;
 
 import static java.time.ZoneOffset.UTC;
 
@@ -37,7 +37,7 @@ public class TransactionDtoCreator {
     }
 
     public ConfirmRequest createWithdrawalConfirmTransactionDto(String walletId) {
-        return new DepositConfirmRequest()
+        return new WithdrawalConfirmRequest()
             .userId(USER_ID)
             .walletId(walletId)
             .amount(100.00)

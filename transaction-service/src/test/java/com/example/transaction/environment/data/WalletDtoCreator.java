@@ -1,13 +1,11 @@
 package com.example.transaction.environment.data;
 
-import java.time.Clock;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 
-import com.example.transaction.core.util.JsonWrapper;
 import com.example.transaction.dto.WalletDto;
 import com.example.transaction.dto.WalletPageDto;
 import com.example.transaction.dto.WalletStatusDto;
@@ -39,7 +37,7 @@ public class WalletDtoCreator {
             .currency("USD")
             .userId(USER_ID)
             .status(WalletStatusDto.ACTIVE)
-            .balance(0.0);
+            .balance(150.0);
     }
 
 }

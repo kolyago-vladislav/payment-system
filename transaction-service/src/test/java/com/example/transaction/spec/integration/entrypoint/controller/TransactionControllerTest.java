@@ -66,7 +66,7 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
         //then
         assertEquals(dtoCreator.transaction.createTransactionConfirmResponse(response.getTransactionId()), response);
         assertEquals(expectedWithdrawalEvent, actualWithdrawalEvent);
-        assertEquals(-100, walletDto.getBalance());
+        assertEquals(50.0, walletDto.getBalance());
     }
 
     @Test
@@ -86,8 +86,8 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
 
         //then
         assertEquals(expected, response);
-        assertEquals(-100, walletFromDto.getBalance());
-        assertEquals(100, walletToDto.getBalance());
+        assertEquals(50.0, walletFromDto.getBalance());
+        assertEquals(250.0, walletToDto.getBalance());
     }
 
     @Test
