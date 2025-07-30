@@ -1,5 +1,7 @@
 package com.example.transaction.business.service.transaction.confirm;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -15,12 +17,13 @@ import com.example.transaction.business.repository.TransactionRepository;
 import com.example.transaction.business.repository.WalletRepository;
 import com.example.transaction.business.service.WalletService;
 import com.example.transaction.business.service.transaction.confirm.base.ConfirmRequestHandler;
+import com.example.transaction.business.validation.base.TransactionValidator;
 import com.example.transaction.core.exception.TransactionServiceException;
 import com.example.transaction.core.util.JsonWrapper;
 import com.example.transaction.dto.ConfirmRequest;
-import com.example.transaction.dto.DepositConfirmRequest;
 import com.example.transaction.dto.TransactionConfirmResponse;
 import com.example.transaction.dto.WithdrawalConfirmRequest;
+import com.example.transaction.model.dto.ValidationContext;
 import com.example.transaction.model.entity.Transaction;
 import com.example.transaction.model.entity.type.TransactionType;
 
@@ -40,11 +43,17 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
     private final ExternalDtoMapper externalDtoMapper;
     private final WalletService walletService;
     private final WalletRepository walletRepository;
+    private final List<TransactionValidator> validators;
 
     @Override
     @Transactional(isolation = REPEATABLE_READ)
     public TransactionConfirmResponse handle(ConfirmRequest confirmRequest) {
         var request = (WithdrawalConfirmRequest) confirmRequest;
+
+        validators.stream()
+            .filter(validator -> validator.getSupportTransactionTypes().contains(getType()))
+            .forEach(validator -> validator.validate(getValidationContext(request)));
+
         var transaction = transactionRepository.save(transactionMapper.to(request, WITHDRAWAL));
         walletService.debit(transaction.getWalletId(), transaction.getAmount());
 
@@ -52,6 +61,13 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
         saveOutboxEvent(transaction);
 
         return transactionMapper.from(transaction);
+    }
+
+    private ValidationContext getValidationContext(WithdrawalConfirmRequest dto) {
+        return ValidationContext.builder()
+            .initialWalletId(dto.getWalletId())
+            .amount(BigDecimal.valueOf(dto.getAmount()))
+            .build();
     }
 
     private void fillWallet(
