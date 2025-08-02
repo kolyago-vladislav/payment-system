@@ -1,5 +1,4 @@
 services:
-
   connector-creation:
     image: curlimages/curl:8.5.0
     user: root
@@ -17,6 +16,18 @@ services:
     command:
       sh -c "/kafka-connect/create-connector.sh"
 
+  keycloak-healthcheck:
+    image: curlimages/curl:7.85.0
+    depends_on:
+      - keycloak
+      - keycloak-postgres
+    command: [ "sh", "-c", "
+      until curl -f http://keycloak:9000/health; do
+        echo 'Waiting for Keycloak...';
+        sleep 5;
+      done
+    " ]
+
   nexus-change-password:
     image: appropriate/curl
     environment:
@@ -29,122 +40,6 @@ services:
     volumes:
       - nexus-data:/nexus-data
       - ./nexus:/scripts:ro
-
-  flyway-transactions-shard-0:
-    image: flyway/flyway
-    container_name: flyway-transactions-shard-0
-    depends_on:
-      postgres-shard-0:
-        condition: service_healthy
-    environment:
-      FLYWAY_URL: jdbc:postgresql://postgres-shard-0:5433/transaction_shard_0
-      FLYWAY_USER: postgres
-      FLYWAY_PASSWORD: postgres
-    command: migrate
-    volumes:
-      - ./databases/transaction:/flyway/sql
-
-  flyway-transactions-shard-1:
-    image: flyway/flyway
-    container_name: flyway-transactions-shard-1
-    depends_on:
-      postgres-shard-1:
-        condition: service_healthy
-    environment:
-      FLYWAY_URL: jdbc:postgresql://postgres-shard-1:5435/transaction_shard_1
-      FLYWAY_USER: postgres
-      FLYWAY_PASSWORD: postgres
-    command: migrate
-    volumes:
-      - ./databases/transaction:/flyway/sql
-
-  postgres-shard-0:
-    image: postgres:17
-    container_name: postgres-shard-0
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: person
-    command: [ "postgres", "-c", "port=5433" ]
-    volumes:
-      - ./databases/init-0.sh:/docker-entrypoint-initdb.d/init.sh
-    ports:
-      - "5433:5433"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5433" ]
-      interval: 2s
-      timeout: 5s
-      retries: 25
-
-  postgres-shard-1:
-    image: postgres:17
-    container_name: postgres-shard-1
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: person
-    command: [ "postgres", "-c", "port=5435" ]
-    volumes:
-      - ./databases/init-1.sh:/docker-entrypoint-initdb.d/init.sh
-    ports:
-      - "5435:5435"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5435" ]
-      interval: 2s
-      timeout: 5s
-      retries: 25
-
-  postgres:
-    image: postgres:17
-    container_name: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: person
-    command: [ "postgres", "-c", "port=5434" ]
-    volumes:
-      - ./databases/init.sh:/docker-entrypoint-initdb.d/init.sh
-    ports:
-      - "5434:5434"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5434" ]
-      interval: 2s
-      timeout: 5s
-      retries: 25
-
-  kafka-connect:
-    image: confluentinc/cp-kafka-connect:7.4.0
-    container_name: kafka-connect
-    ports:
-      - "8083:8083"
-    depends_on:
-      kafka:
-        condition: service_started
-    volumes:
-      - ./kafka-connect/connect-plugins:/connect-plugins
-    environment:
-      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
-      CONNECT_REST_PORT: 8083
-      CONNECT_GROUP_ID: "connect-cluster"
-      CONNECT_CONFIG_STORAGE_TOPIC: connect-config
-      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
-      CONNECT_STATUS_STORAGE_TOPIC: connect-status
-      CONNECT_REPLICATION_FACTOR: 1
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: "All"
-
-      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
-      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
-      CONNECT_ZOOKEEPER_CONNECT: zookeeper:2181
-      CONNECT_PLUGIN_PATH: /connect-plugins
-    healthcheck:
-      test: [ "CMD-SHELL", "curl http://localhost:8083" ]
-      interval: 10s
-      timeout: 3s
-      retries: 15
 
   alloy:
     image: grafana/alloy:latest
@@ -203,17 +98,7 @@ services:
       timeout: 5s
       retries: 5
 
-  keycloak-healthcheck:
-    image: curlimages/curl:7.85.0
-    depends_on:
-      - keycloak
-      - keycloak-postgres
-    command: ["sh", "-c", "
-      until curl -f http://keycloak:9000/health; do
-        echo 'Waiting for Keycloak...';
-        sleep 5;
-      done
-    "]
+
 
   prometheus:
     image: prom/prometheus:latest
@@ -378,6 +263,119 @@ services:
       timeout: 5s
       retries: 30
 
+  flyway-transactions-shard-0:
+    image: flyway/flyway
+    container_name: flyway-transactions-shard-0
+    depends_on:
+      postgres-shard-0:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres-shard-0:5436/transaction_shard_0
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: postgres
+    command: migrate
+    volumes:
+      - ./databases/transaction:/flyway/sql
+
+  flyway-transactions-shard-1:
+    image: flyway/flyway
+    container_name: flyway-transactions-shard-1
+    depends_on:
+      postgres-shard-1:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres-shard-1:5435/transaction_shard_1
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: postgres
+    command: migrate
+    volumes:
+      - ./databases/transaction:/flyway/sql
+
+  postgres-shard-0:
+    image: postgres:17
+    container_name: postgres-shard-0
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5436" ]
+    volumes:
+      - ./databases/init-0.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - "5436:5436"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5436" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
+
+  postgres-shard-1:
+    image: postgres:17
+    container_name: postgres-shard-1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5435" ]
+    volumes:
+      - ./databases/init-1.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - "5435:5435"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5435" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5434" ]
+    volumes:
+      - ./databases/init.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - "5434:5434"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5434" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.4.0
+    container_name: kafka-connect
+    ports:
+      - "8083:8083"
+    depends_on:
+      kafka:
+        condition: service_started
+    volumes:
+      - ./kafka-connect/connect-plugins:/connect-plugins
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: "connect-cluster"
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-config
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: "All"
+
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_ZOOKEEPER_CONNECT: zookeeper:2181
+      CONNECT_PLUGIN_PATH: /connect-plugins
+    healthcheck:
+      test: [ "CMD-SHELL", "curl http://localhost:8083" ]
+      interval: 10s
+      timeout: 3s
+      retries: 15
 volumes:
   artifacts:
   tempo_data:

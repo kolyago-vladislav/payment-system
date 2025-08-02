@@ -45,3 +45,11 @@ components:
           type: string
         country_code:
           type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: integer

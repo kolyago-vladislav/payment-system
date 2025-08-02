@@ -31,13 +31,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
         '409':
           description: Пользователь уже существует
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
 
   /individual/v1/auth/login:
     post:
@@ -63,7 +63,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
 
   /individual/v1/auth/refresh-token:
     post:
@@ -89,7 +89,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
 
   /individual/v1/auth/me:
     get:
@@ -111,13 +111,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
         '404':
           description: Пользователь не найден
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
 
 components:
   securitySchemes:
@@ -173,11 +173,5 @@ components:
           type: string
           format: date-time
 
-    ErrorResponse:
-      type: object
-      properties:
-        error:
-          type: string
-        status:
-          type: integer
+
 

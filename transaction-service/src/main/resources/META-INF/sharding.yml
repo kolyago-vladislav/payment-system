@@ -2,7 +2,7 @@ dataSources:
   ds_0:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: org.postgresql.Driver
-    jdbcUrl: jdbc:postgresql://localhost:5433/transaction_shard_0?currentSchema=transaction&stringtype=unspecified&options=-c%20TimeZone=UTC
+    jdbcUrl: jdbc:postgresql://localhost:5436/transaction_shard_0?currentSchema=transaction&stringtype=unspecified&options=-c%20TimeZone=UTC
     username: postgres
     password: postgres
   ds_1:

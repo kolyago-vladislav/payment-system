@@ -32,8 +32,16 @@ spring:
           issuer-uri: ${application.keycloak.serverUrl}/realms/${application.keycloak.realm}
 
 person:
-  name: ${PERSONS_API_HOST:localhost}
+  name: ${PERSONS_API_HOST:person}
   url: ${PERSONS_API_URL:http://localhost:8092}
+
+transaction:
+  name: ${TRANSACTIONS_API_HOST:transaction}
+  url: ${TRANSACTIONS_API_URL:http://localhost:8093}
+
+wallet:
+  name: ${WALLETS_API_HOST:wallet}
+  url: ${WALLETS_API_URL:http://localhost:8093}
 
 logging:
   config: "classpath:logback.xml"

@@ -5,7 +5,7 @@
     "database.dbname": "transaction_shard_0",
     "database.hostname": "postgres-shard-0",
     "database.password": "postgres",
-    "database.port": "5433",
+    "database.port": "5436",
     "database.server.name": "postgres",
     "database.user": "postgres",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",

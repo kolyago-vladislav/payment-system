@@ -47,6 +47,8 @@ management:
       probability: 1.0
 
 otel:
+  service:
+    name: "transaction-service"
   exporter:
     otlp:
       endpoint:

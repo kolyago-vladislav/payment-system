@@ -1,0 +1,487 @@
+openapi: 3.0.0
+info:
+  title: Transaction Service API
+  description: REST API для взаимодействия с Transaction сервисом.
+  version: 1.1.1
+servers:
+  - url: http://localhost:8081/api/v1
+
+paths:
+  #########################################################
+  ######################## WALLETS ########################
+  #########################################################
+  /individual/v1/wallets:
+    post:
+      summary: Creating a user wallet
+      operationId: "create"
+      tags:
+        - Wallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletWriteDto'
+      responses:
+        '201':
+          description: Wallet successfully createdAt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletWriteResponseDto'
+        '400':
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
+
+  /individual/v1/wallets/{walletId}:
+    get:
+      summary: Getting wallet information
+      operationId: "findById"
+      tags:
+        - Wallet
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Wallet details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletDto'
+        '404':
+          description: Wallet not found
+          content:
+            application/json:
+              schema:
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
+
+  /individual/v1/wallets/user/{userId}:
+    get:
+      summary: Get all wallets of a user
+      operationId: "findByUserId"
+      tags:
+        - Wallet
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of user wallets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletPageDto'
+
+  #########################################################
+  ######################## TRANSACTIONS ###################
+  #########################################################
+  /individual/v1/transactions/{type}/init:
+    post:
+      summary: Initialize a transaction (without creating)
+      operationId: "init"
+      tags:
+        - Transaction
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: Transaction type
+          schema:
+            $ref: '#/components/schemas/TransactionTypeDto'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/DepositInitRequest'
+                - $ref: '#/components/schemas/WithdrawalInitRequest'
+                - $ref: '#/components/schemas/TransferInitRequest'
+      responses:
+        '200':
+          description: Transaction terms
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionInitResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
+
+  /individual/v1/transactions/{type}/confirm:
+    post:
+      summary: Confirming and starting a transaction
+      operationId: "confirm"
+      tags:
+        - Transaction
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: Transaction type
+          schema:
+            $ref: '#/components/schemas/TransactionTypeDto'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/DepositConfirmRequest'
+                - $ref: '#/components/schemas/WithdrawalConfirmRequest'
+                - $ref: '#/components/schemas/TransferConfirmRequest'
+      responses:
+        '200':
+          description: Transaction confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionConfirmResponse'
+        '400':
+          description: Confirmation error
+          content:
+            application/json:
+              schema:
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
+
+  /individual/v1/transactions/{transactionId}/status:
+    get:
+      summary: Getting transaction status
+      operationId: "getStatus"
+      tags:
+        - Transaction
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transaction status and details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDto'
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: './component/components.yaml#/components/schemas/ErrorResponse'
+
+  /individual/v1/transactions:
+    get:
+      summary: Search transactions by filters with pagination
+      operationId: "findAll"
+      tags:
+        - Transaction
+      parameters:
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: walletId
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TransactionTypeDto'
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TransactionStatusDto'
+        - in: query
+          name: dateFrom
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: dateTo
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionPageDto'
+
+components:
+  schemas:
+    WalletWriteDto:
+      type: object
+      required:
+        - name
+        - userId
+        - walletTypeId
+      properties:
+        name:
+          type: string
+          description: Wallet name
+        walletTypeId:
+          type: string
+          description: Wallet type id
+        userId:
+          type: string
+          description: Unique user identifier
+
+    WalletWriteResponseDto:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Wallet id
+
+    WalletDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique wallet identifier
+        name:
+          type: string
+          description: Wallet name
+        walletType:
+          type: string
+          description: Wallet type
+        currency:
+          type: string
+        userId:
+          type: string
+        status:
+          $ref: '#/components/schemas/WalletStatusDto'
+        balance:
+          type: number
+          format: double
+
+    WalletPageDto:
+      type: object
+      required: [ ]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WalletDto'
+
+    DepositInitRequest:
+      type: object
+      required:
+        - walletId
+        - amount
+      properties:
+        walletId:
+          type: string
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+
+    DepositConfirmRequest:
+      type: object
+      required:
+        - walletId
+        - amount
+      properties:
+        walletId:
+          type: string
+        userId:
+          type: string
+        paymentMethodId:
+          type: integer
+        fee:
+          type: number
+          format: double
+          minimum: 0.01
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+
+    WithdrawalInitRequest:
+      type: object
+      required:
+        - walletId
+        - amount
+      properties:
+        walletId:
+          type: string
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+
+    WithdrawalConfirmRequest:
+      type: object
+      required:
+        - walletId
+        - amount
+      properties:
+        walletId:
+          type: string
+        paymentMethodId:
+          type: integer
+        userId:
+          type: string
+        fee:
+          type: number
+          format: double
+          minimum: 0.01
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+
+    TransferInitRequest:
+      type: object
+      required:
+        - fromWalletId
+        - toWalletId
+        - amount
+      properties:
+        fromWalletId:
+          type: string
+        toWalletId:
+          type: string
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+
+    TransferConfirmRequest:
+      type: object
+      required:
+        - fromWalletId
+        - toWalletId
+        - amount
+      properties:
+        fromWalletId:
+          type: string
+        toWalletId:
+          type: string
+        userId:
+          type: string
+        fee:
+          type: number
+          format: double
+          minimum: 0.01
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+
+    TransactionInitResponse:
+      type: object
+      properties:
+        fee:
+          type: number
+          format: double
+
+    TransactionConfirmResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: Id required to monitor the transaction
+        status:
+          $ref: '#/components/schemas/TransactionStatusDto'
+
+    TransactionDto:
+      type: object
+      properties:
+        transactionId:
+          type: string
+        type:
+          $ref: '#/components/schemas/TransactionTypeDto'
+        status:
+          $ref: '#/components/schemas/TransactionStatusDto'
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TransactionPageDto:
+      type: object
+      required: [ ]
+      properties:
+        count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionDto'
+
+
+
+    TransactionStatusDto:
+      type: string
+      enum:
+        - CONFIRMED
+        - FAILED
+        - PENDING
+        - COMPLETED
+      description: Current transaction status
+
+    TransactionTypeDto:
+      type: string
+      enum:
+        - DEPOSIT
+        - WITHDRAWAL
+        - TRANSFER
+      description: Current transaction type
+
+    WalletStatusDto:
+      type: string
+      enum:
+        - ACTIVE
+        - ARCHIVED
+        - BLOCKED
+      description: Current wallet status
