@@ -19,6 +19,7 @@ import static com.example.spec.integration.LifecycleSpecification.PERSON_EMAIL;
 @RequiredArgsConstructor
 public class DtoCreator {
     public final WalletDtoCreator wallet;
+    public final TransactionDtoCreator transaction;
     public IndividualPageDto buildIndividualPageDto() {
         return new IndividualPageDto().items(List.of(buildIndividualDto()));
     }

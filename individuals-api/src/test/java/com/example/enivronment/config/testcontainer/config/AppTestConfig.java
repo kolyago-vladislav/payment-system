@@ -1,5 +1,8 @@
 package com.example.enivronment.config.testcontainer.config;
 
+import java.time.Clock;
+import java.time.ZoneOffset;
+
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -15,6 +18,11 @@ public class AppTestConfig {
 
     @Autowired
     protected KeycloakProperties keycloakProperties;
+
+    @Bean
+    public Clock clock() {
+        return Clock.system(ZoneOffset.UTC);
+    }
 
     @Bean
     public Keycloak keycloak() {

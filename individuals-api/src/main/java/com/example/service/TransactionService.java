@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +28,6 @@ import com.example.mapper.TransactionMapper;
 import com.example.transaction.api.TransactionApiClient;
 import com.example.transaction.dto.ErrorResponse;
 import com.example.util.JsonWrapper;
-
-import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -57,20 +56,23 @@ public class TransactionService {
         Integer offset,
         Integer limit
     ) {
-        var typesRequest = ofNullable(types).stream()
-            .flatMap(Collection::stream)
-            .map(status -> com.example.transaction.dto.TransactionTypeDto.fromValue(status.name()))
-            .toList();
-        var statusesRequest = ofNullable(statuses).stream()
-            .flatMap(Collection::stream)
-            .map(status -> com.example.transaction.dto.TransactionStatusDto.fromValue(status.name()))
-            .toList();
+        var typesRequest = mapOrNull(types, status -> com.example.transaction.dto.TransactionTypeDto.fromValue(status.name()));
+        var statusesRequest = mapOrNull(statuses, status -> com.example.transaction.dto.TransactionStatusDto.fromValue(status.name()));
         return Mono.fromCallable(
                 () -> transactionApiClient.findAll(userIds, walletIds, typesRequest, statusesRequest, dateFrom, dateTo, offset, limit))
             .map(dto -> transactionMapper.from(dto.getBody()))
             .subscribeOn(Schedulers.boundedElastic())
             .doOnNext(_ -> log.debug("Transactions findAll called"))
             .doOnError(this::handleError);
+    }
+
+    private <T, R> List<R> mapOrNull(Collection<T> input, Function<T, R> mapper) {
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+
+        var result = input.stream().map(mapper).toList();
+        return result.isEmpty() ? null : result;
     }
 
     @WithSpan(value = "transactionService.confirm")
