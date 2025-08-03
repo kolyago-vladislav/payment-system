@@ -1,5 +1,7 @@
 package com.example.transaction.core.config;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -13,6 +15,7 @@ import org.apache.shardingsphere.driver.api.yaml.YamlShardingSphereDataSourceFac
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 
 import com.example.transaction.business.service.outbox.event.base.OutboxEventHandler;
@@ -23,11 +26,21 @@ import com.example.transaction.model.entity.type.TransactionType;
 @Configuration
 public class AppConfig {
 
-   @Bean
-   public DataSource shardingSphereDataSource() throws Exception {
-       var resource = new ClassPathResource("META-INF/sharding.yml");
-       return YamlShardingSphereDataSourceFactory.createDataSource(resource.getFile());
-   }
+    @Bean
+    public DataSource shardingSphereDataSource(Environment env) throws Exception {
+        var resource = new ClassPathResource("META-INF/sharding.yml");
+        String rawYaml;
+        try (InputStream inputStream = resource.getInputStream()) {
+            rawYaml = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+
+
+        rawYaml = rawYaml
+            .replace("${TRANSACTION_POSTGRES_0_HOST}", env.getProperty("TRANSACTION_POSTGRES_0_HOST", "localhost"))
+            .replace("${TRANSACTION_POSTGRES_1_HOST}", env.getProperty("TRANSACTION_POSTGRES_1_HOST", "localhost"));
+
+        return YamlShardingSphereDataSourceFactory.createDataSource(rawYaml.getBytes(StandardCharsets.UTF_8));
+    }
 
     @Bean
     public Clock clock() {

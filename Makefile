@@ -29,23 +29,10 @@ up:
 	@echo "Nexus is healthy!"
 
 build-artifacts:
-	@$(DOCKER_COMPOSE) build persons-api --no-cache
+	@$(DOCKER_COMPOSE) build persons-api transactions-api --no-cache
+
+build-gateway:
+	@$(DOCKER_COMPOSE) build individuals-api --no-cache
 
 start:
 	$(DOCKER_COMPOSE) up -d
-
-# Остановка и очистка
-#stop:
-# $(DOCKER_COMPOSE) down
-#
-#clean: stop
-# $(DOCKER_COMPOSE) rm -f
-# docker volume rm $$(docker volume ls -qf dangling=true) 2>/dev/null || true
-# rm -rf ./person-service/build ./common/build
-#
-## Просмотр логов
-#logs:
-# $(DOCKER_COMPOSE) logs -f --tail=200
-#
-## Полный rebuild (полная очистка, пересборка и старт)
-#rebuild: clean all

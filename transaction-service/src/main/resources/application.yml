@@ -15,15 +15,16 @@ spring:
         hbm2ddl:
           auto: validate
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9093}
     client-id: transaction-client
     producer:
+      bootstrap-servers: ${spring.kafka.bootstrap-servers}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
     consumer:
+      bootstrap-servers: ${spring.kafka.bootstrap-servers}
       group-id: "transaction-service"
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer

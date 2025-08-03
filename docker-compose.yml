@@ -187,6 +187,7 @@ services:
 
   kafka:
     image: wurstmeister/kafka:2.13-2.8.1
+    container_name: kafka
     restart: "no"
     ports:
       - "9093:9093"
@@ -220,8 +221,8 @@ services:
     environment:
       KEYCLOAK_URL: http://keycloak:8080
       SPRING_PROFILES_ACTIVE: docker
-      PERSONS_API_HOST: persons-api
       PERSONS_API_URL: http://persons-api:8092
+      TRANSACTIONS_API_URL: http://transactions-api:8093
       OTLP_EXPORTER_ENDPOINT: http://tempo:4318
     ports:
       - "8091:8091"
@@ -239,6 +240,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  transactions-api:
+    build:
+      context: ./transaction-service
+      dockerfile: Dockerfile
+    container_name: transactions-api
+    ports:
+      - "8093:8093"
+    working_dir: /app
+    environment:
+      TRANSACTION_POSTGRES_0_HOST: postgres-shard-0
+      TRANSACTION_POSTGRES_1_HOST: postgres-shard-1
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    depends_on:
+      connector-creation:
+        condition: service_completed_successfully
+      nexus-change-password:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-i", "http://localhost:8093/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
   persons-api:
     build:
