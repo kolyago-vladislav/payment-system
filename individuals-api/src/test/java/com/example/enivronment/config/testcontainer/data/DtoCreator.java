@@ -2,6 +2,8 @@ package com.example.enivronment.config.testcontainer.data;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 import com.example.individual.dto.AddressDto;
@@ -14,8 +16,9 @@ import com.example.individual.dto.UserLoginRequest;
 import static com.example.spec.integration.LifecycleSpecification.PERSON_EMAIL;
 
 @Component
+@RequiredArgsConstructor
 public class DtoCreator {
-
+    public final WalletDtoCreator wallet;
     public IndividualPageDto buildIndividualPageDto() {
         return new IndividualPageDto().items(List.of(buildIndividualDto()));
     }

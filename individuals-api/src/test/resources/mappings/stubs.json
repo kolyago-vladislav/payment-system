@@ -75,6 +75,50 @@
       "response": {
         "status": 200
       }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/transaction/v1/wallets",
+        "bodyPatterns": [
+          {
+            "equalToJson": "{\"name\":\"My_name\",\"walletTypeId\":\"00000000-1111-2222-3333-000000000001\",\"userId\":\"3ddcecd5-5004-4a8a-9447-ed110912b7ee\"}"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n    \"id\": \"19ed22c9-6923-4f4e-867f-b86e5254d80a\"\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/transaction/v1/wallets/19ed22c9-6923-4f4e-867f-b86e5254d80a"
+      },
+      "response": {
+        "status": 201,
+        "body": "{ \"id\": \"19ed22c9-6923-4f4e-867f-b86e5254d80a\", \"name\": \"My_name\", \"walletType\": \"Main Wallet\", \"currency\": \"USD\", \"userId\": \"3ddcecd5-5004-4a8a-9447-ed110912b7ee\", \"status\": \"ACTIVE\", \"balance\": 150.0 }",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/transaction/v1/wallets/user/3ddcecd5-5004-4a8a-9447-ed110912b7ee"
+      },
+      "response": {
+        "status": 201,
+        "body": "{ \"items\": [ { \"id\": \"19ed22c9-6923-4f4e-867f-b86e5254d80a\", \"name\": \"My_name\", \"walletType\": \"Main Wallet\", \"currency\": \"USD\", \"userId\": \"3ddcecd5-5004-4a8a-9447-ed110912b7ee\", \"status\": \"ACTIVE\", \"balance\": 150.0 } ] }",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
     }
   ]
 }
