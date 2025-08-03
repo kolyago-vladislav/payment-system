@@ -68,7 +68,9 @@ public class TransactionService {
         return Mono.fromCallable(
                 () -> transactionApiClient.findAll(userIds, walletIds, typesRequest, statusesRequest, dateFrom, dateTo, offset, limit))
             .map(dto -> transactionMapper.from(dto.getBody()))
-            .subscribeOn(Schedulers.boundedElastic());
+            .subscribeOn(Schedulers.boundedElastic())
+            .doOnNext(_ -> log.debug("Transactions findAll called"))
+            .doOnError(this::handleError);
     }
 
     @WithSpan(value = "transactionService.confirm")
@@ -83,13 +85,17 @@ public class TransactionService {
                     .map(dto -> transactionMapper.from(dto.getBody()))
                     .subscribeOn(Schedulers.boundedElastic()))
             .doOnNext(response -> log.info("Transaction confirmed successfully id={}", response.getTransactionId()))
-            .doOnError(e -> ((FeignException) e).responseBody().ifPresent(
-                byteBuffer -> {
-                    var errorResponse = jsonWrapper.read(byteBuffer.array(), ErrorResponse.class);
-                    log.error("Failed to confirm transaction: message={}", errorResponse.getMessage());
-                    throw new IndividualException(errorResponse.getMessage());
-                }
-            ));
+            .doOnError(this::handleError);
+    }
+
+    private void handleError(Throwable e) {
+        ((FeignException) e).responseBody().ifPresent(
+            byteBuffer -> {
+                var errorResponse = jsonWrapper.read(byteBuffer.array(), ErrorResponse.class);
+                log.error(errorResponse.getMessage());
+                throw new IndividualException(errorResponse.getMessage());
+            }
+        );
     }
 
     @WithSpan(value = "transactionService.init")
@@ -105,13 +111,6 @@ public class TransactionService {
                     ))
                     .map(dto -> transactionMapper.from(dto.getBody()))
                     .subscribeOn(Schedulers.boundedElastic()))
-            .doOnError(e -> ((FeignException) e).responseBody().ifPresent(
-                byteBuffer -> {
-                    var errorResponse = jsonWrapper.read(byteBuffer.array(), ErrorResponse.class);
-                    log.error("Failed to init transaction: message={}", errorResponse.getMessage());
-                    throw new IndividualException(errorResponse.getMessage());
-                }
-            ));
+            .doOnError(this::handleError);
     }
-
 }
