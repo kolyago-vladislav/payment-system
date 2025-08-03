@@ -13,6 +13,10 @@ public class TransactionStatusConverter implements Converter<String, Transaction
 
     @Override
     public TransactionStatusDto convert(@NonNull String value) {
-        return EnumUtil.from(TransactionStatusDto.class, value, () -> new IndividualException("Unknown TransactionStatusDto: %s", value));
+        return EnumUtil.from(
+            TransactionStatusDto.class,
+            value,
+            () -> new IndividualException("Unknown %s: %s", TransactionStatusDto.class.getSimpleName(), value)
+        );
     }
 }

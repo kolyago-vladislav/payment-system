@@ -13,9 +13,10 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
 
 import com.example.exception.IndividualException;
 import com.example.individual.dto.DepositInitRequest;
@@ -24,7 +25,7 @@ import com.example.individual.dto.TransactionTypeDto;
 import com.example.individual.dto.TransferInitRequest;
 import com.example.individual.dto.WithdrawalInitRequest;
 import com.example.util.EnumUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.util.JsonWrapper;
 
 import static org.springframework.web.reactive.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 
@@ -34,10 +35,10 @@ public class TransactionInitRequestHttpMessageReader implements HttpMessageReade
 
     private static final String INIT_REQUEST_TYPE_PATH_VARIABLE = "type";
 
-    private final ObjectMapper objectMapper;
+    private final JsonWrapper jsonWrapper;
 
     @Override
-    public List<MediaType> getReadableMediaTypes() {
+    public @NonNull List<MediaType> getReadableMediaTypes() {
         return List.of(MediaType.APPLICATION_JSON);
     }
 
@@ -51,55 +52,49 @@ public class TransactionInitRequestHttpMessageReader implements HttpMessageReade
     }
 
     @Override
-    public Flux<InitRequest> read(
-        ResolvableType elementType,
-        ReactiveHttpInputMessage inputMessage,
-        Map<String, Object> hints
+    public @NonNull Flux<InitRequest> read(
+        @NonNull ResolvableType elementType,
+        @NonNull ReactiveHttpInputMessage inputMessage,
+        @NonNull Map<String, Object> hints
     ) {
         return readMono(elementType, inputMessage, hints).flux();
     }
 
     @Override
-    public Mono<InitRequest> readMono(
-        ResolvableType elementType,
-        ReactiveHttpInputMessage inputMessage,
-        Map<String, Object> hints
+    public @NonNull Mono<InitRequest> readMono(
+        @NonNull ResolvableType elementType,
+        @NonNull ReactiveHttpInputMessage message,
+        @NonNull Map<String, Object> hints
     ) {
-        ServerWebExchange exchange = (ServerWebExchange) hints.get(ServerWebExchange.class.getName());
-
-        if (exchange == null) {
-            return Mono.error(new IndividualException("Missing ServerWebExchange in hints"));
-        }
-
-        return DataBufferUtils.join(inputMessage.getBody())
+        return DataBufferUtils.join(message.getBody())
             .flatMap(dataBuffer -> {
                 byte[] bytes = new byte[dataBuffer.readableByteCount()];
                 dataBuffer.read(bytes);
                 DataBufferUtils.release(dataBuffer);
 
-                String body = new String(bytes, StandardCharsets.UTF_8);
+                var body = new String(bytes, StandardCharsets.UTF_8);
 
-                Map<String, String> uriVariables = exchange.getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-                if (uriVariables == null || !uriVariables.containsKey(INIT_REQUEST_TYPE_PATH_VARIABLE)) {
-                    return Mono.error(new IndividualException("Missing 'type' path variable"));
+                var attributes = ((ServerHttpRequest) message).getAttributes();
+                @SuppressWarnings("unchecked")
+                var uriVariables = (Map<String, String>) attributes.getOrDefault(URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of());
+
+                var type = uriVariables.get(INIT_REQUEST_TYPE_PATH_VARIABLE);
+                if (type == null) {
+                    return Mono.error(new IndividualException("Missing transaction type in URI"));
                 }
 
-                String typeString = uriVariables.get(INIT_REQUEST_TYPE_PATH_VARIABLE);
+                var typeDto = EnumUtil.from(
+                    TransactionTypeDto.class,
+                    type,
+                    () -> new IndividualException("Unknown %s: %s", TransactionTypeDto.class, type));
 
-                TransactionTypeDto type = EnumUtil.from(TransactionTypeDto.class, typeString,
-                    () -> new IndividualException("Unknown TransactionTypeDto: %s", typeString));
-
-                Class<? extends InitRequest> targetClass = switch (type) {
+                var targetClass = switch (typeDto) {
                     case DEPOSIT -> DepositInitRequest.class;
                     case WITHDRAWAL -> WithdrawalInitRequest.class;
                     case TRANSFER -> TransferInitRequest.class;
                 };
 
-                try {
-                    return Mono.just(objectMapper.readValue(body, targetClass));
-                } catch (Exception e) {
-                    return Mono.error(new IndividualException("Failed to parse InitRequest", e));
-                }
+                return Mono.just(jsonWrapper.read(body, targetClass));
             });
     }
 }

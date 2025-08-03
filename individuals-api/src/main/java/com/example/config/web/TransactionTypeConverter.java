@@ -13,6 +13,10 @@ public class TransactionTypeConverter implements Converter<String, TransactionTy
 
     @Override
     public TransactionTypeDto convert(@NonNull String value) {
-        return EnumUtil.from(TransactionTypeDto.class, value, () -> new IndividualException("Unknown ExternalServiceStatus: %s", value));
+        return EnumUtil.from(
+            TransactionTypeDto.class,
+            value,
+            () -> new IndividualException("Unknown %s: %s", TransactionTypeDto.class.getSimpleName(), value)
+        );
     }
 }

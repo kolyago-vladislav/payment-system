@@ -5,6 +5,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,8 @@ import com.example.mapper.TransactionMapper;
 import com.example.transaction.api.TransactionApiClient;
 import com.example.transaction.dto.ErrorResponse;
 import com.example.util.JsonWrapper;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -54,13 +57,14 @@ public class TransactionService {
         Integer offset,
         Integer limit
     ) {
-        var typesRequest = types.stream()
-            .map(dto -> com.example.transaction.dto.TransactionTypeDto.fromValue(dto.name()))
+        var typesRequest = ofNullable(types).stream()
+            .flatMap(Collection::stream)
+            .map(status -> com.example.transaction.dto.TransactionTypeDto.fromValue(status.name()))
             .toList();
-        var statusesRequest = statuses.stream()
-            .map(dto -> com.example.transaction.dto.TransactionStatusDto.fromValue(dto.name()))
+        var statusesRequest = ofNullable(statuses).stream()
+            .flatMap(Collection::stream)
+            .map(status -> com.example.transaction.dto.TransactionStatusDto.fromValue(status.name()))
             .toList();
-
         return Mono.fromCallable(
                 () -> transactionApiClient.findAll(userIds, walletIds, typesRequest, statusesRequest, dateFrom, dateTo, offset, limit))
             .map(dto -> transactionMapper.from(dto.getBody()))
@@ -79,7 +83,7 @@ public class TransactionService {
                     .map(dto -> transactionMapper.from(dto.getBody()))
                     .subscribeOn(Schedulers.boundedElastic()))
             .doOnNext(response -> log.info("Transaction confirmed successfully id={}", response.getTransactionId()))
-            .doOnError(e -> ((FeignException.BadRequest) e).responseBody().ifPresent(
+            .doOnError(e -> ((FeignException) e).responseBody().ifPresent(
                 byteBuffer -> {
                     var errorResponse = jsonWrapper.read(byteBuffer.array(), ErrorResponse.class);
                     log.error("Failed to confirm transaction: message={}", errorResponse.getMessage());
@@ -100,8 +104,14 @@ public class TransactionService {
                         transactionMapper.from(type, request)
                     ))
                     .map(dto -> transactionMapper.from(dto.getBody()))
-                    .subscribeOn(Schedulers.boundedElastic())
-            );
+                    .subscribeOn(Schedulers.boundedElastic()))
+            .doOnError(e -> ((FeignException) e).responseBody().ifPresent(
+                byteBuffer -> {
+                    var errorResponse = jsonWrapper.read(byteBuffer.array(), ErrorResponse.class);
+                    log.error("Failed to init transaction: message={}", errorResponse.getMessage());
+                    throw new IndividualException(errorResponse.getMessage());
+                }
+            ));
     }
 
 }
