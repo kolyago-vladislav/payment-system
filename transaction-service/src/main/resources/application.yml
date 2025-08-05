@@ -1,0 +1,65 @@
+server:
+  port: 8093
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: transaction
+        show_sql: ${SHOW_SQL:false}
+        format_sql: ${FORMAT_SQL:true}
+        highlight_sql: ${HIGHLIGHT_SQL:true}
+        session.events.log.LOG_QUERIES_SLOWER_THAN_MS: ${SLOW_SQL_QUERY_INDICATOR_MS:1500}
+        hbm2ddl:
+          auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9093}
+    client-id: transaction-client
+    producer:
+      bootstrap-servers: ${spring.kafka.bootstrap-servers}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+    consumer:
+      bootstrap-servers: ${spring.kafka.bootstrap-servers}
+      group-id: "transaction-service"
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      auto-offset-reset: earliest
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      access: read_only
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+
+otel:
+  service:
+    name: "transaction-service"
+  exporter:
+    otlp:
+      endpoint:
+        ${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}
+      protocol: http/protobuf
+  logs:
+    exporter: none
+  metrics:
+    exporter: none
+
+logging:
+  config: "classpath:logback-local.xml"
+

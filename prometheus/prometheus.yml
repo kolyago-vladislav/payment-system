@@ -15,3 +15,8 @@ scrape_configs:
     metrics_path: /actuator/prometheus
     static_configs:
       - targets: [ 'persons-api:8092' ]
+
+  - job_name: 'transactions-api'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [ 'transactions-api:8093' ]

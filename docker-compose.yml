@@ -1,72 +1,66 @@
 services:
-  postgres:
-    image: postgres:17
-    container_name: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: person
-    command: [ "postgres", "-c", "port=5434" ]
-    volumes:
-      - ./databases/init.sh:/docker-entrypoint-initdb.d/init.sh
+  connector-creation:
+    image: curlimages/curl:8.5.0
+    user: root
+    depends_on:
+      kafka-connect:
+        condition: service_healthy
+      flyway-transactions-shard-0:
+        condition: service_completed_successfully
+      flyway-transactions-shard-1:
+        condition: service_completed_successfully
     ports:
-      - "5434:5434"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5434" ]
-      interval: 2s
-      timeout: 5s
-      retries: 25
+      - '40012:40012'
+    volumes:
+      - ./kafka-connect:/kafka-connect
+    command:
+      sh -c "/kafka-connect/create-connector.sh"
 
-  individuals-api:
-    build:
-      context: ./individuals-api
-      dockerfile: Dockerfile
-    container_name: individuals-api
+  keycloak-healthcheck:
+    image: curlimages/curl:7.85.0
+    depends_on:
+      - keycloak
+      - keycloak-postgres
+    command: [ "sh", "-c", "
+      until curl -f http://keycloak:9000/health; do
+        echo 'Waiting for Keycloak...';
+        sleep 5;
+      done
+    " ]
+
+  nexus-change-password:
+    image: appropriate/curl
     environment:
-      KEYCLOAK_URL: http://keycloak:8080
-      SPRING_PROFILES_ACTIVE: docker
-      PERSONS_API_HOST: persons-api
-      PERSONS_API_URL: http://persons-api:8092
-      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
-    ports:
-      - "8091:8091"
-    volumes:
-      - nexus-data:/nexus-data
+      - NEXUS_ADMIN_PASSWORD_FILE=/nexus-data/admin.password
+      - NEXUS_NEW_PASSWORD=admin
     depends_on:
       nexus:
         condition: service_healthy
-      keycloak-healthcheck:
-        condition: service_completed_successfully
-      persons-api:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-i", "http://localhost:8091/actuator/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    entrypoint: [ "/bin/sh", "/scripts/change-password.sh" ]
+    volumes:
+      - nexus-data:/nexus-data
+      - ./nexus:/scripts:ro
 
-  persons-api:
-    build:
-      context: ./person-service
-      dockerfile: Dockerfile
-    container_name: persons-api
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    user: root
     ports:
-      - "8092:8092"
-    working_dir: /app
+      - "9080:9080"  # HTTP-интерфейс Alloy (по умолчанию)
+      - "4317:4317"   # OTLP gRPC (важно!)
+      - "4318:4318"   # OTLP HTTP (если нужен)
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log:/var/log:ro
     environment:
-      POSTGRES_HOST: postgres
-      SPRING_PROFILES_ACTIVE: docker
-      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
-    depends_on:
-      postgres:
-        condition: service_healthy
-      nexus-change-password:
-        condition: service_completed_successfully
-    healthcheck:
-      test: [ "CMD", "curl", "-i", "http://localhost:8092/actuator/health" ]
-      interval: 5s
-      timeout: 5s
-      retries: 30
+      GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:9080
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
@@ -104,17 +98,7 @@ services:
       timeout: 5s
       retries: 5
 
-  keycloak-healthcheck:
-    image: curlimages/curl:7.85.0
-    depends_on:
-      - keycloak
-      - keycloak-postgres
-    command: ["sh", "-c", "
-      until curl -f http://keycloak:9000/health; do
-        echo 'Waiting for Keycloak...';
-        sleep 5;
-      done
-    "]
+
 
   prometheus:
     image: prom/prometheus:latest
@@ -172,27 +156,6 @@ services:
       timeout: 5s
       retries: 5
 
-  alloy:
-    image: grafana/alloy:latest
-    container_name: alloy
-    user: root
-    ports:
-      - "9080:9080"  # HTTP-интерфейс Alloy (по умолчанию)
-      - "4317:4317"   # OTLP gRPC (важно!)
-      - "4318:4318"   # OTLP HTTP (если нужен)
-    volumes:
-      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/log:/var/log:ro
-    environment:
-      GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push
-    command:
-      - run
-      - --server.http.listen-addr=0.0.0.0:9080
-      - --storage.path=/var/lib/alloy/data
-      - /etc/alloy/config.alloy
-
   nexus:
     image: sonatype/nexus3:3.76.0
     container_name: nexus
@@ -206,19 +169,6 @@ services:
       timeout: 10s
       retries: 30
 
-  nexus-change-password:
-    image: appropriate/curl
-    environment:
-      - NEXUS_ADMIN_PASSWORD_FILE=/nexus-data/admin.password
-      - NEXUS_NEW_PASSWORD=admin
-    depends_on:
-      nexus:
-        condition: service_healthy
-    entrypoint: ["/bin/sh", "/scripts/change-password.sh"]
-    volumes:
-      - nexus-data:/nexus-data
-      - ./nexus:/scripts:ro
-
   tempo:
     image: grafana/tempo:2.4.1
     container_name: tempo
@@ -229,6 +179,228 @@ services:
     ports:
       - "3200:3200"
 
+  zookeeper:
+    image: wurstmeister/zookeeper
+    restart: "no"
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    container_name: kafka
+    restart: "no"
+    ports:
+      - "9093:9093"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_LISTENERS: INTERNAL://:9092, EXTERNAL://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092, EXTERNAL://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  plugin-install:
+    image: curlimages/curl:8.5.0
+    user: root
+    ports:
+      - '40011:40011'
+    volumes:
+      - ./kafka-connect:/kafka-connect
+    command:
+      sh -c "/kafka-connect/plugin-install.sh"
+
+  individuals-api:
+    build:
+      context: ./individuals-api
+      dockerfile: Dockerfile
+    container_name: individuals-api
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      SPRING_PROFILES_ACTIVE: docker
+      PERSONS_API_URL: http://persons-api:8092
+      TRANSACTIONS_API_URL: http://transactions-api:8093
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    ports:
+      - "8091:8091"
+    volumes:
+      - nexus-data:/nexus-data
+    depends_on:
+      nexus:
+        condition: service_healthy
+      keycloak-healthcheck:
+        condition: service_completed_successfully
+      persons-api:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-i", "http://localhost:8091/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  transactions-api:
+    build:
+      context: ./transaction-service
+      dockerfile: Dockerfile
+    container_name: transactions-api
+    ports:
+      - "8093:8093"
+    working_dir: /app
+    environment:
+      TRANSACTION_POSTGRES_0_HOST: postgres-shard-0
+      TRANSACTION_POSTGRES_1_HOST: postgres-shard-1
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    depends_on:
+      connector-creation:
+        condition: service_completed_successfully
+      nexus-change-password:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-i", "http://localhost:8093/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  persons-api:
+    build:
+      context: ./person-service
+      dockerfile: Dockerfile
+    container_name: persons-api
+    ports:
+      - "8092:8092"
+    working_dir: /app
+    environment:
+      POSTGRES_HOST: postgres
+      SPRING_PROFILES_ACTIVE: docker
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nexus-change-password:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-i", "http://localhost:8092/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  flyway-transactions-shard-0:
+    image: flyway/flyway
+    container_name: flyway-transactions-shard-0
+    depends_on:
+      postgres-shard-0:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres-shard-0:5436/transaction_shard_0
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: postgres
+    command: migrate
+    volumes:
+      - ./databases/transaction:/flyway/sql
+
+  flyway-transactions-shard-1:
+    image: flyway/flyway
+    container_name: flyway-transactions-shard-1
+    depends_on:
+      postgres-shard-1:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres-shard-1:5435/transaction_shard_1
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: postgres
+    command: migrate
+    volumes:
+      - ./databases/transaction:/flyway/sql
+
+  postgres-shard-0:
+    image: postgres:17
+    container_name: postgres-shard-0
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5436" ]
+    volumes:
+      - ./databases/init-0.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - "5436:5436"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5436" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
+
+  postgres-shard-1:
+    image: postgres:17
+    container_name: postgres-shard-1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5435" ]
+    volumes:
+      - ./databases/init-1.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - "5435:5435"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5435" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: person
+    command: [ "postgres", "-c", "port=5434" ]
+    volumes:
+      - ./databases/init.sh:/docker-entrypoint-initdb.d/init.sh
+    ports:
+      - "5434:5434"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5434" ]
+      interval: 2s
+      timeout: 5s
+      retries: 25
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.4.0
+    container_name: kafka-connect
+    ports:
+      - "8083:8083"
+    depends_on:
+      kafka:
+        condition: service_started
+    volumes:
+      - ./kafka-connect/connect-plugins:/connect-plugins
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: "connect-cluster"
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-config
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: "All"
+
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_ZOOKEEPER_CONNECT: zookeeper:2181
+      CONNECT_PLUGIN_PATH: /connect-plugins
+    healthcheck:
+      test: [ "CMD-SHELL", "curl http://localhost:8083" ]
+      interval: 10s
+      timeout: 3s
+      retries: 15
 volumes:
   artifacts:
   tempo_data:

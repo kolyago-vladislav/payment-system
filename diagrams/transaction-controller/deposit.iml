@@ -1,0 +1,34 @@
+@startuml
+actor Client
+participant IndividualsAPI
+participant TransactionService
+participant WalletService
+participant Kafka
+participant OutboxSerivce
+participant ExternalSystem
+
+Client -> IndividualsAPI: POST /transaction/v1/transactions/deposit/init
+IndividualsAPI -> TransactionService: Prepare deposit terms (init)
+TransactionService -> WalletService: Checking wallet
+WalletService --> TransactionService: OK
+TransactionService --> IndividualsAPI: Conditions (commission, availability)
+IndividualsAPI --> Client: Replenishment conditions
+
+Client -> IndividualsAPI: POST /transaction/v1/transactions/deposit/confirm
+IndividualsAPI -> TransactionService: Confirm deposit
+TransactionService -> DB: Create transaction [status=PENDING]
+TransactionService -> DB: Create outbox event [type=DEPOSIT]
+TransactionService --> IndividualsAPI: {status=PENDING, transactionId}
+IndividualsAPI --> Client: {status=PENDING, transactionId}
+DB -> Kafka: OutboxEvent [type=DEPOSIT]
+Kafka -> OutboxSerivce: OutboxEvent [type=DEPOSIT]
+OutboxSerivce -> ExternalSystem: DepositRequestDto
+ExternalSystem --> TransactionService: DepositCompletedDto [COMPLETED/FAILED]
+alt COMPLETED
+    TransactionService -> WalletService: Credit funds
+    WalletService -> DB: Credit funds [balance++]
+    TransactionService -> DB: Transaction status COMPLETED
+else FAILED
+    TransactionService -> DB: Transaction status FAILED
+end
+@enduml

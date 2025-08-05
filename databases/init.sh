@@ -2,11 +2,8 @@
 set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-DO \$\$
-BEGIN
-    IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'person') THEN
-        CREATE DATABASE person;
-    END IF;
-END;
-\$\$;
+SELECT 'CREATE DATABASE person'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'person')\gexec
 EOSQL
+
+echo -e "wal_level = 'logical'" >> $PGDATA/postgresql.conf

@@ -1,0 +1,22 @@
+@startuml
+actor Client
+participant IndividualsAPI
+participant TransactionService
+participant WalletService
+
+Client -> IndividualsAPI: POST /transaction/v1/transactions/transfer/init
+IndividualsAPI -> TransactionService: Prepare transfer terms (init)
+TransactionService -> WalletService: Checking both wallets
+WalletService --> TransactionService: Conditions (commission, availability)
+TransactionService --> IndividualsAPI: Conditions (commission, availability)
+IndividualsAPI --> Client: Conditions (commission, availability)
+
+Client -> IndividualsAPI: POST /transaction/v1/transactions/transfer/confirm
+IndividualsAPI -> TransactionService: Confirm transfer
+TransactionService -> WalletService: Debit + Credit
+WalletService -> DB: Debit funds (fromWalletId) [balance--]
+WalletService -> DB: Credit funds (toWalletId) [balance++]
+TransactionService -> DB: Create transaction [status=COMPLETED]
+TransactionService --> IndividualsAPI: {status=COMPLETED, transactionId}
+IndividualsAPI --> Client: {status=COMPLETED, transactionId}
+@enduml
