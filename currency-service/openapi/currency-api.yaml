@@ -1,0 +1,192 @@
+openapi: 3.0.0
+info:
+  title: Currency Rate Service API
+  version: 1.0.0
+  description: |
+    API for receiving, calculating and storing exchange rates.
+    Used by internal services (via Individuals API) to calculate the cost of conversion in transactions with wallets.
+
+servers:
+  - url: http://localhost:8083/api/v1
+
+paths:
+  /currency/v1/rates:
+    get:
+      tags:
+        - Currency
+      operationId: findRate
+      summary: Get the exchange rate between two currencies for a specified date/time
+      parameters:
+        - name: source
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 3
+          description: Source currency code (e.g. "USD")
+        - name: target
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 3
+          description: Target currency code (e.g. "EUR")
+        - name: timestamp
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: The date/time for which the rate is needed (ISO 8601, UTC). If not specified, the latest current rate is returned.
+      responses:
+        '200':
+          description: Course found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateDto'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /currency/v1/currencies:
+    get:
+      tags:
+        - Currency
+      operationId: findCurrencies
+      summary: Get a list of supported currencies
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: list of supported currencies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyPageDto'
+
+  /currency/v1/rate-providers:
+    get:
+      tags:
+        - Currency
+      operationId: findRateProviders
+      summary: Get a list of exchange rate providers
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Providers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateProviderPageDto'
+
+components:
+  schemas:
+    RateDto:
+      type: object
+      properties:
+        source:
+          type: string
+          description: Source currency code (e.g. "USD")
+        target:
+          type: string
+          description: Target currency code (e.g. "EUR")
+        rate:
+          type: number
+          description: Exchange rate sourceCode→destinationCode
+        rateTimestamp:
+          type: string
+          format: date-time
+          description: The time the rate is valid for
+        providerCode:
+          type: string
+          description: Course provider code
+
+    CurrencyPageDto:
+      type: object
+      required: [ ]
+      properties:
+        totalPages:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrencyDto'
+
+    CurrencyDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Three-letter currency code (ISO 4217)
+        isoCode:
+          type: integer
+          description: Numeric ISO currency code
+        description:
+          type: string
+        active:
+          type: boolean
+        symbol:
+          type: string
+          description: Currency symbol (eg $ or €)
+
+    RateProviderPageDto:
+      type: object
+      required: [ ]
+      properties:
+        totalPages:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RateProviderDto'
+
+    RateProviderDto:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        priority:
+          type: integer
+        active:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: integer

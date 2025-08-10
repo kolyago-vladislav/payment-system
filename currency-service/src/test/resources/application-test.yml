@@ -1,0 +1,10 @@
+client:
+  frankfurter:
+    url: http://localhost:18092
+    correctionFactor: 1.123
+
+spring:
+  task:
+    scheduling:
+      enabled: false
+

@@ -6,4 +6,9 @@ SELECT 'CREATE DATABASE person'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'person')\gexec
 EOSQL
 
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+SELECT 'CREATE DATABASE currency'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'currency')\gexec
+EOSQL
+
 echo -e "wal_level = 'logical'" >> $PGDATA/postgresql.conf
