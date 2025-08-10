@@ -41,7 +41,7 @@ public class OutboxEventConsumerTest extends NecessaryDependencyConfig {
     void setUp() {
         reset(kafkaTemplate);
 
-        var walletWriteDto = dtoCreator.wallet.createWalletWriteDto();
+        var walletWriteDto = dtoCreator.wallet.createUsdWalletWriteDto();
 
         var response = walletApiTestService.register(walletWriteDto);
 

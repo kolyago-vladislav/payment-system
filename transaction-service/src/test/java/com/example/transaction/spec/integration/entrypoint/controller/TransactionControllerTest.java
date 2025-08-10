@@ -20,7 +20,7 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
 
     @BeforeEach
     void setUp() {
-        var walletWriteDto = dtoCreator.wallet.createWalletWriteDto();
+        var walletWriteDto = dtoCreator.wallet.createUsdWalletWriteDto();
 
         var response = walletApiTestService.register(walletWriteDto);
 
@@ -72,7 +72,7 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
     @Test
     void shouldReturnTransactionConfirmResponseWhenTransferConfirmedCalled() {
         //given
-        var walletWriteDto = dtoCreator.wallet.createWalletWriteDto();
+        var walletWriteDto = dtoCreator.wallet.createEurWalletWriteDto();
         var secondWalletId = walletApiTestService.register(walletWriteDto);
 
         var request = dtoCreator.transaction.createTransferConfirmTransactionDto(walletId, secondWalletId);
@@ -87,7 +87,7 @@ class TransactionControllerTest extends NecessaryDependencyConfig {
         //then
         assertEquals(expected, response);
         assertEquals(50.0, walletFromDto.getBalance());
-        assertEquals(250.0, walletToDto.getBalance());
+        assertEquals(270.0, walletToDto.getBalance());
     }
 
     @Test

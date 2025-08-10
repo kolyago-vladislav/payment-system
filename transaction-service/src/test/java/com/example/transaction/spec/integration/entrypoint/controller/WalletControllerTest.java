@@ -14,7 +14,7 @@ class WalletControllerTest extends NecessaryDependencyConfig {
 
     @BeforeEach
     void setUp() {
-        var walletWriteDto = dtoCreator.wallet.createWalletWriteDto();
+        var walletWriteDto = dtoCreator.wallet.createUsdWalletWriteDto();
 
         var response = walletApiTestService.register(walletWriteDto);
 
