@@ -28,13 +28,13 @@ public interface TransactionMapper {
 
 
     com.example.transaction.dto.DepositConfirmRequest from(DepositConfirmRequest dto);
-    com.example.transaction.dto.TransferConfirmRequest from(TransferConfirmRequest dto, BigDecimal rate);
+    com.example.transaction.dto.TransferConfirmRequest from(TransferConfirmRequest dto);
     com.example.transaction.dto.WithdrawalConfirmRequest from(WithdrawalConfirmRequest dto);
 
     default com.example.transaction.dto.ConfirmRequest from(TransactionTypeDto type, ConfirmRequest dto, BigDecimal rate) {
         return switch (type) {
             case DEPOSIT -> from((DepositConfirmRequest) dto);
-            case TRANSFER -> from((TransferConfirmRequest) dto, rate);
+            case TRANSFER -> from((TransferConfirmRequest) dto).conversionRate(rate.doubleValue());
             case WITHDRAWAL -> from((WithdrawalConfirmRequest) dto);
         };
     }

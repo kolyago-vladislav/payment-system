@@ -50,6 +50,8 @@ public class TransactionDtoCreator {
     public ConfirmRequest createTransferConfirmTransactionDto() {
         return new TransferConfirmRequest()
             .userId(PERSON_ID)
+            .sourceCurrency("USD")
+            .targetCurrency("EUR")
             .fromWalletId(WALLET_ID)
             .toWalletId(WALLET_ID)
             .amount(100.00)

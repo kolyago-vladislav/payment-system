@@ -14,7 +14,8 @@ public class WireMockTestContainer {
         wireMockContainer = new WireMockContainer("wiremock/wiremock:3.13.0")
             .withCreateContainerCmdModifier(cmd -> cmd.withPortBindings(
                 new PortBinding(Ports.Binding.bindPort(8092), new ExposedPort(8080)),
-                new PortBinding(Ports.Binding.bindPort(8093), new ExposedPort(8080))
+                new PortBinding(Ports.Binding.bindPort(8093), new ExposedPort(8080)),
+                new PortBinding(Ports.Binding.bindPort(8094), new ExposedPort(8080))
             ))
             .withMappingFromResource("hackernews", "mappings/stubs.json");
     }
