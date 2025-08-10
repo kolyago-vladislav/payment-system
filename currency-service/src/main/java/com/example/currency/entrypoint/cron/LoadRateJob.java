@@ -17,11 +17,10 @@ public class LoadRateJob {
 
     private final FrankfurterRateLoader frankfurterRateLoader;
 
-    @Scheduled(cron = "*/30 * * * * *")
+    @Scheduled(cron = "${currency-service.cron.load-rate-job.periodicity}")
     @SchedulerLock(
-        name = "LoadRateJob",
-        lockAtMostFor = "10m",
-        lockAtLeastFor = "5m"
+        name = "${currency-service.cron.load-rate-job.name}",
+        lockAtLeastFor = "${currency-service.cron.load-rate-job.lock-minimum}"
     )
     public void loadRates() {
         frankfurterRateLoader.loadRates();

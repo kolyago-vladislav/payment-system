@@ -60,6 +60,12 @@ otel:
   metrics:
     exporter: none
 
+currency-service:
+  cron:
+    load-rate-job:
+      name: LOAD_RATE_JOB_NAME
+      periodicity: "*/30 * * * * *"
+      lock-minimum: 5m
 logging:
   config: "classpath:logback-local.xml"
   level.net.javacrumbs.shedlock: DEBUG
