@@ -6,9 +6,11 @@ import lombok.Builder;
 
 @Builder
 public record ValidationContext(
-    String initialWalletId,
+    String sourceWalletId,
     String targetWalletId,
-    BigDecimal amount
+    BigDecimal amount,
+    String sourceCurrency,
+    String targetCurrency
 ) {
 
 }

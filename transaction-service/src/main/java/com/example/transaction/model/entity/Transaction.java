@@ -48,6 +48,9 @@ public class Transaction extends BaseEntity {
     @Column(name = "amount")
     private BigDecimal amount;
 
+    @Column(name = "target_amount")
+    private BigDecimal targetAmount;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     @ColumnTransformer(write = "?::transaction.transaction_type")
