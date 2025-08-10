@@ -1,11 +1,13 @@
 package com.example.transaction.business.mapper;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 import lombok.Setter;
 
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -50,17 +52,26 @@ public abstract class TransactionMapper {
 
     @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "updatedAt", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "walletId", source = "request.fromWalletId")
-    @Mapping(target = "amount", source = "request.amount")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "walletId", source = "fromWalletId")
+    @Mapping(target = "amount", source = "amount")
+    @Mapping(target = "targetAmount", source = ".", qualifiedByName = "toTargetAmount")
+    @Mapping(target = "type", expression = "java(type)")
     @Mapping(target = "status", constant = "COMPLETED")
-    @Mapping(target = "fee", source = "request.fee")
-    @Mapping(target = "userId", source = "request.userId")
-    @Mapping(target = "targetWalletId", source = "request.toWalletId")
+    @Mapping(target = "fee", source = "fee")
+    @Mapping(target = "userId", source = "userId")
+    @Mapping(target = "targetWalletId", source = "toWalletId")
     public abstract Transaction to(
         TransferConfirmRequest request,
+        @Context
         TransactionType type
     );
+
+    @Named("toTargetAmount")
+    protected BigDecimal toTargetAmount(
+        TransferConfirmRequest request
+    ) {
+        return BigDecimal.valueOf(request.getAmount()).multiply(BigDecimal.valueOf(request.getConversionRate()));
+    }
 
     @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "updatedAt", expression = "java(dateTimeUtil.now())")

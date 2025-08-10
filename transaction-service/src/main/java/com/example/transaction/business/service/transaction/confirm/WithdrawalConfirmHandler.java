@@ -65,7 +65,7 @@ public class WithdrawalConfirmHandler implements ConfirmRequestHandler {
 
     private ValidationContext getValidationContext(WithdrawalConfirmRequest dto) {
         return ValidationContext.builder()
-            .initialWalletId(dto.getWalletId())
+            .sourceWalletId(dto.getWalletId())
             .amount(BigDecimal.valueOf(dto.getAmount()))
             .build();
     }

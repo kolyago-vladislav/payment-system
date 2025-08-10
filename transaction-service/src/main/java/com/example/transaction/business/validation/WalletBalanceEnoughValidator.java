@@ -23,12 +23,12 @@ public class WalletBalanceEnoughValidator implements TransactionValidator {
     public void validate(
         ValidationContext context
     ) {
-        var wallet = walletRepository.findById(UUID.fromString(context.initialWalletId()))
-            .orElseThrow(() -> new TransactionServiceException("Wallet not found by id=%s", context.initialWalletId()));
+        var wallet = walletRepository.findById(UUID.fromString(context.sourceWalletId()))
+            .orElseThrow(() -> new TransactionServiceException("Wallet not found by id=%s", context.sourceWalletId()));
         if (wallet.getBalance().compareTo(context.amount()) < 0) {
             throw new TransactionServiceException(
                 "Insufficient funds in wallet id=%s: balance=%s, required=%s",
-                context.initialWalletId(),
+                context.sourceWalletId(),
                 wallet.getBalance(),
                 context.amount()
             );

@@ -23,12 +23,12 @@ public class WalletExistenceValidator implements TransactionValidator {
     public void validate(
         ValidationContext context
     ) {
-        if (!walletRepository.existsById(UUID.fromString(context.initialWalletId()))) {
-            throw new TransactionServiceException("Wallet not found by id=%s", context.initialWalletId());
+        if (!walletRepository.existsById(UUID.fromString(context.sourceWalletId()))) {
+            throw new TransactionServiceException("Wallet not found by id=%s", context.sourceWalletId());
         }
 
         if (context.targetWalletId() != null && !walletRepository.existsById(UUID.fromString(context.targetWalletId()))) {
-            throw new TransactionServiceException("Wallet not found by id=%s", context.initialWalletId());
+            throw new TransactionServiceException("Wallet not found by id=%s", context.sourceWalletId());
         }
 
     }

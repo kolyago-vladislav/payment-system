@@ -60,7 +60,7 @@ public class DepositConfirmHandler implements ConfirmRequestHandler {
 
     private ValidationContext getValidationContext(DepositConfirmRequest dto) {
         return ValidationContext.builder()
-            .initialWalletId(dto.getWalletId())
+            .sourceWalletId(dto.getWalletId())
             .amount(BigDecimal.valueOf(dto.getAmount()))
             .build();
     }

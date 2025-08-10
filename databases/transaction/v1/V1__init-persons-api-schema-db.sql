@@ -48,6 +48,7 @@ CREATE TABLE transaction.transactions
     user_id           uuid                           NOT NULL,
     wallet_id         uuid                           NOT NULL,
     amount            DECIMAL                        NOT NULL DEFAULT 0.0,
+    target_amount     DECIMAL                                 DEFAULT 0.0,
     type              transaction.transaction_type   NOT NULL,
     status            transaction.transaction_status NOT NULL,
     comment           VARCHAR(256),
