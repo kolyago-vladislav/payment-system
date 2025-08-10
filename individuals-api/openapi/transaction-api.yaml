@@ -379,6 +379,8 @@ components:
         - fromWalletId
         - toWalletId
         - amount
+        - sourceCurrency
+        - targetCurrency
       properties:
         fromWalletId:
           type: string
@@ -399,6 +401,8 @@ components:
         - fromWalletId
         - toWalletId
         - amount
+        - sourceCurrency
+        - targetCurrency
       properties:
         fromWalletId:
           type: string

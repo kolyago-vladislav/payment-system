@@ -7,7 +7,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @EnableFeignClients(basePackages = {
 	"com.example.person.api",
-	"com.example.transaction.api"
+	"com.example.transaction.api",
+	"com.example.currency.api"
 })
 @ConfigurationPropertiesScan
 @SpringBootApplication

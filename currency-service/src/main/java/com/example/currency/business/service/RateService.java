@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.currency.business.mapper.ConversionRateMapper;
 import com.example.currency.business.repository.ConversionRateRepository;
+import com.example.currency.core.exception.CurrencyServiceException;
 import com.example.currency.core.util.DateTimeUtil;
 import com.example.currency.dto.RateDto;
 
@@ -24,7 +25,8 @@ public class RateService {
         String to,
         OffsetDateTime timestamp
     ) {
-        var latestRate = repository.findBySourceCodeAndTargetCodeAndActive(from, to, true);
+        var latestRate = repository.findBySourceCodeAndTargetCodeAndActive(from, to, true)
+            .orElseThrow(() -> new CurrencyServiceException("Can not find rate for %s to %s", from, to));
         return mapper.from(latestRate);
     }
 }

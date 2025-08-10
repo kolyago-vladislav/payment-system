@@ -111,6 +111,11 @@ paths:
 components:
   schemas:
     RateDto:
+      required: [
+        source,
+        target,
+        rate
+      ]
       type: object
       properties:
         source:
@@ -186,7 +191,7 @@ components:
     ErrorResponse:
       type: object
       properties:
-        error:
+        message:
           type: string
-        status:
+        code:
           type: integer

@@ -69,6 +69,9 @@ dependencies {
 
     implementation("com.example:person-api:1.0.0-SNAPSHOT")
     implementation("com.example:transaction-api:1.0.0-SNAPSHOT")
+    implementation("com.example:currency-api:1.0.0-SNAPSHOT")
+
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 

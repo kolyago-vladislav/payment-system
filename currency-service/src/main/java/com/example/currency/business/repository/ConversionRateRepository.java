@@ -1,6 +1,7 @@
 package com.example.currency.business.repository;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -18,5 +19,5 @@ public interface ConversionRateRepository extends JpaRepository<ConversionRate, 
     """)
     void deactivate(String providerId, Instant now);
 
-    ConversionRate findBySourceCodeAndTargetCodeAndActive(String sourceCode, String targetCode, Boolean active);
+    Optional<ConversionRate> findBySourceCodeAndTargetCodeAndActive(String sourceCode, String targetCode, Boolean active);
 }
