@@ -20,3 +20,8 @@ scrape_configs:
     metrics_path: /actuator/prometheus
     static_configs:
       - targets: [ 'transactions-api:8093' ]
+
+  - job_name: 'currencies-api'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [ 'currencies-api:8094' ]

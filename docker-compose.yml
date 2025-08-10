@@ -222,6 +222,7 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       SPRING_PROFILES_ACTIVE: docker
       PERSONS_API_URL: http://persons-api:8092
+      CURRENCY_API_URL: http://currencies-api:8094
       TRANSACTIONS_API_URL: http://transactions-api:8093
       OTLP_EXPORTER_ENDPOINT: http://tempo:4318
     ports:
@@ -234,6 +235,8 @@ services:
       keycloak-healthcheck:
         condition: service_completed_successfully
       persons-api:
+        condition: service_healthy
+      currencies-api:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-i", "http://localhost:8091/actuator/health" ]
@@ -284,6 +287,29 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "curl", "-i", "http://localhost:8092/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  currencies-api:
+    build:
+      context: ./currency-service
+      dockerfile: Dockerfile
+    container_name: currencies-api
+    ports:
+      - "8094:8094"
+    working_dir: /app
+    environment:
+      POSTGRES_HOST: postgres
+      SPRING_PROFILES_ACTIVE: docker
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nexus-change-password:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-i", "http://localhost:8094/actuator/health" ]
       interval: 5s
       timeout: 5s
       retries: 30

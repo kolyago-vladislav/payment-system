@@ -100,6 +100,10 @@ public class TransactionService {
     }
 
     private void handleError(Throwable e) {
+        if (e instanceof IndividualException ex) {
+            throw ex;
+        }
+
         ((FeignException) e).responseBody().ifPresent(
             byteBuffer -> {
                 var errorResponse = jsonWrapper.read(byteBuffer.array(), ErrorResponse.class);

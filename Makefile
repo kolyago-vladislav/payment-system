@@ -29,7 +29,7 @@ up:
 	@echo "Nexus is healthy!"
 
 build-artifacts:
-	@$(DOCKER_COMPOSE) build persons-api transactions-api --no-cache
+	@$(DOCKER_COMPOSE) build persons-api transactions-api currencies-api --no-cache
 
 build-gateway:
 	@$(DOCKER_COMPOSE) build individuals-api --no-cache

@@ -68,6 +68,5 @@ currency-service:
       lock-minimum: 5m
 logging:
   config: "classpath:logback-local.xml"
-  level.net.javacrumbs.shedlock: DEBUG
-  level.net.javacrumbs.shedlock.provider.jdbctemplate: DEBUG
+
 
