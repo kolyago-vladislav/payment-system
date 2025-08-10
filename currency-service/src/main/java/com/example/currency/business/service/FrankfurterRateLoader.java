@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import com.example.currency.model.dto.CurrencyRateDto;
 import com.example.currency.model.entity.ConversionRate;
 import com.example.currency.model.entity.Currency;
 
+@Slf4j
 @Service
 public class FrankfurterRateLoader {
 
@@ -52,6 +55,8 @@ public class FrankfurterRateLoader {
         conversionRateRepository.deactivate(getProviderId(), LocalDateTime.now(clock).toInstant(ZoneOffset.UTC));
 
         exchangeRates.forEach(this::saveRates);
+
+        log.info("Rates count={} updated", exchangeRates.size());
     }
 
     private void saveRates(

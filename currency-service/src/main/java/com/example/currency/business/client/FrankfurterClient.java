@@ -1,9 +1,10 @@
 package com.example.currency.business.client;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import com.example.currency.core.util.JsonWrapper;
 import com.example.currency.model.dto.CurrencyRateDto;
 import com.example.currency.model.entity.Currency;
 
+@Slf4j
 @Component
 public class FrankfurterClient {
 
@@ -37,7 +39,7 @@ public class FrankfurterClient {
             var response = restTemplate.getForObject(url + "/latest?base=" + currency.getCode(), String.class);
             rates.put(currency, jsonWrapper.read(response, CurrencyRateDto.class));
         }
-
+        log.info("Rates count={} loaded", rates.size());
         return rates;
     }
 }

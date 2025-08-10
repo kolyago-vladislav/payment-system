@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.example.currency.business.mapper.CurrencyMapper;
 import com.example.currency.business.repository.CurrencyRepository;
@@ -15,7 +14,6 @@ import com.example.currency.dto.CurrencyPageDto;
 @RequiredArgsConstructor
 public class CurrencyService {
 
-    private final RestTemplate restTemplate;
     private final CurrencyRepository repository;
     private final CurrencyMapper mapper;
 
