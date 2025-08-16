@@ -29,7 +29,7 @@ public class DepositInitHandler extends AbstractInitHandler<DepositInitRequest> 
     @Override
     protected ValidationContext getValidationContext(DepositInitRequest dto) {
         return ValidationContext.builder()
-            .initialWalletId(dto.getWalletId())
+            .sourceWalletId(dto.getWalletId())
             .amount(BigDecimal.valueOf(dto.getAmount()))
             .build();
     }

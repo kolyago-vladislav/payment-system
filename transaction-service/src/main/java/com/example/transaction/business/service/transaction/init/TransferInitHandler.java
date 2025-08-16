@@ -26,8 +26,10 @@ public class TransferInitHandler extends AbstractInitHandler<TransferInitRequest
     @Override
     protected ValidationContext getValidationContext(TransferInitRequest dto) {
         return ValidationContext.builder()
-            .initialWalletId(dto.getFromWalletId())
+            .sourceWalletId(dto.getFromWalletId())
             .targetWalletId(dto.getToWalletId())
+            .sourceCurrency(dto.getSourceCurrency())
+            .targetCurrency(dto.getTargetCurrency())
             .amount(BigDecimal.valueOf(dto.getAmount()))
             .build();
     }

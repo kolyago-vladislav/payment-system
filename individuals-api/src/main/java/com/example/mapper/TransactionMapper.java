@@ -1,5 +1,7 @@
 package com.example.mapper;
 
+import java.math.BigDecimal;
+
 import org.mapstruct.Mapper;
 
 import com.example.individual.dto.ConfirmRequest;
@@ -29,22 +31,22 @@ public interface TransactionMapper {
     com.example.transaction.dto.TransferConfirmRequest from(TransferConfirmRequest dto);
     com.example.transaction.dto.WithdrawalConfirmRequest from(WithdrawalConfirmRequest dto);
 
-    default com.example.transaction.dto.ConfirmRequest from(TransactionTypeDto type, ConfirmRequest dto) {
+    default com.example.transaction.dto.ConfirmRequest from(TransactionTypeDto type, ConfirmRequest dto, BigDecimal rate) {
         return switch (type) {
             case DEPOSIT -> from((DepositConfirmRequest) dto);
-            case TRANSFER -> from((TransferConfirmRequest) dto);
+            case TRANSFER -> from((TransferConfirmRequest) dto).conversionRate(rate.doubleValue());
             case WITHDRAWAL -> from((WithdrawalConfirmRequest) dto);
         };
     }
 
     com.example.transaction.dto.DepositInitRequest from(DepositInitRequest dto);
-    com.example.transaction.dto.TransferInitRequest from(TransferInitRequest dto);
+    com.example.transaction.dto.TransferInitRequest from(TransferInitRequest dto, BigDecimal rate);
     com.example.transaction.dto.WithdrawalInitRequest from(WithdrawalInitRequest dto);
 
-    default com.example.transaction.dto.InitRequest from(TransactionTypeDto type, InitRequest dto) {
+    default com.example.transaction.dto.InitRequest from(TransactionTypeDto type, InitRequest dto, BigDecimal rate) {
         return switch (type) {
             case DEPOSIT -> from((DepositInitRequest) dto);
-            case TRANSFER -> from((TransferInitRequest) dto);
+            case TRANSFER -> from((TransferInitRequest) dto, rate);
             case WITHDRAWAL -> from((WithdrawalInitRequest) dto);
         };
     }

@@ -22,7 +22,7 @@ public class PostgresTestContainer {
             .withNetworkAliases("postgres-0")
             .withExposedPorts(5432)
             .withCreateContainerCmdModifier(cmd ->
-                cmd.withPortBindings(new PortBinding(Ports.Binding.bindPort(5433), new ExposedPort(5432)))
+                cmd.withPortBindings(new PortBinding(Ports.Binding.bindPort(5436), new ExposedPort(5432)))
             );
 
         postgresTestContainerShard1 = new PostgreSQLContainer<>("postgres:17")

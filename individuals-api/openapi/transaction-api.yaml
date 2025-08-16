@@ -379,8 +379,14 @@ components:
         - fromWalletId
         - toWalletId
         - amount
+        - sourceCurrency
+        - targetCurrency
       properties:
         fromWalletId:
+          type: string
+        sourceCurrency:
+          type: string
+        targetCurrency:
           type: string
         toWalletId:
           type: string
@@ -395,11 +401,21 @@ components:
         - fromWalletId
         - toWalletId
         - amount
+        - sourceCurrency
+        - targetCurrency
       properties:
         fromWalletId:
           type: string
         toWalletId:
           type: string
+        sourceCurrency:
+          type: string
+        targetCurrency:
+          type: string
+        conversionRate:
+          type: number
+          format: double
+          minimum: 0.0001
         userId:
           type: string
         fee:

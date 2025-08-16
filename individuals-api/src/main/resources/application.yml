@@ -43,6 +43,10 @@ wallet:
   name: wallet
   url: ${TRANSACTIONS_API_URL:http://localhost:8093}
 
+currency:
+  name: currency
+  url: ${CURRENCY_API_URL:http://localhost:8094}
+
 logging:
   config: "classpath:logback.xml"
 

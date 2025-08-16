@@ -162,7 +162,7 @@
         "urlPathPattern": "/transaction/v1/transactions/TRANSFER/confirm",
         "bodyPatterns": [
           {
-            "equalToJson": "{ \"fromWalletId\": \"19ed22c9-6923-4f4e-867f-b86e5254d80a\", \"toWalletId\": \"19ed22c9-6923-4f4e-867f-b86e5254d80a\", \"userId\": \"3ddcecd5-5004-4a8a-9447-ed110912b7ee\", \"fee\": 10.00, \"amount\": 100.00 }"
+            "equalToJson": "{ \"fromWalletId\": \"19ed22c9-6923-4f4e-867f-b86e5254d80a\", \"sourceCurrency\": \"USD\", \"targetCurrency\": \"EUR\", \"conversionRate\": 0.85852,\"toWalletId\": \"19ed22c9-6923-4f4e-867f-b86e5254d80a\", \"userId\": \"3ddcecd5-5004-4a8a-9447-ed110912b7ee\", \"fee\": 10.00, \"amount\": 100.00 }"
           }
         ]
       },
@@ -206,6 +206,27 @@
       "response": {
         "status": 200,
         "body": "{ \"count\": 1, \"items\": [ { \"transactionId\": \"71e7a0dc-9078-4d45-96b2-f168baa9901a\", \"type\": \"DEPOSIT\", \"status\": \"PENDING\", \"amount\": 100.00, \"currency\": \"USD\", \"createdAt\": \"2024-10-02T07:04:03Z\", \"updatedAt\": \"2024-10-02T07:04:03Z\" } ] }",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/currency/v1/rates",
+        "queryParameters": {
+          "source": {
+            "equalTo": "USD"
+          },
+          "target": {
+            "equalTo": "EUR"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "{ \"source\": \"USD\", \"target\": \"EUR\", \"rate\": 0.85852, \"rateTimestamp\": null, \"providerCode\": \"FRANKFURTER\" }",
         "headers": {
           "Content-Type": "application/json"
         }

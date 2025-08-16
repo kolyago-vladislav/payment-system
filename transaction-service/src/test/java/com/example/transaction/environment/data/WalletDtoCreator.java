@@ -17,11 +17,19 @@ import static com.example.transaction.spec.integration.LifecycleSpecification.US
 @RequiredArgsConstructor
 public class WalletDtoCreator {
 
-    public WalletWriteDto createWalletWriteDto() {
+    public WalletWriteDto createEurWalletWriteDto() {
+        return createWalletWithType("00000000-1111-2222-3333-000000000005");
+    }
+
+    public WalletWriteDto createUsdWalletWriteDto() {
+        return createWalletWithType("00000000-1111-2222-3333-000000000001");
+    }
+
+    private static WalletWriteDto createWalletWithType(String typeId) {
         return new WalletWriteDto()
             .name("My_name")
             .userId(USER_ID)
-            .walletTypeId("00000000-1111-2222-3333-000000000001");
+            .walletTypeId(typeId);
     }
 
     public WalletPageDto createWalletPageDto(String id) {

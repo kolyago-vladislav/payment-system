@@ -48,6 +48,9 @@ public class TransactionDtoCreator {
     public ConfirmRequest createTransferConfirmTransactionDto(String walletId, String targetWalletId) {
         return new TransferConfirmRequest()
             .userId(USER_ID)
+            .sourceCurrency("USD")
+            .targetCurrency("EUR")
+            .conversionRate(1.2000)
             .fromWalletId(walletId)
             .toWalletId(targetWalletId)
             .amount(100.00)

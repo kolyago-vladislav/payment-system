@@ -43,15 +43,17 @@ public class TransferConfirmHandler implements ConfirmRequestHandler {
 
         var transaction = transactionRepository.save(transactionMapper.to(request, TRANSFER));
         walletService.debit(transaction.getWalletId(), transaction.getAmount());
-        walletService.credit(transaction.getTargetWalletId(), transaction.getAmount());
+        walletService.credit(transaction.getTargetWalletId(), transaction.getTargetAmount());
 
         return transactionMapper.from(transaction);
     }
 
     private ValidationContext getValidationContext(TransferConfirmRequest dto) {
         return ValidationContext.builder()
-            .initialWalletId(dto.getFromWalletId())
+            .sourceWalletId(dto.getFromWalletId())
             .targetWalletId(dto.getToWalletId())
+            .sourceCurrency(dto.getSourceCurrency())
+            .targetCurrency(dto.getTargetCurrency())
             .amount(BigDecimal.valueOf(dto.getAmount()))
             .build();
     }
