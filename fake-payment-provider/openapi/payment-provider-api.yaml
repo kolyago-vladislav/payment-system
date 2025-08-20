@@ -25,14 +25,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransactionRequest'
+              $ref: '#/components/schemas/TransactionWriteDto'
       responses:
         '201':
           description: Транзакция успешно создана
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Transaction'
+                $ref: '#/components/schemas/TransactionDto'
         '400':
           description: Неверный запрос (например, валидация не пройдена)
           content:
@@ -41,45 +41,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Требуется аутентификация или неверные креденшалы
-    get:
-      summary: Получить список транзакций за период дат
-      security:
-        - basicAuth: []
-      operationId: findTransactions
-      tags:
-        - Payment
-      parameters:
-        - in: query
-          name: start_date
-          required: true
-          schema:
-            type: string
-            format: date-time
-          description: Начало периода (включительно), формат ISO 8601
-        - in: query
-          name: end_date
-          required: true
-          schema:
-            type: string
-            format: date-time
-          description: Конец периода (включительно), формат ISO 8601
-      responses:
-        '200':
-          description: Список найденных транзакций за период
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Transaction'
-        '400':
-          description: Неверные параметры запроса (например, отсутствует start_date или формат неверен)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Неавторизован (нет валидных Basic Auth креденшалов)
   /fake-payment-provider/v1/transactions/{id}:
     get:
       summary: Получить детали конкретной транзакции
@@ -94,6 +55,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: ID транзакции
       responses:
         '200':
@@ -101,7 +63,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Transaction'
+                $ref: '#/components/schemas/TransactionDto'
         '404':
           description: Транзакция не найдена (не существует или принадлежит другому мерчанту)
           content:
@@ -123,53 +85,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PayoutRequest'
+              $ref: '#/components/schemas/PayoutWriteDto'
       responses:
         '201':
           description: Выплата успешно зарегистрирована
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Payout'
+                $ref: '#/components/schemas/PayoutDto'
         '400':
           description: Неверный запрос (ошибка валидации входных данных)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Неавторизован
-    get:
-      summary: Получить список всех выплат (при желании - за период)
-      security:
-        - basicAuth: []
-      operationId: findPayouts
-      tags:
-        - Payout
-      parameters:
-        - in: query
-          name: start_date
-          required: false
-          schema:
-            type: string
-            format: date-time
-          description: (Опционально) Начальная дата фильтра по дате создания
-        - in: query
-          name: end_date
-          required: false
-          schema:
-            type: string
-            format: date-time
-          description: (Опционально) Конечная дата фильтра по дате создания
-      responses:
-        '200':
-          description: Список выплат
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Payout'
         '401':
           description: Неавторизован
   /fake-payment-provider/v1/payouts/{id}:
@@ -186,6 +115,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: ID выплаты
       responses:
         '200':
@@ -193,7 +123,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Payout'
+                $ref: '#/components/schemas/PayoutDto'
         '404':
           description: Выплата не найдена (не существует или принадлежит другому мерчанту)
           content:
@@ -214,7 +144,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StatusUpdate'
+              $ref: '#/components/schemas/StatusUpdateDto'
       responses:
         '200':
           description: Уведомление принято, статус обновлен
@@ -238,7 +168,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StatusUpdate'
+              $ref: '#/components/schemas/StatusUpdateDto'
       responses:
         '200':
           description: Уведомление о выплате принято, статус обновлен
@@ -260,7 +190,7 @@ components:
       type: http
       scheme: basic
   schemas:
-    TransactionRequest:
+    TransactionWriteDto:
       type: object
       required: [amount, currency, method]
       properties:
@@ -278,11 +208,13 @@ components:
         description:
           type: string
           description: Необязательное описание или назначение платежа
-    Transaction:
+
+    TransactionDto:
       type: object
       properties:
         id:
           type: integer
+          format: int64
         merchantId:
           type: string
         amount:
@@ -306,7 +238,8 @@ components:
         externalId:
           type: string
       required: [id, merchantId, amount, currency, method, status, createdAt]
-    PayoutRequest:
+
+    PayoutWriteDto:
       type: object
       required: [amount, currency]
       properties:
@@ -318,11 +251,13 @@ components:
         currency:
           type: string
           description: Код валюты выплаты
-    Payout:
+
+    PayoutDto:
       type: object
       properties:
         id:
           type: integer
+          format: int64
         merchantId:
           type: string
         amount:
@@ -342,12 +277,14 @@ components:
         externalId:
           type: string
       required: [id, merchantId, amount, currency, status, createdAt]
-    StatusUpdate:   # схема для webhook-уведомления о статусе
+
+    StatusUpdateDto:
       type: object
       required: [id, status]
       properties:
         id:
           type: integer
+          format: int64
           description: ID транзакции/выплаты, статус которой обновляется
         status:
           type: string
@@ -355,16 +292,17 @@ components:
         reason:
           type: string
           description: Необязательное поле с причиной отказа / дополнительной информацией
+
+
     ErrorResponse:
       type: object
       properties:
         error:
           type: string
-          description: Короткий код ошибки, например "VALIDATION_ERROR"
-        message:
-          type: string
-          description: Описание ошибки для отображения или логирования
-      required: [error, message]
+        status:
+          type: integer
+      required: [error, status]
+
 security:
   - basicAuth: []   # По умолчанию все приватные методы требуют Basic Auth
 

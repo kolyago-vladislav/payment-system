@@ -25,3 +25,8 @@ scrape_configs:
     metrics_path: /actuator/prometheus
     static_configs:
       - targets: [ 'currencies-api:8094' ]
+
+  - job_name: 'fake-payment-provider-api'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [ 'fake-payment-provider-api:8095' ]

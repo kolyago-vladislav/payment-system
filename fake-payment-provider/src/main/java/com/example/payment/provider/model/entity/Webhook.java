@@ -6,8 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.OffsetDateTime;
-import java.util.Map;
+import java.time.Instant;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -36,9 +35,9 @@ public class Webhook {
 
     @Column(name = "payload")
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, Object> payload;
+    private String payload;
 
     @Column(name = "received_at")
-    private OffsetDateTime receivedAt;
+    private Instant receivedAt;
 
 }

@@ -1,5 +1,5 @@
 server:
-  port: 8094
+  port: 8095
 
 spring:
   datasource:
@@ -25,6 +25,12 @@ spring:
         hbm2ddl:
           auto: validate
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+external-service:
+  webhook:
+    failure-rate-threshold: 0.65
+    max-retry-count: 10
+    backoff-time-unit: MINUTES
 
 management:
   endpoints:

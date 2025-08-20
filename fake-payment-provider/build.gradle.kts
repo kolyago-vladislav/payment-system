@@ -158,9 +158,9 @@ fun getAbsolutePath(nameWithoutExtension: String): Provider<String> {
 }
 
 fun defineJavaPackageName(name: String): String {
-     val beforeDash = name.substringBefore('-')
-     val match = Regex("^[a-z]+").find(beforeDash)
-     return match?.value ?: beforeDash.lowercase()
+    val base = name.substringBefore('.')
+    val parts = base.split('-')
+    return parts.dropLast(1).joinToString(".")
 }
 
 
