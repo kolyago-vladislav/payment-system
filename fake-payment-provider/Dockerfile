@@ -22,7 +22,7 @@ FROM eclipse-temurin:24-jre
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=build /home/gradle/project/build/libs/*.jar app.jar
+COPY --from=build /home/gradle/project/build/libs/fake-payment-provider-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8095
 CMD ["java", "-jar", "app.jar"]
