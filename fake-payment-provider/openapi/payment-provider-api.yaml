@@ -1,0 +1,309 @@
+openapi: 3.0.0
+info:
+  title: Fake Payment Provider API
+  version: "1.0"
+  description: >
+    API для учебного микросервиса "Фейковый провайдер платежей".
+    Поддерживает операции с транзакциями пополнения, выплатами,
+    и обработку webhook-уведомлений.
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /fake-payment-provider/v1/transactions:
+    post:
+      summary: Создать новую транзакцию пополнения
+      security:
+        - basicAuth: []
+      operationId: createTransaction
+      tags:
+        - Payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionWriteDto'
+      responses:
+        '201':
+          description: Транзакция успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDto'
+        '400':
+          description: Неверный запрос (например, валидация не пройдена)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Требуется аутентификация или неверные креденшалы
+  /fake-payment-provider/v1/transactions/{id}:
+    get:
+      summary: Получить детали конкретной транзакции
+      security:
+        - basicAuth: []
+      operationId: findByTransactionId
+      tags:
+        - Payment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: ID транзакции
+      responses:
+        '200':
+          description: Детали транзакции
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDto'
+        '404':
+          description: Транзакция не найдена (не существует или принадлежит другому мерчанту)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Неавторизован (отклонено Basic Auth)
+  /fake-payment-provider/v1/payouts:
+    post:
+      summary: Создать запрос на выплату
+      security:
+        - basicAuth: []
+      operationId: createPayout
+      tags:
+        - Payout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayoutWriteDto'
+      responses:
+        '201':
+          description: Выплата успешно зарегистрирована
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayoutDto'
+        '400':
+          description: Неверный запрос (ошибка валидации входных данных)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Неавторизован
+  /fake-payment-provider/v1/payouts/{id}:
+    get:
+      summary: Получить детали конкретной выплаты
+      security:
+        - basicAuth: []
+      operationId: findById
+      tags:
+        - Payout
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: ID выплаты
+      responses:
+        '200':
+          description: Детали выплаты
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayoutDto'
+        '404':
+          description: Выплата не найдена (не существует или принадлежит другому мерчанту)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Неавторизован
+  /fake-payment-provider/v1/webhook/transaction:
+    post:
+      summary: Входящее уведомление о статусе транзакции (успех/неуспех)
+      security: []   # вебхуки не требуют Basic Auth (предполагается своя проверка по подписи)
+      operationId: registerTransactionWebhook
+      tags:
+        - Webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusUpdateDto'
+      responses:
+        '200':
+          description: Уведомление принято, статус обновлен
+        '400':
+          description: Некорректный запрос (например, транзакция не найдена или неверный статус)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Неавторизовано (неверенная подпись webhook-а, если реализовано)
+  /fake-payment-provider/v1/webhook/payout:
+    post:
+      summary: Входящее уведомление о статусе выплаты
+      security: []
+      operationId: registerWithdrawalWebhook
+      tags:
+        - Webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusUpdateDto'
+      responses:
+        '200':
+          description: Уведомление о выплате принято, статус обновлен
+        '400':
+          description: Некорректный запрос (например, выплата не найдена)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Неавторизовано (неверная аутентификация webhook)
+
+
+
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    TransactionWriteDto:
+      type: object
+      required: [amount, currency, method]
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          description: Сумма пополнения (должна быть > 0)
+        currency:
+          type: string
+          description: Трехбуквенный код валюты (ISO 4217), напр. "USD"
+        method:
+          type: string
+          description: Способ оплаты, например "CARD" (если неподдерживается, вернется ошибка)
+        description:
+          type: string
+          description: Необязательное описание или назначение платежа
+
+    TransactionDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        merchantId:
+          type: string
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+        method:
+          type: string
+        status:
+          type: string
+          description: Статус транзакции (PENDING, SUCCESS, FAILED)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        description:
+          type: string
+        externalId:
+          type: string
+      required: [id, merchantId, amount, currency, method, status, createdAt]
+
+    PayoutWriteDto:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          description: Сумма выплаты (должна быть > 0)
+        currency:
+          type: string
+          description: Код валюты выплаты
+
+    PayoutDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        merchantId:
+          type: string
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+        status:
+          type: string
+          description: Статус выплаты (PENDING, SUCCESS, FAILED)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        externalId:
+          type: string
+      required: [id, merchantId, amount, currency, status, createdAt]
+
+    StatusUpdateDto:
+      type: object
+      required: [id, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID транзакции/выплаты, статус которой обновляется
+        status:
+          type: string
+          description: Новый статус ("SUCCESS" или "FAILED")
+        reason:
+          type: string
+          description: Необязательное поле с причиной отказа / дополнительной информацией
+
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: integer
+      required: [error, status]
+
+security:
+  - basicAuth: []   # По умолчанию все приватные методы требуют Basic Auth
+
+

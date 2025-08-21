@@ -291,6 +291,29 @@ services:
       timeout: 5s
       retries: 30
 
+  fake-payment-provider-api:
+    build:
+      context: ./fake-payment-provider
+      dockerfile: Dockerfile
+    container_name: fake-payment-provider-api
+    ports:
+      - "8095:8095"
+    working_dir: /app
+    environment:
+      POSTGRES_HOST: postgres
+      SPRING_PROFILES_ACTIVE: docker
+      OTLP_EXPORTER_ENDPOINT: http://tempo:4318
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nexus-change-password:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-i", "http://localhost:8095/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
   currencies-api:
     build:
       context: ./currency-service
